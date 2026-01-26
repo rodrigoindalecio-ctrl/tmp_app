@@ -1,12 +1,12 @@
 'use client'
 
+import { ProtectedRoute } from '@/lib/protected-route'
 import { useAuth } from '@/lib/auth-context'
 import { useEvent, Guest, Companion } from '@/lib/event-context'
 import { useRouter, useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
-export default function AdminEditGuest() {
-  const { user, isAdmin } = useAuth()
+function AdminEditGuestContent() {
   const { guests, updateGuest, removeGuest } = useEvent()
   const router = useRouter()
   const params = useParams()
@@ -18,11 +18,6 @@ export default function AdminEditGuest() {
   const [companionsList, setCompanionsList] = useState<Companion[]>([])
 
   useEffect(() => {
-    if (!user || !isAdmin) {
-      router.push('/login')
-      return
-    }
-
     const foundGuest = guests.find(g => g.id === guestId)
     if (foundGuest) {
       setGuest(foundGuest)
@@ -301,5 +296,13 @@ export default function AdminEditGuest() {
         </div>
       )}
     </div>
+  )
+}
+
+export default function AdminEditGuest() {
+  return (
+    <ProtectedRoute requireAdmin={true}>
+      <AdminEditGuestContent />
+    </ProtectedRoute>
   )
 }

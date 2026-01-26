@@ -1,12 +1,13 @@
 'use client'
 
+import { ProtectedRoute } from '@/lib/protected-route'
 import { useAuth } from '@/lib/auth-context'
 import { useAdmin, type AdminEvent } from '@/lib/admin-context'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
-export default function NovoEvento() {
-  const { user, logout, isAdmin } = useAuth()
+function NovoEventoContent() {
+  const { user, logout } = useAuth()
   const { addEvent } = useAdmin()
   const router = useRouter()
   const [loading, setLoading] = useState(false)
@@ -18,16 +19,6 @@ export default function NovoEvento() {
     location: '',
     image: ''
   })
-
-  useEffect(() => {
-    if (!user || !isAdmin) {
-      router.push('/login')
-    }
-  }, [user, isAdmin, router])
-
-  if (!user || !isAdmin) {
-    return null
-  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -118,11 +109,11 @@ export default function NovoEvento() {
           <div className="p-6 border-t border-borderSoft">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
-                {user.name.charAt(0)}
+                {user?.name.charAt(0)}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{user.name}</p>
-                <p className="text-xs text-textSecondary truncate">{user.email}</p>
+                <p className="text-sm font-medium truncate">{user?.name}</p>
+                <p className="text-xs text-textSecondary truncate">{user?.email}</p>
               </div>
             </div>
             <button
@@ -272,5 +263,13 @@ export default function NovoEvento() {
         </main>
       </div>
     </div>
+  )
+}
+
+export default function NovoEvento() {
+  return (
+    <ProtectedRoute requireAdmin={true}>
+      <NovoEventoContent />
+    </ProtectedRoute>
   )
 }

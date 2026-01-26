@@ -1,27 +1,18 @@
 'use client'
 
+import { ProtectedRoute } from '@/lib/protected-route'
 import { useAuth } from '@/lib/auth-context'
 import { useAdmin } from '@/lib/admin-context'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 
-export default function UsersManagement() {
-  const { user, logout, isAdmin } = useAuth()
+function UsersManagementContent() {
+  const { user, logout } = useAuth()
   const { users } = useAdmin()
   const router = useRouter()
   const [searchTerm, setSearchTerm] = useState('')
   const [showInviteModal, setShowInviteModal] = useState(false)
   const [newUser, setNewUser] = useState({ name: '', email: '', type: 'noivos' as 'noivos' | 'admin' })
-
-  useEffect(() => {
-    if (!user || !isAdmin) {
-      router.push('/login')
-    }
-  }, [user, isAdmin, router])
-
-  if (!user || !isAdmin) {
-    return null
-  }
 
   const filteredUsers = users.filter(u =>
     u.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -96,11 +87,11 @@ export default function UsersManagement() {
           <div className="p-6 border-t border-borderSoft">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
-                {user.name.charAt(0)}
+                {user?.name.charAt(0)}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{user.name}</p>
-                <p className="text-xs text-textSecondary truncate">{user.email}</p>
+                <p className="text-sm font-medium truncate">{user?.name}</p>
+                <p className="text-xs text-textSecondary truncate">{user?.email}</p>
               </div>
             </div>
             <button
@@ -268,5 +259,13 @@ export default function UsersManagement() {
         </div>
       )}
     </div>
+  )
+}
+
+export default function UsersManagement() {
+  return (
+    <ProtectedRoute requireAdmin={true}>
+      <UsersManagementContent />
+    </ProtectedRoute>
   )
 }

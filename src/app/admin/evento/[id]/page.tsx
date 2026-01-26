@@ -1,13 +1,14 @@
 'use client'
 
+import { ProtectedRoute } from '@/lib/protected-route'
 import { useAuth } from '@/lib/auth-context'
 import { useAdmin } from '@/lib/admin-context'
 import { useRouter, useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { ConfirmDialog } from '@/app/components/confirm-dialog'
 
-export default function AdminEventoPage() {
-  const { user, logout, isAdmin } = useAuth()
+function AdminEventoPageContent() {
+  const { user, logout } = useAuth()
   const { events, updateEvent } = useAdmin()
   const router = useRouter()
   const params = useParams()
@@ -19,20 +20,15 @@ export default function AdminEventoPage() {
   const [deleteAllConfirmDialog, setDeleteAllConfirmDialog] = useState({ isOpen: false, step: 1 })
 
   useEffect(() => {
-    if (!user || !isAdmin) {
-      router.push('/login')
-      return
-    }
-
     const foundEvent = events.find(e => e.id === eventId)
     if (!foundEvent) {
       router.push('/admin/dashboard')
     } else {
       setEvent(foundEvent)
     }
-  }, [user, isAdmin, router, events, eventId])
+  }, [router, events, eventId])
 
-  if (!event || !user || !isAdmin) {
+  if (!event) {
     return null
   }
 
@@ -177,11 +173,11 @@ export default function AdminEventoPage() {
           <div className="p-6 border-t border-borderSoft">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
-                {user.name.charAt(0)}
+                {user?.name.charAt(0)}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{user.name}</p>
-                <p className="text-xs text-textSecondary truncate">{user.email}</p>
+                <p className="text-sm font-medium truncate">{user?.name}</p>
+                <p className="text-xs text-textSecondary truncate">{user?.email}</p>
               </div>
             </div>
             <button
@@ -360,5 +356,13 @@ export default function AdminEventoPage() {
         onCancel={() => setDeleteAllConfirmDialog({ isOpen: false, step: 1 })}
       />
     </div>
+  )
+}
+
+export default function AdminEventoPage() {
+  return (
+    <ProtectedRoute requireAdmin={true}>
+      <AdminEventoPageContent />
+    </ProtectedRoute>
   )
 }

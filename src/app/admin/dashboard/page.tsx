@@ -1,12 +1,13 @@
 'use client'
 
+import { ProtectedRoute } from '@/lib/protected-route'
 import { useAuth } from '@/lib/auth-context'
 import { useAdmin } from '@/lib/admin-context'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 
-export default function AdminDashboard() {
-  const { user, logout, isAdmin } = useAuth()
+function AdminDashboardContent() {
+  const { user, logout } = useAuth()
   const { events, getTotalMetrics } = useAdmin()
   const router = useRouter()
   const [searchTerm, setSearchTerm] = useState('')
@@ -20,12 +21,8 @@ export default function AdminDashboard() {
   })
 
   useEffect(() => {
-    if (!user || !isAdmin) {
-      router.push('/login')
-      return
-    }
     setMetrics(getTotalMetrics())
-  }, [user, isAdmin, router, getTotalMetrics])
+  }, [getTotalMetrics])
 
   // Sincroniza guests dos eventos com o localStorage
   useEffect(() => {
@@ -44,10 +41,6 @@ export default function AdminDashboard() {
       }
     }
   }, [events])
-
-  if (!user || !isAdmin) {
-    return null
-  }
 
   const filteredEvents = events.filter(event =>
     event.eventSettings.coupleNames.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -125,11 +118,11 @@ export default function AdminDashboard() {
           <div className="p-6 border-t border-borderSoft">
             <div className="flex items-center gap-3 mb-4">
               <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold">
-                {user.name.charAt(0)}
+                {user?.name.charAt(0)}
               </div>
               <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium truncate">{user.name}</p>
-                <p className="text-xs text-textSecondary truncate">{user.email}</p>
+                <p className="text-sm font-medium truncate">{user?.name}</p>
+                <p className="text-xs text-textSecondary truncate">{user?.email}</p>
               </div>
             </div>
             <button
@@ -278,3 +271,10 @@ export default function AdminDashboard() {
   )
 }
 
+export default function AdminDashboard() {
+  return (
+    <ProtectedRoute requireAdmin={true}>
+      <AdminDashboardContent />
+    </ProtectedRoute>
+  )
+}
