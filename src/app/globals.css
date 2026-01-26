@@ -1,0 +1,45 @@
+@import "tailwindcss";
+
+@font-face {
+  font-family: 'Arabella';
+  src: url('/Arabella.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Impara';
+  src: url('/Impara-ExtraBold.otf') format('opentype');
+}
+
+@theme {
+  --color-brand: #6D191F;
+  --color-primary: #C6A664;
+  --color-primary-soft: #EFE7D8;
+
+  --color-background: #FAFAF8;
+  --color-surface: #FFFFFF;
+
+  --color-text-primary: #2E2E2E;
+  --color-text-secondary: #6B6B6B;
+
+  --color-border-soft: #E6E2DC;
+
+  --color-success: #4CAF50;
+  --color-warning: #F2B705;
+  --color-danger: #E74C3C;
+
+  --font-serif: var(--font-playfair), ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
+  --font-sans: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-arabella: 'Arabella', cursive;
+  --font-impara: 'Impara', sans-serif;
+}
+
+@layer base {
+  body {
+    background-color: var(--color-background);
+    color: var(--color-text-primary);
+  }
+}
+
+:root {
+  color-scheme: light;
+}
