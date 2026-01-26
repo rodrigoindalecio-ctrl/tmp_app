@@ -23,7 +23,7 @@ function AdminEditGuestContent() {
       setGuest(foundGuest)
       setCompanionsList(foundGuest.companionsList || [])
     }
-  }, [guestId, guests, user, isAdmin, router])
+  }, [guestId, guests])
 
   if (!guest) {
     return (
