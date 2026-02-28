@@ -21,23 +21,23 @@ export default function ImportPage() {
     const [manualRestricoes, setManualRestricoes] = useState('')
     const [manualGrupo, setManualGrupo] = useState('')
     const [manualCategory, setManualCategory] = useState('adult_paying')
-    
+
     // Acompanhantes (5 posições)
     const [manualCompanions, setManualCompanions] = useState<Array<{ name: string; category: string }>>([
-      { name: '', category: 'adult_paying' },
-      { name: '', category: 'adult_paying' },
-      { name: '', category: 'adult_paying' },
-      { name: '', category: 'adult_paying' },
-      { name: '', category: 'adult_paying' }
+        { name: '', category: 'adult_paying' },
+        { name: '', category: 'adult_paying' },
+        { name: '', category: 'adult_paying' },
+        { name: '', category: 'adult_paying' },
+        { name: '', category: 'adult_paying' }
     ])
-    
+
     const [pendingGuest, setPendingGuest] = useState<{ name: string, telefone: string, email: string, companionsList: any[], restricoes: string, grupo: string, category: string } | null>(null)
 
     // File upload states
     const [isDragging, setIsDragging] = useState(false)
     const [importStatus, setImportStatus] = useState<'idle' | 'processing' | 'success' | 'error'>('idle')
     const [importedCount, setImportedCount] = useState(0)
-    
+
     // New states for sheet parsing
     const [parseResult, setParseResult] = useState<ParseSheetResult | null>(null)
     const [errorMessage, setErrorMessage] = useState('')
@@ -101,11 +101,11 @@ export default function ImportPage() {
         setManualTelefone('')
         setManualEmail('')
         setManualCompanions([
-          { name: '', category: 'adult_paying' },
-          { name: '', category: 'adult_paying' },
-          { name: '', category: 'adult_paying' },
-          { name: '', category: 'adult_paying' },
-          { name: '', category: 'adult_paying' }
+            { name: '', category: 'adult_paying' },
+            { name: '', category: 'adult_paying' },
+            { name: '', category: 'adult_paying' },
+            { name: '', category: 'adult_paying' },
+            { name: '', category: 'adult_paying' }
         ])
         setManualRestricoes('')
         setManualGrupo('')
@@ -118,7 +118,7 @@ export default function ImportPage() {
 
         // Importar em lote, com detecção de duplicatas
         const result = addGuestsBatch(parseResult.convidados)
-        
+
         setImportedCount(result.imported)
         setDuplicatesList(result.duplicates)
         setStep('success')
@@ -129,8 +129,8 @@ export default function ImportPage() {
     const handleDownloadModel = async () => {
         try {
             const templateData = await generateImportTemplate()
-            const blob = new Blob([templateData], { 
-                type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
+            const blob = new Blob([templateData as any], {
+                type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
             })
             const url = URL.createObjectURL(blob)
             const link = document.createElement('a')
@@ -410,124 +410,124 @@ export default function ImportPage() {
                                 </div>
 
                                 <form onSubmit={handleManualAdd} className="space-y-4">
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-xs font-medium text-textSecondary mb-1">Nome Principal *</label>
-                                        <input
-                                            type="text"
-                                            required
-                                            placeholder="Nome completo"
-                                            className="w-full px-4 py-3 rounded-lg border border-borderSoft focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder-textSecondary text-sm"
-                                            value={manualName}
-                                            onChange={(e) => setManualName(e.target.value)}
-                                        />
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-xs font-medium text-textSecondary mb-1">Nome Principal *</label>
+                                            <input
+                                                type="text"
+                                                required
+                                                placeholder="Nome completo"
+                                                className="w-full px-4 py-3 rounded-lg border border-borderSoft focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder-textSecondary text-sm"
+                                                value={manualName}
+                                                onChange={(e) => setManualName(e.target.value)}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-textSecondary mb-1">Telefone *</label>
+                                            <input
+                                                type="tel"
+                                                required
+                                                placeholder="(11) 99999-9999"
+                                                className="w-full px-4 py-3 rounded-lg border border-borderSoft focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder-textSecondary text-sm"
+                                                value={manualTelefone}
+                                                onChange={(e) => setManualTelefone(e.target.value)}
+                                            />
+                                        </div>
                                     </div>
-                                    <div>
-                                        <label className="block text-xs font-medium text-textSecondary mb-1">Telefone *</label>
-                                        <input
-                                            type="tel"
-                                            required
-                                            placeholder="(11) 99999-9999"
-                                            className="w-full px-4 py-3 rounded-lg border border-borderSoft focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder-textSecondary text-sm"
-                                            value={manualTelefone}
-                                            onChange={(e) => setManualTelefone(e.target.value)}
-                                        />
-                                    </div>
-                                </div>
 
-                                <div className="grid grid-cols-2 gap-4">
-                                    <div>
-                                        <label className="block text-xs font-medium text-textSecondary mb-1">Email</label>
-                                        <input
-                                            type="email"
-                                            placeholder="email@exemplo.com"
-                                            className="w-full px-4 py-3 rounded-lg border border-borderSoft focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder-textSecondary text-sm"
-                                            value={manualEmail}
-                                            onChange={(e) => setManualEmail(e.target.value)}
-                                        />
+                                    <div className="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label className="block text-xs font-medium text-textSecondary mb-1">Email</label>
+                                            <input
+                                                type="email"
+                                                placeholder="email@exemplo.com"
+                                                className="w-full px-4 py-3 rounded-lg border border-borderSoft focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder-textSecondary text-sm"
+                                                value={manualEmail}
+                                                onChange={(e) => setManualEmail(e.target.value)}
+                                            />
+                                        </div>
+                                        <div>
+                                            <label className="block text-xs font-medium text-textSecondary mb-1">Grupo</label>
+                                            <input
+                                                type="text"
+                                                placeholder="ex: Família, Amigos"
+                                                className="w-full px-4 py-3 rounded-lg border border-borderSoft focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder-textSecondary text-sm"
+                                                value={manualGrupo}
+                                                onChange={(e) => setManualGrupo(e.target.value)}
+                                            />
+                                        </div>
                                     </div>
+
                                     <div>
-                                        <label className="block text-xs font-medium text-textSecondary mb-1">Grupo</label>
-                                        <input
-                                            type="text"
-                                            placeholder="ex: Família, Amigos"
-                                            className="w-full px-4 py-3 rounded-lg border border-borderSoft focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder-textSecondary text-sm"
-                                            value={manualGrupo}
-                                            onChange={(e) => setManualGrupo(e.target.value)}
-                                        />
+                                        <label className="block text-xs font-medium text-textSecondary mb-1">Categoria</label>
+                                        <select
+                                            value={manualCategory}
+                                            onChange={(e) => setManualCategory(e.target.value)}
+                                            className="w-full px-4 py-3 rounded-lg border border-borderSoft focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm"
+                                        >
+                                            <option value="adult_paying">Adulto Pagante</option>
+                                            <option value="child_paying">Criança Pagante</option>
+                                            <option value="child_not_paying">Criança Não Pagante</option>
+                                        </select>
                                     </div>
-                                </div>
 
-                                <div>
-                                    <label className="block text-xs font-medium text-textSecondary mb-1">Categoria</label>
-                                    <select
-                                        value={manualCategory}
-                                        onChange={(e) => setManualCategory(e.target.value)}
-                                        className="w-full px-4 py-3 rounded-lg border border-borderSoft focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm"
-                                    >
-                                        <option value="adult_paying">Adulto Pagante</option>
-                                        <option value="child_paying">Criança Pagante</option>
-                                        <option value="child_not_paying">Criança Não Pagante</option>
-                                    </select>
-                                </div>
-
-                                <div>
-                                    <label className="block text-xs font-medium text-textSecondary mb-3">Acompanhantes (até 5)</label>
-                                    <div className="space-y-3 bg-background/50 p-4 rounded-lg border border-borderSoft">
-                                        {manualCompanions.map((companion, idx) => (
-                                            <div key={idx} className="grid grid-cols-3 gap-3">
-                                                <div className="col-span-2">
-                                                    <input
-                                                        type="text"
-                                                        placeholder={`Acompanhante ${idx + 1}`}
-                                                        className="w-full px-3 py-2 rounded-lg border border-borderSoft focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder-textSecondary text-sm"
-                                                        value={companion.name}
+                                    <div>
+                                        <label className="block text-xs font-medium text-textSecondary mb-3">Acompanhantes (até 5)</label>
+                                        <div className="space-y-3 bg-background/50 p-4 rounded-lg border border-borderSoft">
+                                            {manualCompanions.map((companion, idx) => (
+                                                <div key={idx} className="grid grid-cols-3 gap-3">
+                                                    <div className="col-span-2">
+                                                        <input
+                                                            type="text"
+                                                            placeholder={`Acompanhante ${idx + 1}`}
+                                                            className="w-full px-3 py-2 rounded-lg border border-borderSoft focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder-textSecondary text-sm"
+                                                            value={companion.name}
+                                                            onChange={(e) => {
+                                                                const newCompanions = [...manualCompanions]
+                                                                newCompanions[idx].name = e.target.value
+                                                                setManualCompanions(newCompanions)
+                                                            }}
+                                                        />
+                                                    </div>
+                                                    <select
+                                                        value={companion.category}
                                                         onChange={(e) => {
                                                             const newCompanions = [...manualCompanions]
-                                                            newCompanions[idx].name = e.target.value
+                                                            newCompanions[idx].category = e.target.value
                                                             setManualCompanions(newCompanions)
                                                         }}
-                                                    />
+                                                        className="px-3 py-2 rounded-lg border border-borderSoft focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm"
+                                                    >
+                                                        <option value="adult_paying">Adulto</option>
+                                                        <option value="child_paying">Criança Pag.</option>
+                                                        <option value="child_not_paying">Criança N.Pag.</option>
+                                                    </select>
                                                 </div>
-                                                <select
-                                                    value={companion.category}
-                                                    onChange={(e) => {
-                                                        const newCompanions = [...manualCompanions]
-                                                        newCompanions[idx].category = e.target.value
-                                                        setManualCompanions(newCompanions)
-                                                    }}
-                                                    className="px-3 py-2 rounded-lg border border-borderSoft focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm"
-                                                >
-                                                    <option value="adult_paying">Adulto</option>
-                                                    <option value="child_paying">Criança Pag.</option>
-                                                    <option value="child_not_paying">Criança N.Pag.</option>
-                                                </select>
-                                            </div>
-                                        ))}
+                                            ))}
+                                        </div>
+                                        <p className="text-xs text-textSecondary mt-2">Deixe em branco os acompanhantes que não será adicionar</p>
                                     </div>
-                                    <p className="text-xs text-textSecondary mt-2">Deixe em branco os acompanhantes que não será adicionar</p>
-                                </div>
 
-                                <div>
-                                    <label className="block text-xs font-medium text-textSecondary mb-1">Restrições</label>
-                                    <input
-                                        type="text"
-                                        placeholder="ex: Vegetariano, sem glúten"
-                                        className="w-full px-4 py-3 rounded-lg border border-borderSoft focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder-textSecondary text-sm"
-                                        value={manualRestricoes}
-                                        onChange={(e) => setManualRestricoes(e.target.value)}
-                                    />
-                                </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-textSecondary mb-1">Restrições</label>
+                                        <input
+                                            type="text"
+                                            placeholder="ex: Vegetariano, sem glúten"
+                                            className="w-full px-4 py-3 rounded-lg border border-borderSoft focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder-textSecondary text-sm"
+                                            value={manualRestricoes}
+                                            onChange={(e) => setManualRestricoes(e.target.value)}
+                                        />
+                                    </div>
 
-                                <div className="pt-4">
-                                    <button
-                                        type="submit"
-                                        className="w-full py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition-colors shadow-sm shadow-primary/20 text-sm flex items-center justify-center gap-2"
-                                    >
-                                        Continuar <ArrowRightIcon />
-                                    </button>
-                                </div>
-                            </form>
+                                    <div className="pt-4">
+                                        <button
+                                            type="submit"
+                                            className="w-full py-3 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition-colors shadow-sm shadow-primary/20 text-sm flex items-center justify-center gap-2"
+                                        >
+                                            Continuar <ArrowRightIcon />
+                                        </button>
+                                    </div>
+                                </form>
                             </div>
                         )}
                     </div>
@@ -738,7 +738,7 @@ export default function ImportPage() {
 
                         <div className="flex gap-4">
                             <button
-                                onClick={() => { 
+                                onClick={() => {
                                     setStep('input')
                                     setImportedCount(0)
                                     setDuplicatesList([])

@@ -80,10 +80,10 @@ export default function SettingsPage() {
 
     const handleImageMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
         if (!isDragging) return
-        
+
         const deltaX = e.clientX - dragStartX
         const deltaY = e.clientY - dragStartY
-        
+
         setDragOffsetX(dragOffsetX + deltaX)
         setDragOffsetY(dragOffsetY + deltaY)
         setDragStartX(e.clientX)
@@ -143,7 +143,7 @@ export default function SettingsPage() {
             // Single finger drag
             const deltaX = e.touches[0].clientX - dragStartX
             const deltaY = e.touches[0].clientY - dragStartY
-            
+
             setDragOffsetX(dragOffsetX + deltaX)
             setDragOffsetY(dragOffsetY + deltaY)
             setDragStartX(e.touches[0].clientX)
@@ -153,7 +153,7 @@ export default function SettingsPage() {
             e.preventDefault()
             const currentDistance = getTouchDistance(e.touches)
             const currentAngle = getTouchAngle(e.touches)
-            
+
             // Pinch zoom
             if (touchDistance > 0) {
                 const scaleDelta = (currentDistance - touchDistance) * 0.005
@@ -161,7 +161,7 @@ export default function SettingsPage() {
                 setCropScale(newScale)
                 setTouchDistance(currentDistance)
             }
-            
+
             // Two-finger rotation
             if (touchStartRotation !== 0) {
                 const angleDelta = currentAngle - touchStartRotation
@@ -230,6 +230,13 @@ export default function SettingsPage() {
     }
 
 
+    // Auto-focus no preview ao abrir o modal
+    useEffect(() => {
+        if (showCropModal && cropPreviewRef.current) {
+            cropPreviewRef.current.focus()
+        }
+    }, [showCropModal])
+
     useEffect(() => {
         if (!user) {
             router.push('/login')
@@ -239,13 +246,6 @@ export default function SettingsPage() {
     if (!user) {
         return null
     }
-
-    // Auto-focus no preview ao abrir o modal
-    useEffect(() => {
-        if (showCropModal && cropPreviewRef.current) {
-            cropPreviewRef.current.focus()
-        }
-    }, [showCropModal])
 
     // Função para adicionar link de presente
     const handleAddGiftLink = () => {
@@ -740,19 +740,19 @@ export default function SettingsPage() {
                                             <div className="space-y-3">
                                                 <p className="text-sm font-medium text-textSecondary">Pré-visualização</p>
                                                 <div className="relative rounded-xl overflow-hidden bg-background border-2 border-primary/20">
-                                                    <div 
-                                                ref={cropPreviewRef}
-                                                className="aspect-video relative overflow-hidden cursor-grab active:cursor-grabbing touch-none"
-                                                tabIndex={0}
-                                                onMouseDown={handleImageMouseDown}
-                                                onMouseMove={handleImageMouseMove}
-                                                onMouseUp={handleImageMouseUp}
-                                                onMouseLeave={handleImageMouseUp}
-                                                onWheelCapture={handleWheel}
-                                                onTouchStart={handleTouchStart}
-                                                onTouchMove={handleTouchMove}
-                                                onTouchEnd={handleTouchEnd}
-                                            >
+                                                    <div
+                                                        ref={cropPreviewRef}
+                                                        className="aspect-video relative overflow-hidden cursor-grab active:cursor-grabbing touch-none"
+                                                        tabIndex={0}
+                                                        onMouseDown={handleImageMouseDown}
+                                                        onMouseMove={handleImageMouseMove}
+                                                        onMouseUp={handleImageMouseUp}
+                                                        onMouseLeave={handleImageMouseUp}
+                                                        onWheelCapture={handleWheel}
+                                                        onTouchStart={handleTouchStart}
+                                                        onTouchMove={handleTouchMove}
+                                                        onTouchEnd={handleTouchEnd}
+                                                    >
                                                         <Image
                                                             src={tempImage}
                                                             alt="Crop Preview"
@@ -804,7 +804,7 @@ export default function SettingsPage() {
                                                             max="3"
                                                             step="0.1"
                                                             value={cropScale}
-                                                            onChange={(e) => { 
+                                                            onChange={(e) => {
                                                                 setCropScale(parseFloat(e.target.value))
                                                                 // Reset position when scaling back to 1
                                                                 if (parseFloat(e.target.value) === 1) {
