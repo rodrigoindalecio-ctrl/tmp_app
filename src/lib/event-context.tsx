@@ -90,26 +90,50 @@ export function EventProvider({ children }: { children: ReactNode }) {
     const params = useParams()
     const slug = params?.slug as string
     const { user } = useAuth()
-    const { events, updateEvent } = useAdmin()
+    const { events, updateEvent, loading: adminLoading } = useAdmin()
 
     const eventIdFromParams = params?.id as string
     const eventId = useMemo(() => {
+        if (adminLoading) return null
         if (eventIdFromParams) return eventIdFromParams
         if (slug) {
-            const event = events.find(e => e.slug === slug || e.eventSettings.slug === slug)
+            const event = events.find(e =>
+                e.slug?.toLowerCase() === slug.toLowerCase() ||
+                e.eventSettings.slug?.toLowerCase() === slug.toLowerCase()
+            )
             return event?.id || null
         }
         // Se estamos no /dashboard (sem slug), procuramos o evento criado por este usuário
         if (user) {
-            const userEvent = events.find(e => e.createdBy === user.email || e.createdBy === (user as any).id)
+            const userEmailLower = user.email ? user.email.toLowerCase() : ''
+            const userEvent = events.find(e => {
+                const createdByLower = e.createdBy ? e.createdBy.toLowerCase() : ''
+                return createdByLower === userEmailLower
+            })
             return userEvent?.id || null
         }
         return null
-    }, [slug, events, eventIdFromParams, user])
+    }, [slug, events, eventIdFromParams, user, adminLoading])
 
     const [guests, setGuests] = useState<Guest[]>([])
     const [eventSettings, setEventSettings] = useState<EventSettings>(DEFAULT_EVENT_SETTINGS)
     const [loading, setLoading] = useState(false)
+
+    // Log para depuração
+    useEffect(() => {
+        if (!adminLoading && user) {
+            console.log('[EventProvider] Status:', {
+                email: user.email,
+                eventsCount: events.length,
+                eventId
+            });
+            if (!eventId) {
+                console.warn('[EventProvider] Atenção: Nenhum evento encontrado para o usuário:', user.email);
+            } else {
+                console.log('[EventProvider] Evento Ativo:', events.find(e => e.id === eventId)?.slug);
+            }
+        }
+    }, [eventId, events, user, adminLoading]);
 
     useEffect(() => {
         const currentEvent = events.find(e => e.id === eventId || e.slug === slug)
@@ -257,12 +281,14 @@ export function EventProvider({ children }: { children: ReactNode }) {
                 const { error } = await supabase.from('guests').insert(toImport)
                 if (error) throw error
                 setGuests(prev => [...newGuests, ...prev])
+                return { imported: toImport.length, duplicates }
             } catch (error) {
                 console.error('Erro no batch import:', error)
+                return { imported: 0, duplicates: [], error: 'Erro ao salvar convidados' }
             }
         }
 
-        return { imported: toImport.length, duplicates }
+        return { imported: 0, duplicates }
     }
 
     async function removeGuest(id: string) {

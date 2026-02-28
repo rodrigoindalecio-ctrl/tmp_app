@@ -117,7 +117,13 @@ export default function ImportPage() {
     const confirmBatch = async () => {
         if (!parseResult || parseResult.convidados.length === 0) return
 
-        const result = await addGuestsBatch(parseResult.convidados)
+        const result = await (addGuestsBatch(parseResult.convidados) as any)
+
+        if (result.error) {
+            alert(result.error)
+            return
+        }
+
         setImportedCount(result.imported)
         setDuplicatesList(result.duplicates)
         setStep('success')
