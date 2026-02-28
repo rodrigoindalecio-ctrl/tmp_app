@@ -64,6 +64,7 @@ type EventContextType = {
     updateGuest: (id: string, guest: Partial<Guest>) => Promise<void>
     updateGuestCompanions: (id: string, companions: Companion[]) => Promise<void>
     removeCompanion: (guestId: string, companionIndex: number) => Promise<void>
+    updateEventSettings: (settings: Partial<EventSettings>) => Promise<void>
 }
 
 const DEFAULT_EVENT_SETTINGS: EventSettings = {
@@ -89,7 +90,7 @@ export function EventProvider({ children }: { children: ReactNode }) {
     const params = useParams()
     const slug = params?.slug as string
     const { user } = useAuth()
-    const { events } = useAdmin()
+    const { events, updateEvent } = useAdmin()
 
     const eventIdFromParams = params?.id as string
     const eventId = useMemo(() => {
@@ -322,6 +323,20 @@ export function EventProvider({ children }: { children: ReactNode }) {
         await updateGuest(guestId, { companionsList: newList })
     }
 
+    async function updateEventSettings(newSettings: Partial<EventSettings>) {
+        if (!eventId) return
+        const updatedSettings = { ...eventSettings, ...newSettings }
+
+        // Atualiza no banco através do AdminContext
+        await updateEvent(eventId, {
+            eventSettings: updatedSettings,
+            slug: updatedSettings.slug
+        })
+
+        // Atualiza estado local
+        setEventSettings(updatedSettings)
+    }
+
     return (
         <EventContext.Provider value={{
             guests,
@@ -334,7 +349,8 @@ export function EventProvider({ children }: { children: ReactNode }) {
             updateGuestStatus,
             updateGuest,
             updateGuestCompanions,
-            removeCompanion
+            removeCompanion,
+            updateEventSettings
         }}>
             {children}
         </EventContext.Provider>
