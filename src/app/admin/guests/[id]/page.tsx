@@ -5,6 +5,7 @@ import { useAuth } from '@/lib/auth-context'
 import { useEvent, Guest, Companion, GuestCategory } from '@/lib/event-context'
 import { useRouter, useParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
+import { SharedLayout } from '@/app/components/shared-layout'
 
 function AdminEditGuestContent() {
   const { guests, updateGuest, removeGuest } = useEvent()
@@ -28,11 +29,11 @@ function AdminEditGuestContent() {
 
   if (!guest) {
     return (
-      <div className="min-h-screen bg-background flex items-center justify-center">
-        <div className="text-center">
-          <p className="text-textSecondary">Carregando...</p>
+      <SharedLayout role="admin" title="Carregando...">
+        <div className="flex items-center justify-center p-20">
+          <p className="text-slate-400 font-bold">Aguarde, carregando informações...</p>
         </div>
-      </div>
+      </SharedLayout>
     )
   }
 
@@ -138,313 +139,195 @@ function AdminEditGuestContent() {
   }
 
   return (
-    <div className="min-h-screen bg-background p-8">
-      <div className="max-w-2xl mx-auto">
+    <SharedLayout
+      role="admin"
+      title="Editar Convidado"
+      subtitle={guest.name}
+    >
+      <div className="max-w-4xl">
+        {/* Back Button */}
         <button
-          onClick={() => router.push('/admin/dashboard')}
-          className="text-slate-400 hover:text-brand font-black text-[10px] uppercase tracking-widest flex items-center gap-2 mb-6 transition-all p-2 bg-white rounded-xl border border-transparent shadow-inner hover:bg-white hover:border-brand/20 group w-fit"
+          onClick={() => router.back()}
+          className="hidden md:inline-flex mb-6 items-center gap-2 text-slate-400 hover:text-brand font-black text-[9px] uppercase tracking-widest transition-all p-2 bg-white border border-slate-100 rounded-xl shadow-sm hover:border-brand/20 group"
         >
           <span className="group-hover:-translate-x-1 transition-transform">←</span> Voltar
         </button>
 
-        <div className="bg-white rounded-2xl border border-brand/10 overflow-hidden shadow-sm">
-          <div className="p-8 border-b border-brand/10">
-            <h1 className="text-3xl font-black text-slate-800 tracking-tight">Editar Convidado</h1>
-            <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">Editando: <span className="text-brand font-black">{guest.name}</span></p>
+        <div className="bg-white rounded-[2rem] border border-brand/10 shadow-sm overflow-hidden flex flex-col md:flex-row min-h-[500px]">
+          {/* Internal Progress/Status Sidebar (Desktop) */}
+          <div className="w-full md:w-64 bg-slate-50 border-r border-brand/5 p-6 space-y-6">
+            <div>
+              <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-3">Status do Convite</p>
+              <div className={`p-4 rounded-xl flex flex-col gap-1 ${guest.status === 'confirmed' ? 'bg-emerald-50 text-emerald-600' :
+                  guest.status === 'declined' ? 'bg-rose-50 text-rose-500' : 'bg-amber-50 text-amber-600'
+                }`}>
+                <span className="text-xs font-black uppercase tracking-widest leading-none">
+                  {guest.status === 'confirmed' ? '✓ Confirmado' : guest.status === 'declined' ? '✗ Declinou' : '⏳ Pendente'}
+                </span>
+                <span className="text-[10px] opacity-70 font-bold mt-1">
+                  {getConfirmedGuests().length} confirmados
+                </span>
+              </div>
+            </div>
+
+            <nav className="flex flex-col gap-2">
+              <button
+                onClick={() => setActiveTab('edit')}
+                className={`w-full text-left px-4 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'edit' ? 'bg-brand text-white shadow-lg shadow-brand/20' : 'text-slate-400 hover:bg-white'
+                  }`}
+              >
+                📝 Dados da Família
+              </button>
+              <button
+                onClick={() => setActiveTab('summary')}
+                className={`w-full text-left px-4 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'summary' ? 'bg-brand text-white shadow-lg shadow-brand/20' : 'text-slate-400 hover:bg-white'
+                  }`}
+              >
+                📋 Resumo Geral
+              </button>
+            </nav>
           </div>
 
-          {/* Tabs */}
-          <div className="flex border-b border-brand/10 bg-slate-50">
-            <button
-              onClick={() => setActiveTab('edit')}
-              className={`flex-1 flex justify-center items-center py-5 px-6 text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'edit'
-                  ? 'text-brand border-b-4 border-brand bg-white relative top-[2px]'
-                  : 'text-slate-400 hover:text-slate-600 border-b-4 border-transparent'
-                }`}
-            >
-              ✏️ Editar
-            </button>
-            <button
-              onClick={() => setActiveTab('summary')}
-              className={`flex-1 flex justify-center items-center py-5 px-6 text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'summary'
-                  ? 'text-brand border-b-4 border-brand bg-white relative top-[2px]'
-                  : 'text-slate-400 hover:text-slate-600 border-b-4 border-transparent'
-                }`}
-            >
-              ✅ Resumo - Confirmados ({getConfirmedGuests().length})
-            </button>
-          </div>
-
-          {/* Edit Tab */}
-          {activeTab === 'edit' && (
-            <div className="p-8 space-y-6 max-h-[calc(100vh-300px)] overflow-y-auto">
-              {/* Nome Principal */}
-              <div>
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">
-                  Nome Principal
-                </label>
-                <input
-                  type="text"
-                  value={guest.name}
-                  onChange={(e) => setGuest({ ...guest, name: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-slate-700 disabled:opacity-50"
-                  disabled={isSaving}
-                />
-                <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-2">Tag: <span className="font-black text-brand bg-brand/10 px-2 py-1 rounded-md ml-1">Principal</span></p>
-              </div>
-
-              {/* Grupo */}
-              <div>
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">
-                  Grupo/Família
-                </label>
-                <input
-                  type="text"
-                  value={guest.grupo || ''}
-                  onChange={(e) => setGuest({ ...guest, grupo: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-slate-700 disabled:opacity-50"
-                  disabled={isSaving}
-                />
-              </div>
-
-              {/* Email */}
-              <div>
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  value={guest.email || ''}
-                  onChange={(e) => setGuest({ ...guest, email: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-slate-700 disabled:opacity-50"
-                  disabled={isSaving}
-                />
-              </div>
-
-              {/* Telefone */}
-              <div>
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">
-                  Telefone
-                </label>
-                <input
-                  type="tel"
-                  value={guest.telefone || ''}
-                  onChange={(e) => setGuest({ ...guest, telefone: e.target.value })}
-                  className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-slate-700 disabled:opacity-50"
-                  disabled={isSaving}
-                />
-              </div>
-
-              {/* Status */}
-              <div>
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">
-                  Status
-                </label>
-                <select
-                  value={guest.status}
-                  onChange={(e) => setGuest({ ...guest, status: e.target.value as any })}
-                  className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-slate-700 disabled:opacity-50 appearance-none"
-                  disabled={isSaving}
-                >
-                  <option value="pending">⏳ Pendente</option>
-                  <option value="confirmed">✓ Confirmado</option>
-                  <option value="declined">✗ Recusado</option>
-                </select>
-              </div>
-
-              {/* Categoria */}
-              <div>
-                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2">
-                  Categoria
-                </label>
-                <select
-                  value={guest.category}
-                  onChange={(e) => setGuest({ ...guest, category: e.target.value as GuestCategory })}
-                  className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-slate-700 disabled:opacity-50 appearance-none"
-                  disabled={isSaving}
-                >
-                  <option value="adult_paying">Adulto Pagante</option>
-                  <option value="child_paying">Criança Pagante</option>
-                  <option value="child_not_paying">Criança Não Pagante</option>
-                </select>
-              </div>
-
-              {/* Acompanhantes - 5 Slots Fixos */}
-              <div className="bg-slate-50 rounded-xl p-6 space-y-6 border border-brand/5 shadow-inner">
-                <h3 className="text-sm font-black text-slate-800 tracking-tight">Acompanhantes <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">(Máx. 5)</span></h3>
-                {companionsList.slice(0, 5).map((companion, index) => (
-                  <div key={index} className="space-y-3 bg-white p-4 rounded-xl border border-slate-100 shadow-sm relative filter drop-shadow-sm">
-                    <div className="absolute -left-3 -top-3 w-8 h-8 rounded-full bg-brand/10 text-brand font-black text-[10px] border-2 border-white flex items-center justify-center">
-                      {index + 1}
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-start pl-2">
-                      <div className="col-span-2">
-                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
-                          Nome
-                        </label>
-                        <input
-                          type="text"
-                          value={companion.name}
-                          onChange={(e) => handleCompanionNameChange(index, e.target.value)}
-                          className="w-full px-3 py-2 bg-slate-50 border-none rounded-lg text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-slate-700"
-                          placeholder="Nome do acompanhante"
-                          disabled={isSaving}
-                        />
-                      </div>
-                      <div>
-                        <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">
-                          Categoria
-                        </label>
-                        <select
-                          value={companion.category || 'adult_paying'}
-                          onChange={(e) => handleCompanionCategoryChange(index, e.target.value as GuestCategory)}
-                          className="w-full px-3 py-2 bg-slate-50 border-none rounded-lg text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-slate-700 appearance-none"
-                          disabled={isSaving}
-                        >
-                          <option value="adult_paying">Adulto</option>
-                          <option value="child_paying">Criança Pag.</option>
-                          <option value="child_not_paying">Criança N.P.</option>
-                        </select>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-3 pl-2 bg-slate-50 p-2 rounded-lg">
+          {/* Tab Content */}
+          <div className="flex-1 flex flex-col min-h-0">
+            {activeTab === 'edit' ? (
+              <div className="p-6 md:p-8 space-y-8 overflow-y-auto max-h-[60vh] md:max-h-none">
+                {/* Principal */}
+                <section>
+                  <h3 className="text-[10px] font-black text-brand uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-brand"></span>
+                    Convidado Principal
+                  </h3>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div className="space-y-2">
+                      <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">Nome Completo</label>
                       <input
-                        type="checkbox"
-                        id={`companion-confirmed-${index}`}
-                        checked={companion.isConfirmed}
-                        onChange={(e) => handleCompanionConfirmedChange(index, e.target.checked)}
-                        className="w-4 h-4 rounded border-brand/20 text-brand focus:ring-brand/20 cursor-pointer shadow-sm accent-brand"
+                        type="text"
+                        value={guest.name}
+                        onChange={(e) => updateGuest(guest.id, { name: e.target.value })}
+                        className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl text-sm font-bold focus:ring-2 focus:ring-brand/20 shadow-inner outline-none text-slate-700 transition-all"
                         disabled={isSaving}
                       />
-                      <label htmlFor={`companion-confirmed-${index}`} className="text-[10px] font-black text-slate-500 uppercase tracking-widest cursor-pointer select-none">
-                        Confirmar Presença
-                      </label>
                     </div>
-                    {companion.name && <div className="text-[10px] font-black uppercase tracking-widest pl-2">Status: <span className={companion.isConfirmed ? 'text-emerald-500' : 'text-slate-400'}>{companion.isConfirmed ? '✓ Confirmado' : '⊘ Pendente'}</span></div>}
+                    <div className="space-y-2">
+                      <label className="block text-[9px] font-black text-slate-400 uppercase tracking-widest pl-1">Categoria</label>
+                      <select
+                        value={guest.category}
+                        onChange={(e) => updateGuest(guest.id, { category: e.target.value as GuestCategory })}
+                        className="w-full px-4 py-3 bg-slate-50 border-none rounded-xl text-sm font-bold focus:ring-2 focus:ring-brand/20 shadow-inner outline-none text-slate-700 transition-all appearance-none"
+                        disabled={isSaving}
+                      >
+                        <option value="adult_paying">Adulto</option>
+                        <option value="child_paying">Criança Pagante</option>
+                        <option value="child_not_paying">Criança Não Pagante</option>
+                      </select>
+                    </div>
                   </div>
-                ))}
+                </section>
+
+                {/* Companions */}
+                <section>
+                  <h3 className="text-[10px] font-black text-brand uppercase tracking-widest mb-4 flex items-center gap-2">
+                    <span className="w-1.5 h-1.5 rounded-full bg-brand"></span>
+                    Acompanhantes ({companionsList.filter(c => c.name.trim()).length})
+                  </h3>
+                  <div className="space-y-3">
+                    {companionsList.map((companion, index) => (
+                      <div key={index} className={`p-4 rounded-2xl border transition-all ${companion.name.trim() ? 'bg-white border-brand/10 shadow-sm' : 'bg-slate-50 border-transparent opacity-60 hover:opacity-100 hover:bg-white hover:border-brand/10'}`}>
+                        <div className="flex flex-col sm:flex-row gap-3 items-center">
+                          <input
+                            type="text"
+                            value={companion.name}
+                            onChange={(e) => handleCompanionNameChange(index, e.target.value)}
+                            placeholder={`Acompanhante ${index + 1}`}
+                            className="flex-1 px-4 py-2 bg-slate-50 border-none rounded-lg text-sm font-bold shadow-inner outline-none w-full text-slate-700"
+                            disabled={isSaving}
+                          />
+                          <select
+                            value={companion.category || 'adult_paying'}
+                            onChange={(e) => handleCompanionCategoryChange(index, e.target.value as GuestCategory)}
+                            className="bg-slate-50 border-none rounded-lg px-3 py-2 text-[9px] font-black uppercase tracking-widest shadow-inner outline-none w-full sm:w-auto text-slate-500 appearance-none"
+                            disabled={isSaving}
+                          >
+                            <option value="adult_paying">Adulto</option>
+                            <option value="child_paying">Criança Pagante</option>
+                            <option value="child_not_paying">Criança Não Pagante</option>
+                          </select>
+                          <div className="flex items-center gap-2 flex-shrink-0 bg-white px-3 py-1.5 rounded-lg border border-slate-100 shadow-sm">
+                            <input
+                              type="checkbox"
+                              checked={companion.isConfirmed}
+                              onChange={(e) => handleCompanionConfirmedChange(index, e.target.checked)}
+                              className="w-4 h-4 rounded text-brand focus:ring-brand accent-brand border-slate-200"
+                              disabled={isSaving}
+                            />
+                            <span className="text-[9px] font-black text-slate-400 uppercase tracking-widest">Confirmado</span>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </section>
               </div>
-            </div>
-          )}
-
-          {/* Summary Tab */}
-          {activeTab === 'summary' && (
-            <div className="p-8 max-h-[calc(100vh-300px)] overflow-y-auto">
-              <div className="space-y-4">
-                {getConfirmedGuests().length === 0 ? (
-                  <div className="text-center py-12">
-                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nenhum convidado confirmado ainda</p>
+            ) : (
+              <div className="p-8 space-y-6">
+                <div className="bg-slate-50 rounded-2xl p-6 border border-brand/5 shadow-inner">
+                  <h4 className="text-[10px] font-black text-brand uppercase tracking-widest mb-6 px-1">Integrantes Confirmados</h4>
+                  <div className="space-y-2">
+                    {getConfirmedGuests().length === 0 ? (
+                      <p className="text-[10px] font-bold text-slate-400 italic text-center py-10">Ninguém confirmado nesta família.</p>
+                    ) : (
+                      getConfirmedGuests().map((item, idx) => (
+                        <div key={idx} className="flex items-center justify-between p-4 bg-white rounded-xl shadow-sm border border-slate-100">
+                          <span className="text-sm font-black text-slate-800 tracking-tight">{item.name}</span>
+                          <span className="text-[9px] font-black bg-brand/10 px-3 py-1.5 rounded-lg text-brand uppercase tracking-widest shadow-inner">
+                            {getCategoryLabel(item.category)}
+                          </span>
+                        </div>
+                      ))
+                    )}
                   </div>
-                ) : (
-                  <div className="overflow-x-auto rounded-xl border border-brand/10 shadow-sm">
-                    <table className="w-full text-sm">
-                      <thead>
-                        <tr className="border-b border-brand/10 bg-slate-50">
-                          <th className="text-left py-4 px-6 text-[10px] font-black uppercase tracking-widest text-slate-400">Nome</th>
-                          <th className="text-left py-4 px-6 text-[10px] font-black uppercase tracking-widest text-slate-400">Categoria</th>
-                          <th className="text-left py-4 px-6 text-[10px] font-black uppercase tracking-widest text-slate-400">Grupo</th>
-                        </tr>
-                      </thead>
-                      <tbody className="divide-y divide-slate-100">
-                        {getConfirmedGuests().map((item, index) => (
-                          <tr key={index} className="hover:bg-brand/5 transition-colors group">
-                            <td className="py-4 px-6 text-slate-800 font-bold tracking-tight">
-                              {item.name}
-                              {guest?.name === item.name && (
-                                <span className="ml-2 inline-block px-2 py-1 text-[10px] bg-brand/10 text-brand rounded-md font-black uppercase tracking-widest shadow-inner">
-                                  Principal
-                                </span>
-                              )}
-                            </td>
-                            <td className="py-4 px-6">
-                              <span className="inline-block px-3 py-1 bg-slate-100 shadow-inner rounded-md text-[10px] font-black uppercase tracking-widest text-slate-500">
-                                {getCategoryLabel(item.category)}
-                              </span>
-                            </td>
-                            <td className="py-4 px-6 text-slate-500 font-bold">{item.grupo}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* BUTTONS */}
-          <div className="p-8 border-t border-brand/10 bg-slate-50 space-y-4">
-            {activeTab === 'edit' && (
-              <div>
-                <div className="flex gap-4">
-                  <button
-                    onClick={() => router.push('/admin/dashboard')}
-                    className="flex-1 py-4 px-6 rounded-xl bg-white border-2 border-slate-100 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-all shadow-sm disabled:opacity-50"
-                    disabled={isSaving}
-                  >
-                    Cancelar
-                  </button>
-                  <button
-                    onClick={handleSave}
-                    className="flex-1 py-4 px-6 rounded-xl bg-brand font-black uppercase tracking-widest text-[10px] text-white hover:bg-brand/90 hover:-translate-y-1 transition-all shadow-lg shadow-brand/20 disabled:opacity-50 disabled:hover:translate-y-0"
-                    disabled={isSaving}
-                  >
-                    {isSaving ? 'Salvando...' : 'Salvar Alterações'}
-                  </button>
-                </div>
-
-                <div className="mt-4 pt-4 border-t border-brand/5">
-                  <button
-                    onClick={() => setShowDeleteConfirm(true)}
-                    className="w-full py-4 px-6 rounded-xl bg-white border-2 border-rose-100 text-[10px] font-black uppercase tracking-widest text-rose-500 hover:border-rose-200 hover:bg-rose-50 transition-all shadow-sm flex items-center justify-center gap-2"
-                  >
-                    🗑️ Excluir Convidado Permanentemente
-                  </button>
                 </div>
               </div>
             )}
-            {activeTab === 'summary' && (
+
+            {/* Sticky Actions */}
+            <div className="mt-auto p-6 md:p-8 bg-white border-t border-brand/5 flex flex-col sm:flex-row gap-3">
               <button
-                onClick={() => router.push('/admin/dashboard')}
-                className="w-full py-4 px-6 rounded-xl bg-white border-2 border-slate-100 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-600 hover:bg-slate-50 transition-all shadow-sm flex items-center justify-center"
+                onClick={handleSave}
+                disabled={isSaving}
+                className="flex-1 py-3 px-6 bg-brand text-white rounded-xl text-[9px] font-black uppercase tracking-widest shadow-lg shadow-brand/20 hover:bg-brand/90 transition-all disabled:opacity-50"
               >
-                Voltar ao Dashboard
+                {isSaving ? 'Salvando...' : '💾 Salvar Alterações'}
               </button>
-            )}
+              <button
+                onClick={() => setShowDeleteConfirm(true)}
+                className="py-3 px-6 bg-white text-rose-500 border border-brand/5 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-rose-50 transition-all"
+              >
+                🗑️ Excluir
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Delete Confirmation Modal */}
       {showDeleteConfirm && (
-        <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-white rounded-3xl shadow-2xl border-4 border-brand/5 max-w-sm w-full p-8 animate-in fade-in zoom-in-95 duration-200">
-            <h3 className="text-xl font-black text-slate-800 tracking-tight text-center mb-3">
-              Excluir Convidado?
-            </h3>
-
-            <p className="text-slate-500 font-bold text-center text-sm mb-8">
-              Tem certeza que deseja excluir <strong className="text-slate-800">{guest.name}</strong>? Esta ação não pode ser desfeita.
+        <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
+          <div className="bg-white rounded-[2rem] p-8 max-w-sm w-full shadow-2xl border-4 border-white animate-in zoom-in-95 duration-200">
+            <div className="w-16 h-16 bg-rose-50 text-rose-500 rounded-2xl flex items-center justify-center text-2xl mb-4 mx-auto border border-rose-100">🗑️</div>
+            <h3 className="text-xl font-black text-slate-800 tracking-tight text-center mb-2">Excluir Convidado?</h3>
+            <p className="text-sm text-slate-500 font-bold text-center mb-8 px-4 leading-relaxed">
+              Tem certeza que deseja remover <span className="text-slate-800">{guest.name}</span>? Esta ação não pode ser desfeita.
             </p>
-
-            <div className="flex gap-4">
-              <button
-                onClick={() => setShowDeleteConfirm(false)}
-                className="flex-1 py-4 px-6 rounded-xl bg-slate-50 border border-transparent text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-all shadow-inner"
-              >
-                Cancelar
-              </button>
-              <button
-                onClick={handleDelete}
-                className="flex-1 py-4 px-6 rounded-xl bg-rose-500 text-white text-[10px] font-black uppercase tracking-widest hover:bg-rose-600 hover:-translate-y-1 transition-all shadow-lg shadow-rose-500/20"
-              >
-                Excluir
-              </button>
+            <div className="flex gap-3">
+              <button onClick={() => setShowDeleteConfirm(false)} className="flex-1 py-3 bg-slate-50 rounded-xl text-[9px] font-black uppercase text-slate-400 font-bold">Cancelar</button>
+              <button onClick={handleDelete} className="flex-1 py-3 bg-rose-500 text-white rounded-xl text-[9px] font-black uppercase shadow-lg shadow-rose-500/20 font-bold">Sim, Excluir</button>
             </div>
           </div>
         </div>
       )}
-    </div>
+    </SharedLayout>
   )
 }
 
@@ -455,3 +338,4 @@ export default function AdminEditGuest() {
     </ProtectedRoute>
   )
 }
+

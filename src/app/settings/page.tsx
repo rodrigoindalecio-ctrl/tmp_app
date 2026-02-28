@@ -5,7 +5,7 @@ import { useEvent } from '@/lib/event-context'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState, useRef } from 'react'
 import Image from 'next/image'
-
+import SharedLayout from '@/app/components/shared-layout'
 
 export default function SettingsPage() {
     const { user, logout } = useAuth()
@@ -94,7 +94,6 @@ export default function SettingsPage() {
         setIsDragging(false)
     }
 
-
     // Calculate distance between two touch points
     const getTouchDistance = (touches: React.TouchList | TouchList): number => {
         const arr = Array.from(touches) as Touch[]
@@ -111,15 +110,6 @@ export default function SettingsPage() {
         const dx = arr[1].clientX - arr[0].clientX
         const dy = arr[1].clientY - arr[0].clientY
         return (Math.atan2(dy, dx) * 180) / Math.PI
-    }
-
-    // Get center point between two touches
-    const getTouchCenter = (touches: React.TouchList | TouchList): [number, number] => {
-        const arr = Array.from(touches) as Touch[]
-        if (arr.length < 2) return [0, 0]
-        const centerX = (arr[0].clientX + arr[1].clientX) / 2
-        const centerY = (arr[0].clientY + arr[1].clientY) / 2
-        return [centerX, centerY]
     }
 
     // Handle touch events for mobile
@@ -173,16 +163,11 @@ export default function SettingsPage() {
     }
 
     const handleTouchEnd = (e: React.TouchEvent<HTMLDivElement>) => {
-        if (e.touches.length < 2) {
-            setTouchDistance(0)
-            setTouchStartRotation(0)
-        }
         if (e.touches.length === 0) {
             setIsDragging(false)
         }
     }
 
-    // Handle mouse wheel for zoom
     const handleWheel = (e: React.WheelEvent<HTMLDivElement>) => {
         e.preventDefault()
         const scaleDelta = e.deltaY > 0 ? -0.1 : 0.1
@@ -190,18 +175,15 @@ export default function SettingsPage() {
         setCropScale(newScale)
     }
 
-    // Handle image file upload
     const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
         if (!file) return
 
-        // Check file size (max 5MB)
         if (file.size > 5 * 1024 * 1024) {
             alert('Arquivo muito grande! Máximo 5MB.')
             return
         }
 
-        // Convert to base64 and open crop modal
         const reader = new FileReader()
         reader.onloadend = () => {
             const base64String = reader.result as string
@@ -215,7 +197,6 @@ export default function SettingsPage() {
         reader.readAsDataURL(file)
     }
 
-    // Handle crop confirmation
     const handleCropConfirm = () => {
         setCoverImage(tempImage)
         setImagePreview(tempImage)
@@ -223,14 +204,11 @@ export default function SettingsPage() {
         setTempImage('')
     }
 
-    // Handle URL change
     const handleUrlChange = (value: string) => {
         setCoverImage(value)
         setImagePreview(value)
     }
 
-
-    // Auto-focus no preview ao abrir o modal
     useEffect(() => {
         if (showCropModal && cropPreviewRef.current) {
             cropPreviewRef.current.focus()
@@ -247,17 +225,14 @@ export default function SettingsPage() {
         return null
     }
 
-    // Função para adicionar link de presente
     const handleAddGiftLink = () => {
         setGiftListLinks([...giftListLinks, { name: '', url: '' }])
     }
 
-    // Função para remover link de presente
     const handleRemoveGiftLink = (index: number) => {
         setGiftListLinks(giftListLinks.filter((_, i) => i !== index))
     }
 
-    // Função para atualizar link de presente
     const handleUpdateGiftLink = (index: number, field: 'name' | 'url', value: string) => {
         const updated = [...giftListLinks]
         updated[index] = { ...updated[index], [field]: value }
@@ -266,8 +241,6 @@ export default function SettingsPage() {
 
     const handleSave = (e: React.FormEvent) => {
         e.preventDefault()
-
-        // Save to EventContext
         updateEventSettings({
             eventType,
             coupleNames,
@@ -284,135 +257,80 @@ export default function SettingsPage() {
             coverImageScale,
             customMessage
         })
-
         setSaved(true)
         setTimeout(() => setSaved(false), 3000)
     }
 
     return (
-        <div className="min-h-screen bg-background flex font-sans text-textPrimary">
-
-            {/* SIDEBAR */}
-            <aside className="w-64 bg-surface border-r border-borderSoft flex flex-col flex-shrink-0 hidden md:flex">
-                <div className="p-8">
-                    <div className="flex items-center gap-3 mb-10">
-                        <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-serif italic text-lg shadow-sm">
-                            R
-                        </div>
-                        <span className="font-medium text-lg tracking-tight">RSVP Manager</span>
-                    </div>
-
-                    <nav className="space-y-1">
-                        <NavItem href="/dashboard" label="Meu Evento" icon={<HomeIcon />} />
-                        <NavItem href="/import" label="Importar" icon={<UploadIcon />} />
-                        <NavItem href="/settings" active label="Configurações" icon={<SettingsIcon />} />
-                    </nav>
-                </div>
-
-                <div className="px-6 py-8 border-t border-borderSoft">
-                    <div className="flex items-center gap-3">
-                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
-                            {user.name.charAt(0)}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium truncate">{user.name}</p>
-                            <p className="text-xs text-textSecondary truncate">{user.email}</p>
-                        </div>
-                        <button onClick={logout} className="text-textSecondary hover:text-danger transition-colors">
-                            <LogOutIcon />
-                        </button>
-                    </div>
-                </div>
-            </aside>
-
-            {/* MAIN CONTENT */}
-            <main className="flex-1 p-8 max-w-[1000px] mx-auto w-full">
-
-                {/* MOBILE USER PROFILE */}
-                <div className="md:hidden flex items-center justify-between gap-3 mb-8 p-4 bg-surface border border-borderSoft rounded-xl shadow-sm">
-                    <div className="flex items-center gap-3 min-w-0">
-                        <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm flex-shrink-0">
-                            {user.name.charAt(0)}
-                        </div>
-                        <div className="min-w-0">
-                            <p className="text-sm font-medium truncate">{user.name}</p>
-                            <p className="text-xs text-textSecondary truncate">{user.email}</p>
-                        </div>
-                    </div>
-                    <button onClick={logout} className="p-2 text-textSecondary hover:text-danger hover:bg-danger/10 rounded-lg transition-colors">
-                        <LogOutIcon />
-                    </button>
-                </div>
-
-                {/* BACK BUTTON */}
-                <button
-                    onClick={() => router.back()}
-                    className="flex items-center gap-2 text-textSecondary hover:text-textPrimary mb-6 transition-colors"
-                >
-                    <ChevronLeftIcon />
-                    <span className="font-medium">Voltar</span>
-                </button>
-
+        <SharedLayout
+            role="user"
+            title="Configurações"
+            subtitle="Personalize as informações do seu evento"
+        >
+            <main className="max-w-[800px] mx-auto w-full animate-in fade-in duration-500 pb-20">
                 {/* SETTINGS CARD */}
-                <div className="bg-surface rounded-2xl border border-borderSoft shadow-sm p-8">
-                    <div className="flex items-center gap-2 mb-8">
-                        <HeartIconOutline className="w-6 h-6 text-primary" />
-                        <h1 className="text-2xl font-semibold text-textPrimary">Configurações do Evento</h1>
+                <div className="bg-white rounded-[2.5rem] border border-brand/5 shadow-sm p-8 md:p-12">
+                    <div className="flex items-center gap-3 mb-10">
+                        <div className="w-12 h-12 bg-brand/5 rounded-2xl flex items-center justify-center text-brand">
+                            <HeartIconOutline className="w-6 h-6" />
+                        </div>
+                        <div>
+                            <h2 className="text-2xl font-black text-slate-800 tracking-tight">Evento</h2>
+                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Dados principais e identidade</p>
+                        </div>
                     </div>
 
-                    <form onSubmit={handleSave} className="space-y-6">
+                    <form onSubmit={handleSave} className="space-y-8">
                         {/* Tipo de Evento */}
-                        <div>
-                            <label htmlFor="eventType" className="block text-sm font-semibold text-textPrimary mb-2">
-                                Tipo de Evento
-                            </label>
-                            <select
-                                id="eventType"
-                                value={eventType}
-                                onChange={(e) => setEventType(e.target.value as 'casamento' | 'debutante')}
-                                className="w-full px-4 py-2.5 border border-borderSoft rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all cursor-pointer"
-                            >
-                                <option value="casamento">Casamento</option>
-                                <option value="debutante">Debutante</option>
-                            </select>
-                        </div>
-
-                        {/* Nomes (dinâmico) */}
-                        <div>
-                            <label htmlFor="coupleNames" className="block text-sm font-semibold text-textPrimary mb-2">
-                                {eventType === 'casamento' ? 'Nomes do Casal' : 'Nome da Debutante'}
-                            </label>
-                            <input
-                                type="text"
-                                id="coupleNames"
-                                value={coupleNames}
-                                onChange={(e) => handleNamesChange(e.target.value)}
-                                placeholder={eventType === 'casamento' ? 'Ex: Vanessa e Rodrigo' : 'Ex: Maria Clara'}
-                                className="w-full px-4 py-2.5 border border-borderSoft rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
-                            />
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                            <div>
+                                <label htmlFor="eventType" className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 ml-1">Tipo de Evento</label>
+                                <select
+                                    id="eventType"
+                                    value={eventType}
+                                    onChange={(e) => setEventType(e.target.value as 'casamento' | 'debutante')}
+                                    className="w-full px-5 py-3.5 bg-slate-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-slate-700 appearance-none cursor-pointer"
+                                >
+                                    <option value="casamento">💍 Casamento</option>
+                                    <option value="debutante">💃 Debutante</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label htmlFor="coupleNames" className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 ml-1">
+                                    {eventType === 'casamento' ? 'Nomes do Casal' : 'Nome da Debutante'}
+                                </label>
+                                <input
+                                    type="text"
+                                    id="coupleNames"
+                                    value={coupleNames}
+                                    onChange={(e) => handleNamesChange(e.target.value)}
+                                    placeholder={eventType === 'casamento' ? 'Ex: Vanessa e Rodrigo' : 'Ex: Maria Clara'}
+                                    className="w-full px-5 py-3.5 bg-slate-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-slate-700"
+                                />
+                            </div>
                         </div>
 
                         {/* Slug (URL) */}
                         <div>
-                            <label htmlFor="slug" className="flex items-center gap-2 text-sm font-semibold text-textPrimary mb-2">
-                                Slug (URL)
+                            <label htmlFor="slug" className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 ml-1">
+                                Slug (URL personalizada)
                                 <div className="group relative inline-block">
-                                    <InfoIcon className="w-4 h-4 text-textSecondary cursor-help hover:text-primary transition-colors" />
-                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-2 w-64 p-3 bg-gray-900/95 backdrop-blur-sm text-white text-[11px] leading-relaxed rounded-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50 shadow-xl pointer-events-none font-sans">
-                                        <p className="font-bold mb-1 border-b border-white/10 pb-1 text-primary">⚠️ Aviso Importante</p>
-                                        O "slug" é o endereço que você envia aos convidados (ex: /vanessaerodrigo). Se você alterá-lo após já ter compartilhado, o link anterior deixará de funcionar. Recomendamos escolher um nome definitivo e simples.
-                                        <div className="absolute top-full left-1/2 -translate-x-1/2 border-8 border-transparent border-t-gray-900/95" />
+                                    <InfoIcon className="w-4 h-4 text-slate-300 cursor-help hover:text-brand transition-colors" />
+                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 w-72 p-4 bg-slate-900 text-white text-[11px] leading-relaxed rounded-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 shadow-2xl pointer-events-none">
+                                        <p className="font-black mb-2 text-brand uppercase tracking-widest">⚠️ Atenção</p>
+                                        Este é o endereço do seu site (ex: rsvp.me/{slug}). Se você alterar após já ter enviado os convites, o link anterior parará de funcionar.
+                                        <div className="absolute top-full left-1/2 -translate-x-1/2 border-[6px] border-transparent border-t-slate-900" />
                                     </div>
                                 </div>
                             </label>
-                            <div className="relative">
+                            <div className="relative group">
+                                <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">/</span>
                                 <input
                                     type="text"
                                     id="slug"
                                     value={slug}
                                     onChange={(e) => handleSlugChange(e.target.value)}
-                                    placeholder="vanessaerodrigo"
-                                    className="w-full px-4 py-2.5 border border-borderSoft rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all font-mono"
+                                    className="w-full pl-9 pr-14 py-3.5 bg-slate-50 border-none rounded-2xl text-sm font-mono font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-brand"
                                 />
                                 {slugEdited && (
                                     <button
@@ -421,269 +339,237 @@ export default function SettingsPage() {
                                             setSlugEdited(false)
                                             setSlug(generateSlug(coupleNames))
                                         }}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-primary hover:text-primary/80 font-medium"
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 px-3 py-1 bg-white rounded-lg text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-brand shadow-sm transition-all"
                                     >
                                         Auto
                                     </button>
                                 )}
                             </div>
-                            <p className="text-xs text-textSecondary mt-1.5">
-                                Seu link: <span className="font-mono text-primary">/{slug}</span>
-                            </p>
                         </div>
 
-                        {/* Data do Evento + Horário + Prazo para Confirmação */}
+                        {/* Data + Horário + Prazo */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div>
-                                <label htmlFor="eventDate" className="flex items-center gap-2 text-sm font-semibold text-textPrimary mb-2">
-                                    <CalendarIconRose />
-                                    Data do Evento
-                                </label>
+                                <label htmlFor="eventDate" className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 ml-1">Data do Evento</label>
                                 <input
                                     type="date"
                                     id="eventDate"
                                     value={eventDate}
                                     onChange={(e) => setEventDate(e.target.value)}
-                                    className="w-full px-4 py-2.5 border border-borderSoft rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
+                                    className="w-full px-5 py-3.5 bg-slate-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-slate-700"
                                 />
                             </div>
                             <div>
-                                <label htmlFor="eventTime" className="flex items-center gap-2 text-sm font-semibold text-textPrimary mb-2">
-                                    🕐 Horário do Evento
-                                </label>
+                                <label htmlFor="eventTime" className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 ml-1">Horário</label>
                                 <input
                                     type="time"
                                     id="eventTime"
                                     value={eventTime}
                                     onChange={(e) => setEventTime(e.target.value)}
-                                    className="w-full px-4 py-2.5 border border-borderSoft rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
+                                    className="w-full px-5 py-3.5 bg-slate-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-slate-700"
                                 />
                             </div>
                             <div>
-                                <label htmlFor="confirmationDeadline" className="block text-sm font-semibold text-textPrimary mb-2">
-                                    Prazo para Confirmação
-                                </label>
+                                <label htmlFor="confirmationDeadline" className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 ml-1">Prazo RSVP</label>
                                 <input
                                     type="date"
                                     id="confirmationDeadline"
                                     value={confirmationDeadline}
                                     onChange={(e) => setConfirmationDeadline(e.target.value)}
-                                    className="w-full px-4 py-2.5 border border-borderSoft rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
+                                    className="w-full px-5 py-3.5 bg-slate-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-slate-700"
                                 />
                             </div>
                         </div>
 
-                        {/* Local do Evento */}
-                        <div>
-                            <label htmlFor="eventLocation" className="flex items-center gap-2 text-sm font-semibold text-textPrimary mb-2">
-                                <PinIconRose />
-                                Local do Evento
-                            </label>
-                            <input
-                                type="text"
-                                id="eventLocation"
-                                value={eventLocation}
-                                onChange={(e) => setEventLocation(e.target.value)}
-                                className="w-full px-4 py-2.5 border border-borderSoft rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
-                            />
-                        </div>
+                        {/* Localização */}
+                        <div className="space-y-6 pt-4">
+                            <div className="flex items-center gap-3 mb-6">
+                                <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400">
+                                    <PinIconRose />
+                                </div>
+                                <h3 className="text-lg font-black text-slate-800 tracking-tight">Localização</h3>
+                            </div>
 
-                        {/* Localização Waze */}
-                        <div>
-                            <label htmlFor="wazeLocation" className="block text-sm font-semibold text-textPrimary mb-2">
-                                🗺️ Localização para Waze (opcional)
-                            </label>
-                            <input
-                                type="text"
-                                id="wazeLocation"
-                                value={wazeLocation}
-                                onChange={(e) => setWazeLocation(e.target.value)}
-                                placeholder="Ex: Rua das Flores, 123, São Paulo ou coordenadas"
-                                className="w-full px-4 py-2.5 border border-borderSoft rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
-                            />
-                            <p className="text-xs text-textSecondary mt-1">Se deixar vazio, usará o local do evento</p>
+                            <div>
+                                <label htmlFor="eventLocation" className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 ml-1">Endereço Completo</label>
+                                <input
+                                    type="text"
+                                    id="eventLocation"
+                                    value={eventLocation}
+                                    onChange={(e) => setEventLocation(e.target.value)}
+                                    placeholder="Ex: Villa de Regale, Rua das Palmeiras, 100"
+                                    className="w-full px-5 py-3.5 bg-slate-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-slate-700"
+                                />
+                            </div>
+
+                            <div>
+                                <label htmlFor="wazeLocation" className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 ml-1">Link Waze/Maps (Opcional)</label>
+                                <input
+                                    type="text"
+                                    id="wazeLocation"
+                                    value={wazeLocation}
+                                    onChange={(e) => setWazeLocation(e.target.value)}
+                                    placeholder="Cole aqui o link compartilhado do GPS"
+                                    className="w-full px-5 py-3.5 bg-slate-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-slate-700"
+                                />
+                            </div>
                         </div>
 
                         {/* Listas de Presentes */}
-                        <div className="border-t border-borderSoft pt-6">
-                            <label className="block text-sm font-semibold text-textPrimary mb-4">
-                                🎁 Listas de Presentes
-                            </label>
+                        <div className="space-y-6 pt-4">
+                            <div className="flex items-center justify-between mb-6">
+                                <div className="flex items-center gap-3">
+                                    <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400">
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 12V8H4v4M2 4h20v4H2zM12 4v16M7 12v8h10v-8" /></svg>
+                                    </div>
+                                    <h3 className="text-lg font-black text-slate-800 tracking-tight">Presentes</h3>
+                                </div>
+                                <button
+                                    type="button"
+                                    onClick={handleAddGiftLink}
+                                    className="px-4 py-2 bg-slate-50 hover:bg-slate-100 text-[10px] font-black uppercase tracking-widest text-slate-500 rounded-xl transition-all"
+                                >
+                                    + Adicionar
+                                </button>
+                            </div>
 
                             {giftListLinks.length > 0 && (
-                                <div className="space-y-3 mb-4">
+                                <div className="space-y-4">
                                     {giftListLinks.map((link, index) => (
-                                        <div key={index} className="flex gap-2 items-end">
+                                        <div key={index} className="flex flex-col sm:flex-row gap-4 p-5 bg-slate-50 rounded-[2rem] border border-slate-100/50 group animate-in slide-in-from-left-4 duration-300">
                                             <div className="flex-1">
                                                 <input
                                                     type="text"
-                                                    placeholder="Nome da loja (ex: Amazon)"
+                                                    placeholder="Nome da loja"
                                                     value={link.name}
                                                     onChange={(e) => handleUpdateGiftLink(index, 'name', e.target.value)}
-                                                    className="w-full px-3 py-2 border border-borderSoft rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
+                                                    className="w-full px-4 py-2 bg-white border border-slate-100 rounded-xl text-xs font-bold focus:ring-2 focus:ring-brand/20 transition-all outline-none"
                                                 />
                                             </div>
-                                            <div className="flex-1">
+                                            <div className="flex-[2]">
                                                 <input
                                                     type="url"
-                                                    placeholder="URL da lista"
+                                                    placeholder="Link da lista"
                                                     value={link.url}
                                                     onChange={(e) => handleUpdateGiftLink(index, 'url', e.target.value)}
-                                                    className="w-full px-3 py-2 border border-borderSoft rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
+                                                    className="w-full px-4 py-2 bg-white border border-slate-100 rounded-xl text-xs font-bold focus:ring-2 focus:ring-brand/20 transition-all outline-none"
                                                 />
                                             </div>
                                             <button
                                                 type="button"
                                                 onClick={() => handleRemoveGiftLink(index)}
-                                                className="px-3 py-2 text-danger hover:bg-danger/10 rounded-lg transition-colors text-sm"
+                                                className="self-end sm:self-center p-2 text-slate-300 hover:text-rose-500 transition-colors"
                                             >
-                                                ✕
+                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18M6 6l12 12" /></svg>
                                             </button>
                                         </div>
                                     ))}
                                 </div>
                             )}
 
-                            <button
-                                type="button"
-                                onClick={handleAddGiftLink}
-                                className="w-full px-4 py-2 border border-dashed border-borderSoft hover:border-primary/50 text-textPrimary hover:bg-primary/5 rounded-lg text-sm font-medium transition-all"
-                            >
-                                + Adicionar Lista de Presentes
-                            </button>
+                            {giftListLinks.length === 0 && (
+                                <div className="text-center py-8 bg-slate-50/50 rounded-[2rem] border border-dashed border-slate-200">
+                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nenhuma lista adicionada</p>
+                                </div>
+                            )}
                         </div>
 
                         {/* Imagem de Capa */}
-                        <div>
-                            <label className="flex items-center gap-2 text-sm font-semibold text-textPrimary mb-2">
-                                <ImageIconRose />
-                                Imagem de Capa
-                            </label>
+                        <div className="space-y-6 pt-4">
+                            <div className="flex items-center gap-3 mb-6">
+                                <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400">
+                                    <ImageIconRose />
+                                </div>
+                                <h3 className="text-lg font-black text-slate-800 tracking-tight">Banner de Capa</h3>
+                            </div>
 
-                            {/* Toggle URL/Upload */}
-                            <div className="flex gap-2 mb-3">
-                                <button
-                                    type="button"
-                                    onClick={() => setUploadMethod('url')}
-                                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${uploadMethod === 'url'
-                                        ? 'bg-primary text-white'
-                                        : 'bg-gray-100 text-textSecondary hover:bg-gray-200'
-                                        }`}
-                                >
-                                    URL
-                                </button>
+                            <div className="flex gap-2 p-1.5 bg-slate-100 rounded-2xl w-fit mb-8">
                                 <button
                                     type="button"
                                     onClick={() => setUploadMethod('upload')}
-                                    className={`px-4 py-2 text-sm font-medium rounded-lg transition-all ${uploadMethod === 'upload'
-                                        ? 'bg-primary text-white'
-                                        : 'bg-gray-100 text-textSecondary hover:bg-gray-200'
-                                        }`}
+                                    className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${uploadMethod === 'upload' ? 'bg-white text-brand shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
                                 >
-                                    Upload
+                                    Arquivo
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setUploadMethod('url')}
+                                    className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${uploadMethod === 'url' ? 'bg-white text-brand shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                                >
+                                    URL Link
                                 </button>
                             </div>
 
-                            {/* URL Input */}
-                            {uploadMethod === 'url' && (
+                            {uploadMethod === 'url' ? (
                                 <input
                                     type="text"
-                                    id="coverImage"
                                     value={coverImage}
                                     onChange={(e) => handleUrlChange(e.target.value)}
-                                    placeholder="https://..."
-                                    className="w-full px-4 py-2.5 border border-borderSoft rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all"
+                                    placeholder="https://sua-imagem.com/foto.jpg"
+                                    className="w-full px-5 py-3.5 bg-slate-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-slate-700"
                                 />
-                            )}
-
-                            {/* File Upload */}
-                            {uploadMethod === 'upload' && (
-                                <div>
-                                    <div className="relative border-2 border-dashed border-primary/30 rounded-xl p-8 text-center hover:border-primary hover:bg-primary/5 transition-all cursor-pointer group"
-                                        onClick={() => document.getElementById('coverImageFile')?.click()}
-                                    >
-                                        <input
-                                            type="file"
-                                            id="coverImageFile"
-                                            accept="image/*"
-                                            onChange={handleImageUpload}
-                                            className="hidden"
-                                        />
-                                        <div className="flex flex-col items-center gap-3">
-                                            <div className="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center group-hover:bg-primary/20 transition-colors">
-                                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-primary">
-                                                    <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                                    <circle cx="8.5" cy="8.5" r="1.5"></circle>
-                                                    <polyline points="21 15 16 10 5 21"></polyline>
-                                                </svg>
-                                            </div>
-                                            <div>
-                                                <p className="text-sm font-medium text-textPrimary">Clique ou arraste uma imagem</p>
-                                                <p className="text-xs text-textSecondary mt-1">JPG, PNG ou WEBP • Máximo 5MB</p>
-                                            </div>
+                            ) : (
+                                <div
+                                    className="relative border-4 border-dashed border-slate-100 rounded-[2.5rem] p-12 text-center hover:border-brand/30 hover:bg-slate-50 transition-all cursor-pointer group"
+                                    onClick={() => document.getElementById('coverImageFile')?.click()}
+                                >
+                                    <input
+                                        type="file"
+                                        id="coverImageFile"
+                                        accept="image/*"
+                                        onChange={handleImageUpload}
+                                        className="hidden"
+                                    />
+                                    <div className="flex flex-col items-center gap-4">
+                                        <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-slate-200 shadow-sm border border-slate-50 group-hover:scale-110 transition-transform">
+                                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" x2="12" y1="3" y2="15" /></svg>
+                                        </div>
+                                        <div>
+                                            <p className="text-sm font-black text-slate-700">Escolha uma Foto</p>
+                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">JPG ou PNG até 5MB</p>
                                         </div>
                                     </div>
                                 </div>
                             )}
 
-                            {/* Preview with Controls */}
                             {imagePreview && imagePreview !== 'https://...' && (
-                                <div className="mt-4 space-y-4">
-                                    <div className="relative rounded-2xl overflow-hidden border-2 border-primary/30 bg-background shadow-inner">
-                                        <div className="aspect-video relative">
-                                            <Image
-                                                src={imagePreview}
-                                                alt="Preview"
-                                                fill
-                                                className="transition-all duration-200 ease-out"
-                                                style={{
-                                                    objectFit: 'cover',
-                                                    objectPosition: `50% ${coverImagePosition}%`,
-                                                    transform: `scale(${coverImageScale})`
-                                                }}
-                                            />
-                                            {/* Mask Overlay to show "Safe Area" */}
-                                            <div className="absolute inset-0 pointer-events-none border-[20px] border-black/10" />
-                                        </div>
-                                        <div className="absolute top-3 right-3 flex gap-2">
+                                <div className="mt-8 space-y-6 animate-in fade-in zoom-in-95 duration-500">
+                                    <div className="relative rounded-[3rem] overflow-hidden border-8 border-white shadow-2xl shadow-slate-200 aspect-[16/9] bg-slate-100">
+                                        <Image
+                                            src={imagePreview}
+                                            alt="Preview"
+                                            fill
+                                            className="transition-all duration-300 pointer-events-none"
+                                            style={{
+                                                objectFit: 'cover',
+                                                objectPosition: `50% ${coverImagePosition}%`,
+                                                transform: `scale(${coverImageScale})`
+                                            }}
+                                        />
+                                        <div className="absolute inset-0 border-[1.5rem] border-black/5 pointer-events-none" />
+                                        <div className="absolute top-6 right-6 flex gap-2">
                                             <button
                                                 type="button"
-                                                onClick={() => {
-                                                    setTempImage(imagePreview)
-                                                    setShowCropModal(true)
-                                                }}
-                                                className="p-2 bg-white/90 backdrop-blur-sm text-blue-600 rounded-full hover:bg-blue-500 hover:text-white transition-all shadow-lg"
-                                                title="Editar imagem"
+                                                onClick={() => { setTempImage(imagePreview); setShowCropModal(true); }}
+                                                className="w-10 h-10 bg-white/90 backdrop-blur text-brand rounded-2xl flex items-center justify-center hover:bg-brand hover:text-white transition-all shadow-lg"
                                             >
-                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                    <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-                                                    <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-                                                </svg>
+                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
                                             </button>
                                             <button
                                                 type="button"
-                                                onClick={() => {
-                                                    setCoverImage('https://...')
-                                                    setImagePreview('https://...')
-                                                    setCoverImagePosition(50)
-                                                    setCoverImageScale(1)
-                                                }}
-                                                className="p-2 bg-white/90 backdrop-blur-sm text-red-500 rounded-full hover:bg-red-500 hover:text-white transition-all shadow-lg"
-                                                title="Remover imagem"
+                                                onClick={() => { setCoverImage('https://...'); setImagePreview(''); }}
+                                                className="w-10 h-10 bg-white/90 backdrop-blur text-rose-500 rounded-2xl flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all shadow-lg"
                                             >
-                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                                                    <path d="M18 6 6 18M6 6l12 12" />
-                                                </svg>
+                                                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6 6 18M6 6l12 12" /></svg>
                                             </button>
                                         </div>
                                     </div>
 
-                                    {/* Controls Area */}
-                                    <div className="bg-primary/5 rounded-xl p-5 space-y-4 border border-primary/20">
-                                        <div>
-                                            <div className="flex justify-between mb-2">
-                                                <label className="text-xs font-bold uppercase tracking-wider text-textPrimary/60">Posição Vertical</label>
-                                                <span className="text-xs font-mono text-primary">{coverImagePosition}%</span>
+                                    <div className="bg-slate-50 p-8 rounded-[2.5rem] border border-slate-100 space-y-6">
+                                        <div className="space-y-4">
+                                            <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-slate-400">
+                                                <span>Ajuste Vertical</span>
+                                                <span className="text-brand">{coverImagePosition}%</span>
                                             </div>
                                             <input
                                                 type="range"
@@ -691,13 +577,13 @@ export default function SettingsPage() {
                                                 max="100"
                                                 value={coverImagePosition}
                                                 onChange={(e) => setCoverImagePosition(parseInt(e.target.value))}
-                                                className="w-full h-1.5 bg-primary/20 rounded-lg appearance-none cursor-pointer accent-primary"
+                                                className="w-full h-1.5 bg-slate-200 rounded-full appearance-none cursor-pointer accent-brand"
                                             />
                                         </div>
-                                        <div>
-                                            <div className="flex justify-between mb-2">
-                                                <label className="text-xs font-bold uppercase tracking-wider text-textPrimary/60">Ajuste de Zoom</label>
-                                                <span className="text-xs font-mono text-primary">{coverImageScale.toFixed(1)}x</span>
+                                        <div className="space-y-4">
+                                            <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-slate-400">
+                                                <span>Nível de Zoom</span>
+                                                <span className="text-brand">{coverImageScale.toFixed(1)}x</span>
                                             </div>
                                             <input
                                                 type="range"
@@ -706,236 +592,137 @@ export default function SettingsPage() {
                                                 step="0.1"
                                                 value={coverImageScale}
                                                 onChange={(e) => setCoverImageScale(parseFloat(e.target.value))}
-                                                className="w-full h-1.5 bg-primary/20 rounded-lg appearance-none cursor-pointer accent-primary"
+                                                className="w-full h-1.5 bg-slate-200 rounded-full appearance-none cursor-pointer accent-brand"
                                             />
-                                        </div>
-                                    </div>
-                                    <p className="text-[10px] text-gray-400 text-center italic">
-                                        Dica: Use os controles acima para centralizar o casal/debutante perfeitamente na capa.
-                                    </p>
-                                </div>
-                            )}
-
-                            {/* Crop Modal */}
-                            {showCropModal && tempImage && (
-                                <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-                                    <div className="bg-surface rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-auto">
-                                        {/* Header */}
-                                        <div className="sticky top-0 bg-gradient-to-r from-primary/10 to-primary/5 border-b border-primary/20 px-6 py-4 flex items-center justify-between">
-                                            <h3 className="text-lg font-semibold text-textPrimary">Recortar Imagem</h3>
-                                            <button
-                                                type="button"
-                                                onClick={() => setShowCropModal(false)}
-                                                className="p-1.5 hover:bg-white/50 rounded-lg transition-colors"
-                                            >
-                                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                                                    <path d="M18 6 6 18M6 6l12 12" />
-                                                </svg>
-                                            </button>
-                                        </div>
-
-                                        {/* Content */}
-                                        <div className="p-6 space-y-6">
-                                            {/* Preview */}
-                                            <div className="space-y-3">
-                                                <p className="text-sm font-medium text-textSecondary">Pré-visualização</p>
-                                                <div className="relative rounded-xl overflow-hidden bg-background border-2 border-primary/20">
-                                                    <div
-                                                        ref={cropPreviewRef}
-                                                        className="aspect-video relative overflow-hidden cursor-grab active:cursor-grabbing touch-none"
-                                                        tabIndex={0}
-                                                        onMouseDown={handleImageMouseDown}
-                                                        onMouseMove={handleImageMouseMove}
-                                                        onMouseUp={handleImageMouseUp}
-                                                        onMouseLeave={handleImageMouseUp}
-                                                        onWheelCapture={handleWheel}
-                                                        onTouchStart={handleTouchStart}
-                                                        onTouchMove={handleTouchMove}
-                                                        onTouchEnd={handleTouchEnd}
-                                                    >
-                                                        <Image
-                                                            src={tempImage}
-                                                            alt="Crop Preview"
-                                                            fill
-                                                            className="transition-none duration-0 select-none pointer-events-none"
-                                                            style={{
-                                                                objectFit: 'cover',
-                                                                transform: `translate(${dragOffsetX}px, ${dragOffsetY}px) scale(${cropScale}) rotate(${cropRotation}deg)`,
-                                                                cursor: isDragging ? 'grabbing' : 'grab'
-                                                            }}
-                                                        />
-                                                        {/* Safe Area Grid */}
-                                                        <div className="absolute inset-0 pointer-events-none">
-                                                            <div className="absolute inset-0 border-2 border-blue-400/30" />
-                                                            <div className="absolute top-1/3 left-0 right-0 border-t border-blue-300/20" />
-                                                            <div className="absolute top-2/3 left-0 right-0 border-t border-blue-300/20" />
-                                                            <div className="absolute left-1/3 top-0 bottom-0 border-l border-blue-300/20" />
-                                                            <div className="absolute left-2/3 top-0 bottom-0 border-l border-blue-300/20" />
-                                                            {/* Hint text when dragging is available */}
-                                                            {cropScale > 1 && (
-                                                                <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 bg-black/60 text-white text-xs px-3 py-1 rounded-full pointer-events-none whitespace-nowrap">
-                                                                    <span className="hidden sm:inline">Arraste para mover 🖐️</span>
-                                                                    <span className="sm:hidden">Arraste com 1 dedo 👆</span>
-                                                                </div>
-                                                            )}
-                                                            {/* Mobile gestures hint */}
-                                                            {cropScale === 1 && (
-                                                                <div className="absolute bottom-3 left-1/2 transform -translate-x-1/2 bg-black/60 text-white text-xs px-3 py-1 rounded-full pointer-events-none whitespace-nowrap">
-                                                                    <span className="hidden sm:inline">Scroll para zoom 🖱️</span>
-                                                                    <span className="sm:hidden">Pinça para zoom 🤏</span>
-                                                                </div>
-                                                            )}
-                                                        </div>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {/* Controls */}
-                                            <div className="grid grid-cols-2 gap-4">
-                                                {/* Zoom */}
-                                                <div>
-                                                    <label className="block text-xs font-semibold text-textSecondary mb-2 uppercase tracking-wider">
-                                                        Zoom
-                                                    </label>
-                                                    <div className="flex items-center gap-2">
-                                                        <input
-                                                            type="range"
-                                                            min="0.5"
-                                                            max="3"
-                                                            step="0.1"
-                                                            value={cropScale}
-                                                            onChange={(e) => {
-                                                                setCropScale(parseFloat(e.target.value))
-                                                                // Reset position when scaling back to 1
-                                                                if (parseFloat(e.target.value) === 1) {
-                                                                    setDragOffsetX(0)
-                                                                    setDragOffsetY(0)
-                                                                }
-                                                            }}
-                                                            className="flex-1 h-2 bg-borderSoft rounded-lg appearance-none cursor-pointer accent-primary"
-                                                        />
-                                                        <span className="text-xs font-mono text-textSecondary min-w-[35px]">{cropScale.toFixed(1)}x</span>
-                                                    </div>
-                                                </div>
-
-                                                {/* Rotação */}
-                                                <div>
-                                                    <label className="block text-xs font-semibold text-textSecondary mb-2 uppercase tracking-wider">
-                                                        Rotação
-                                                    </label>
-                                                    <div className="flex items-center gap-2">
-                                                        <input
-                                                            type="range"
-                                                            min="0"
-                                                            max="360"
-                                                            value={cropRotation}
-                                                            onChange={(e) => setCropRotation(parseInt(e.target.value))}
-                                                            className="flex-1 h-2 bg-borderSoft rounded-lg appearance-none cursor-pointer accent-primary"
-                                                        />
-                                                        <span className="text-xs font-mono text-textSecondary min-w-[30px]">{cropRotation}°</span>
-                                                    </div>
-                                                </div>
-                                            </div>
-
-                                            {/* Hint */}
-                                            <div className="bg-primary/5 border border-primary/20 rounded-lg p-3">
-                                                <p className="text-xs text-primary/70 font-medium">
-                                                    <span className="hidden sm:inline">💡 Dica: Aumente o zoom e arraste a imagem com o mouse para posicionar perfeitamente! Use scroll para zoom rápido.</span>
-                                                    <span className="sm:hidden">💡 Dica: Use pinça (2 dedos) para zoom, arraste com 1 dedo para mover, e 2 dedos para girar!</span>
-                                                </p>
-                                            </div>
-
-                                            {/* Quick Actions */}
-                                            <div className="flex gap-2 flex-wrap">
-                                                <button
-                                                    type="button"
-                                                    onClick={() => { setDragOffsetX(0); setDragOffsetY(0); setCropScale(1); setCropRotation(0); }}
-                                                    className="px-3 py-1.5 text-xs font-medium bg-borderSoft text-textPrimary rounded-lg hover:bg-borderSoft/80 transition-colors"
-                                                >
-                                                    ↺ Resetar Posição
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    onClick={() => setCropRotation((cropRotation + 90) % 360)}
-                                                    className="px-3 py-1.5 text-xs font-medium bg-borderSoft text-textPrimary rounded-lg hover:bg-borderSoft/80 transition-colors"
-                                                >
-                                                    🔄 Girar 90°
-                                                </button>
-                                            </div>
-                                        </div>
-
-                                        {/* Footer */}
-                                        <div className="bg-background border-t border-borderSoft px-6 py-4 flex gap-3 sticky bottom-0">
-                                            <button
-                                                type="button"
-                                                onClick={() => setShowCropModal(false)}
-                                                className="flex-1 px-4 py-2.5 border border-borderSoft text-textPrimary font-medium rounded-lg hover:bg-background/80 transition-colors"
-                                            >
-                                                Cancelar
-                                            </button>
-                                            <button
-                                                type="button"
-                                                onClick={handleCropConfirm}
-                                                className="flex-1 px-4 py-2.5 bg-primary text-white font-medium rounded-lg hover:bg-primary/90 transition-colors"
-                                            >
-                                                Confirmar Corte
-                                            </button>
                                         </div>
                                     </div>
                                 </div>
                             )}
                         </div>
 
-                        {/* Mensagem Personalizada */}
-                        <div>
-                            <label htmlFor="customMessage" className="block text-sm font-semibold text-textPrimary mb-2">
-                                Mensagem Personalizada
-                            </label>
+                        {/* Mensagem Final */}
+                        <div className="pt-4">
+                            <label htmlFor="customMessage" className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 ml-1">Mensagem para os Convidados</label>
                             <textarea
                                 id="customMessage"
                                 value={customMessage}
                                 onChange={(e) => setCustomMessage(e.target.value)}
                                 rows={4}
-                                className="w-full px-4 py-2.5 border border-borderSoft rounded-lg text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all resize-none"
+                                placeholder="Uma mensagem carinhosa para quem vai acessar seu site..."
+                                className="w-full px-5 py-4 bg-slate-50 border-none rounded-[2rem] text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-slate-700 resize-none"
                             />
                         </div>
 
-                        {/* Save Button */}
-                        <button
-                            type="submit"
-                            className="w-full bg-primary hover:bg-primary/90 text-white font-medium py-3 px-6 rounded-lg transition-all shadow-sm shadow-primary/20 flex items-center justify-center gap-2"
-                        >
-                            <SaveIcon />
-                            {saved ? 'Alterações Salvas!' : 'Salvar Alterações'}
-                        </button>
+                        {/* Botão Salvar */}
+                        <div className="pt-10">
+                            <button
+                                type="submit"
+                                className={`w-full py-5 rounded-[2rem] font-black uppercase tracking-widest text-sm transition-all shadow-xl flex items-center justify-center gap-3 ${saved ? 'bg-emerald-500 text-white shadow-emerald-500/20' : 'bg-brand text-white shadow-brand/20 hover:scale-[1.02] active:scale-95'}`}
+                            >
+                                {saved ? (
+                                    <>
+                                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3"><path d="M20 6 9 17l-5-5" /></svg>
+                                        Configurações Atualizadas!
+                                    </>
+                                ) : (
+                                    <>
+                                        <SaveIcon />
+                                        Salvar Alterações
+                                    </>
+                                )}
+                            </button>
+                        </div>
                     </form>
                 </div>
             </main>
-        </div>
+
+            {/* Crop Modal */}
+            {showCropModal && tempImage && (
+                <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center z-[100] p-4 animate-in fade-in duration-300">
+                    <div className="bg-white rounded-[3rem] shadow-2xl max-w-2xl w-full overflow-hidden border border-white/20 animate-in zoom-in-95 duration-500">
+                        <div className="p-8 border-b border-slate-50 flex items-center justify-between">
+                            <h3 className="text-xl font-black text-slate-800 tracking-tight">Ajustar Imagem</h3>
+                            <button onClick={() => setShowCropModal(false)} className="w-10 h-10 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 hover:bg-slate-100 transition-all">
+                                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6 6 18M6 6l12 12" /></svg>
+                            </button>
+                        </div>
+
+                        <div className="p-8">
+                            <div
+                                ref={cropPreviewRef}
+                                className="aspect-video relative rounded-[2rem] overflow-hidden bg-slate-100 cursor-grab active:cursor-grabbing group shadow-inner border border-slate-200"
+                                tabIndex={0}
+                                onMouseDown={handleImageMouseDown}
+                                onMouseMove={handleImageMouseMove}
+                                onMouseUp={handleImageMouseUp}
+                                onMouseLeave={handleImageMouseUp}
+                                onWheelCapture={handleWheel}
+                                onTouchStart={handleTouchStart}
+                                onTouchMove={handleTouchMove}
+                                onTouchEnd={handleTouchEnd}
+                            >
+                                <Image
+                                    src={tempImage}
+                                    alt="Crop"
+                                    fill
+                                    className="pointer-events-none select-none"
+                                    style={{
+                                        objectFit: 'cover',
+                                        transform: `translate(${dragOffsetX}px, ${dragOffsetY}px) scale(${cropScale}) rotate(${cropRotation}deg)`
+                                    }}
+                                />
+                                <div className="absolute inset-0 border-[20px] border-black/10 pointer-events-none" />
+                                <div className="absolute inset-0 grid grid-cols-3 grid-rows-3 pointer-events-none opacity-20">
+                                    {[...Array(8)].map((_, i) => <div key={i} className="border border-white/50" />)}
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-6 mt-8">
+                                <div className="space-y-4">
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Zoom</label>
+                                    <input
+                                        type="range" min="0.5" max="3" step="0.1"
+                                        value={cropScale}
+                                        onChange={(e) => setCropScale(parseFloat(e.target.value))}
+                                        className="w-full h-1.5 bg-slate-100 rounded-full appearance-none cursor-pointer accent-brand"
+                                    />
+                                </div>
+                                <div className="space-y-4">
+                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Giro</label>
+                                    <input
+                                        type="range" min="0" max="360"
+                                        value={cropRotation}
+                                        onChange={(e) => setCropRotation(parseInt(e.target.value))}
+                                        className="w-full h-1.5 bg-slate-100 rounded-full appearance-none cursor-pointer accent-brand"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+
+                        <div className="p-8 bg-slate-50 flex gap-4">
+                            <button
+                                onClick={() => setShowCropModal(false)}
+                                className="flex-1 py-4 bg-white border border-slate-200 text-slate-400 text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-white transition-all"
+                            >
+                                Cancelar
+                            </button>
+                            <button
+                                onClick={handleCropConfirm}
+                                className="flex-1 py-4 bg-brand text-white text-[10px] font-black uppercase tracking-widest rounded-2xl shadow-lg shadow-brand/20 hover:scale-105 transition-all"
+                            >
+                                Confirmar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+        </SharedLayout>
     )
 }
 
-// --- SUBCOMPONENTS ---
-
-function NavItem({ label, icon, active = false, href }: { label: string, icon: React.ReactNode, active?: boolean, href?: string }) {
-    return (
-        <a href={href || '#'} className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${active ? 'bg-primary/10 text-primary' : 'text-textSecondary hover:bg-primary/10 hover:text-primary'}`}>
-            <span className={active ? 'text-primary' : 'text-textSecondary group-hover:text-primary'}>{icon}</span>
-            {label}
-        </a>
-    )
-}
-
-// --- ICONS ---
-
-const HomeIcon = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" /></svg>
-const UploadIcon = ({ className = "w-5 h-5" }: { className?: string }) => <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" x2="12" y1="3" y2="15" /></svg>
-const SettingsIcon = ({ className = "w-5 h-5" }: { className?: string }) => <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" /><circle cx="12" cy="12" r="3" /></svg>
-const LogOutIcon = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" x2="9" y1="12" y2="12" /></svg>
-const ChevronLeftIcon = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m15 18-6-6 6-6" /></svg>
-const HeartIconOutline = ({ className = "w-5 h-5" }: { className?: string }) => <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" /></svg>
-const CalendarIconRose = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary"><rect width="18" height="18" x="3" y="4" rx="2" ry="2" /><line x1="16" x2="16" y1="2" y2="6" /><line x1="8" x2="8" y1="2" y2="6" /><line x1="3" x2="21" y1="10" y2="10" /></svg>
-const PinIconRose = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" /><circle cx="12" cy="10" r="3" /></svg>
-const ImageIconRose = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-primary"><rect width="18" height="18" x="3" y="3" rx="2" ry="2" /><circle cx="9" cy="9" r="2" /><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" /></svg>
-const SaveIcon = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" /><polyline points="17 21 17 13 7 13 7 21" /><polyline points="7 3 7 8 15 8" /></svg>
-const InfoIcon = ({ className = "w-4 h-4" }: { className?: string }) => <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>
+// Icons
+const SaveIcon = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z" /><polyline points="17 21 17 13 7 13 7 21" /><polyline points="7 3 7 8 15 8" /></svg>
+const InfoIcon = ({ className = "w-4 h-4" }: { className?: string }) => <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><line x1="12" y1="16" x2="12" y2="12" /><line x1="12" y1="8" x2="12.01" y2="8" /></svg>
+const HeartIconOutline = ({ className = "w-5 h-5" }: { className?: string }) => <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" /></svg>
+const PinIconRose = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" /><circle cx="12" cy="10" r="3" /></svg>
+const ImageIconRose = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2" /><circle cx="9" cy="9" r="2" /><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" /></svg>

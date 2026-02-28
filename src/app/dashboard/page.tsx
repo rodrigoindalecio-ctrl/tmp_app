@@ -8,6 +8,8 @@ import Image from 'next/image'
 import { GuestEditModal } from './guest-edit-modal'
 import { ConfirmDialog } from '@/app/components/confirm-dialog'
 import { formatDate } from '@/lib/date-utils'
+import { SharedLayout } from '@/app/components/shared-layout'
+import Link from 'next/link'
 
 export default function DashboardPage() {
   const { user, logout } = useAuth()
@@ -331,484 +333,239 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex font-sans text-textPrimary">
-
-      {/* SIDEBAR */}
-      <aside className="w-64 bg-white border-r border-brand/10 flex flex-col flex-shrink-0 hidden md:flex shadow-sm">
-        <div className="p-8">
-          <div className="flex items-center gap-3 mb-10">
-            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-black text-lg bg-brand shadow-sm">
-              R
-            </div>
-            <span className="font-black text-lg tracking-tight text-slate-800 uppercase tracking-widest">RSVP Manager</span>
-          </div>
-
-          <nav className="space-y-1">
-            <NavItem href="/dashboard" active label="Meu Evento" icon={<HomeIcon />} />
-            <NavItem href="/import" label="Importar" icon={<UploadIcon />} />
-            <NavItem href="/settings" label="Configurações" icon={<SettingsIcon />} />
-          </nav>
-        </div>
-
-        <div className="px-6 py-8 border-t border-brand/10 bg-slate-50/50 mt-auto">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-brand/10 flex items-center justify-center text-brand font-black text-sm uppercase shadow-sm">
-              {user.name.charAt(0)}
-            </div>
-            <div className="flex-1 min-w-0">
-              <p className="text-sm font-black text-slate-800 tracking-tight truncate">{user.name}</p>
-              <p className="text-[10px] font-bold text-slate-400 tracking-widest uppercase truncate">{user.email}</p>
-            </div>
-            <button onClick={logout} className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all shadow-inner">
-              <LogOutIcon />
-            </button>
-          </div>
-        </div>
-      </aside>
-
-      {/* MAIN CONTENT */}
-      <main className="flex-1 p-4 md:p-8 max-w-[1600px] mx-auto w-full pb-24 md:pb-8">
-
-        {/* MOBILE USER PROFILE strip — only md- */}
-        <div className="md:hidden flex items-center justify-between gap-3 mb-5 p-3.5 bg-white border border-slate-100 rounded-2xl shadow-sm">
-          <div className="flex items-center gap-2.5 min-w-0">
-            <div className="w-9 h-9 rounded-xl bg-brand/10 flex items-center justify-center text-brand font-black text-sm uppercase flex-shrink-0">
-              {user.name.charAt(0)}
-            </div>
-            <div className="min-w-0">
-              <p className="text-sm font-black text-slate-800 tracking-tight truncate">{user.name}</p>
-              <p className="text-[9px] font-bold text-slate-400 tracking-widest uppercase truncate">{user.email}</p>
-            </div>
-          </div>
-        </div>
-
-        {/* HERO SECTION - Cover Image (Clean Banner) */}
-        {eventSettings.coverImage && eventSettings.coverImage !== 'https://...' && (
-          <div className="relative h-64 md:h-80 rounded-2xl overflow-hidden mb-10 shadow-lg">
-            <Image
-              src={eventSettings.coverImage}
-              alt="Event Cover"
-              fill
-              className="transition-all duration-300"
-              style={{
-                objectFit: 'cover',
-                objectPosition: `50% ${eventSettings.coverImagePosition || 50}%`,
-                transform: `scale(${eventSettings.coverImageScale || 1})`
-              }}
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/30 via-transparent to-transparent" />
-          </div>
-        )}
-
-        {/* HEADER DO EVENTO */}
-        <header className="flex flex-col md:flex-row md:items-start justify-between gap-6 mb-10">
-          <div>
-            <div className="flex items-center gap-2 text-primary mb-2">
-              {eventSettings.eventType === 'casamento' ? (
-                <HeartIconFilled />
-              ) : (
-                <Image
-                  src="/crown-icon-ok.png"
-                  alt="Crown"
-                  width={20}
-                  height={20}
-                  className="object-contain"
-                />
-              )}
-              <span className="text-sm font-medium tracking-wide uppercase">
-                {eventSettings.eventType === 'casamento' ? 'Casamento' : 'Debutante'}
-              </span>
-            </div>
-            <h1 className="text-3xl md:text-4xl font-black text-slate-800 mb-3 tracking-tight">
-              {eventSettings.coupleNames}
-            </h1>
-            <div className="flex flex-col sm:flex-row sm:items-center gap-4 text-xs font-bold text-slate-500 uppercase tracking-widest">
-              <div className="flex items-center gap-1.5">
+    <SharedLayout
+      role="user"
+      title={eventSettings.coupleNames}
+      subtitle={`${eventSettings.eventType === 'casamento' ? '💒' : '👑'} ${eventSettings.eventType === 'casamento' ? 'Casamento' : 'Debutante'}`}
+      headerActions={
+        <>
+          <button
+            onClick={handleExportCSV}
+            className="flex items-center gap-2 px-4 py-2.5 bg-brand text-white rounded-xl text-[9px] font-black uppercase tracking-widest shadow-lg shadow-brand/20 hover:bg-brand/90 transition-all"
+          >
+            <DownloadIcon /> XLSX
+          </button>
+          <button
+            onClick={handleDeleteAllGuests}
+            disabled={metrics.total === 0}
+            className="flex items-center gap-2 px-4 py-2.5 border border-rose-100 text-rose-500 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-rose-50 transition-all disabled:opacity-50"
+          >
+            🗑️ Limpar Lista
+          </button>
+        </>
+      }
+    >
+      {/* HERO SECTION - Cover Image */}
+      {eventSettings.coverImage && eventSettings.coverImage !== 'https://...' && (
+        <div className="relative h-48 md:h-72 rounded-[2.5rem] overflow-hidden mb-10 shadow-xl border-4 border-white">
+          <Image
+            src={eventSettings.coverImage}
+            alt="Event Cover"
+            fill
+            className="transition-all duration-300"
+            style={{
+              objectFit: 'cover',
+              objectPosition: `50% ${eventSettings.coverImagePosition || 50}%`,
+              transform: `scale(${eventSettings.coverImageScale || 1})`
+            }}
+          />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent flex items-end p-8">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-6 text-white text-[10px] font-bold uppercase tracking-[0.2em]">
+              <div className="flex items-center gap-2 drop-shadow-md">
                 <CalendarIcon />
-                <span>{formatDate(eventSettings.eventDate, {
-                  day: '2-digit',
-                  month: 'long',
-                  year: 'numeric'
-                })}</span>
-                {eventSettings.eventTime && (
-                  <span className="ml-1">às {eventSettings.eventTime}</span>
-                )}
+                <span>{formatDate(eventSettings.eventDate, { day: '2-digit', month: 'long', year: 'numeric' })}</span>
               </div>
-              <div className="hidden sm:block w-1 h-1 bg-gray-300 rounded-full" />
-              <div className="flex items-center gap-1.5">
+              <div className="flex items-center gap-2 drop-shadow-md">
                 <PinIcon />
-                <span>{eventSettings.eventLocation}</span>
-              </div>
-            </div>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <button onClick={() => router.push('/import')} className="flex items-center gap-2 px-4 py-3 bg-white border-2 border-slate-100 rounded-xl text-xs font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 hover:border-slate-200 transition-all shadow-sm">
-              <UploadIcon className="w-4 h-4" />
-              Importar
-            </button>
-            <button onClick={() => router.push('/settings')} className="flex items-center gap-2 px-4 py-3 bg-white border-2 border-slate-100 rounded-xl text-xs font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 hover:border-slate-200 transition-all shadow-sm">
-              <SettingsIcon className="w-4 h-4" />
-              Configurações
-            </button>
-          </div>
-        </header>
-
-        {/* SHARE CARD */}
-        <div className="bg-brand/5 border border-brand/10 rounded-2xl p-6 mb-10 shadow-sm">
-          <div className="flex items-start gap-4">
-            <div className="p-3 bg-white rounded-xl text-brand shadow-sm mt-1 flex-shrink-0">
-              <ShareIcon />
-            </div>
-            <div className="flex-1 min-w-0">
-              <h3 className="text-brand font-black text-lg mb-1 tracking-tight">Compartilhe com seus convidados</h3>
-              <p className="text-slate-500 text-sm mb-6 max-w-2xl font-medium">
-                Envie este link para seus convidados confirmarem presença. Eles poderão acessar a página pública sem necessidade de login.
-              </p>
-
-              <div className="flex flex-col sm:flex-row gap-2 max-w-3xl">
-                <div className="flex-1 bg-white border-2 border-slate-100 rounded-xl px-4 py-4 text-sm text-slate-500 font-bold overflow-x-auto whitespace-nowrap scrollbar-hide">
-                  {typeof window !== 'undefined' ?
-                    `${window.location.origin}/evento/${eventSettings.slug || user.name.toLowerCase().replace(/\s+/g, '-')}` :
-                    `https://app-rsvp.com/evento/${eventSettings.slug || user.name.toLowerCase().replace(/\s+/g, '-')}`
-                  }
-                </div>
-                <div className="flex gap-2">
-                  <button
-                    onClick={handleCopyLink}
-                    className="flex-1 sm:flex-none px-6 py-4 bg-brand hover:bg-brand/90 text-white font-black uppercase tracking-widest text-xs rounded-xl transition-all shadow-lg shadow-brand/20 flex items-center justify-center gap-2 min-w-[100px]"
-                  >
-                    {copied ? (
-                      <>
-                        <CheckIcon /> Copiado
-                      </>
-                    ) : (
-                      <>
-                        <CopyIcon /> Copiar
-                      </>
-                    )}
-                  </button>
-                  <button
-                    onClick={() => window.open(`/evento/${eventSettings.slug || user.name.toLowerCase().replace(/\s+/g, '-')}`, '_blank')}
-                    className="p-4 bg-white border-2 border-slate-100 text-brand rounded-xl hover:border-brand/20 hover:bg-brand/5 transition-all flex-shrink-0"
-                    title="Abrir em nova aba"
-                  >
-                    <ExternalLinkIcon />
-                  </button>
-                </div>
+                <span className="truncate max-w-[200px]">{eventSettings.eventLocation}</span>
               </div>
             </div>
           </div>
         </div>
+      )}
 
-        {/* KPI CARDS */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-          <KPICard
-            label="Total de Convidados"
-            value={metrics.total.toString()}
-            icon={<UsersIcon />}
-            isActive={filter === 'all'}
-            onClick={() => setFilter('all')}
-          />
-          <KPICard
-            label="Confirmados"
-            value={metrics.confirmed.toString()}
-            subValue={`${metrics.total > 0 ? Math.round((metrics.confirmed / metrics.total) * 100) : 0}%`}
-            icon={<CheckCircleIcon />}
-            status="success"
-            isActive={filter === 'confirmed'}
-            onClick={() => setFilter('confirmed')}
-          />
-          <KPICard
-            label="Pendentes"
-            value={metrics.pending.toString()}
-            subValue={`${metrics.total > 0 ? Math.round((metrics.pending / metrics.total) * 100) : 0}%`}
-            icon={<ClockIcon />}
-            status="warning"
-            isActive={filter === 'pending'}
-            onClick={() => setFilter('pending')}
-          />
-          <KPICard
-            label="Recusados"
-            value={metrics.declined.toString()}
-            icon={<XCircleIcon />}
-            isActive={filter === 'declined'}
-            onClick={() => setFilter('declined')}
-          />
-        </div>
-
-        {/* FILTERS & SEARCH */}
-        <div className="bg-white rounded-t-2xl border border-b-0 border-brand/10 p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="relative flex-1 max-w-md">
-            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
-              <SearchIcon />
+      {/* SHARE CARD */}
+      <div className="bg-white border border-brand/10 rounded-[2rem] p-6 mb-10 shadow-sm relative overflow-hidden group">
+        <div className="absolute -right-10 -top-10 w-40 h-40 bg-brand/5 rounded-full blur-3xl group-hover:bg-brand/10 transition-colors" />
+        <div className="flex flex-col md:flex-row items-center gap-6">
+          <div className="w-16 h-16 bg-brand/5 rounded-2xl flex items-center justify-center text-brand flex-shrink-0 animate-pulse">
+            <ShareIcon />
+          </div>
+          <div className="flex-1 min-w-0 text-center md:text-left">
+            <h3 className="text-slate-800 font-black text-xl mb-1 tracking-tight">Convite Digital</h3>
+            <p className="text-slate-400 text-xs font-bold leading-relaxed max-w-2xl px-4 md:px-0">
+              O seu link personalizado está pronto. Envie para os convidados confirmarem presença.
+            </p>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+            <div className="flex-1 bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-[10px] text-slate-400 font-black uppercase tracking-widest overflow-hidden text-ellipsis flex items-center shadow-inner">
+              {typeof window !== 'undefined' ?
+                `${window.location.origin}/evento/${eventSettings.slug || user.name.toLowerCase().replace(/\s+/g, '-')}` : '...'
+              }
             </div>
+            <button
+              onClick={handleCopyLink}
+              className={`px-8 py-3 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all flex items-center justify-center gap-2 ${copied ? 'bg-emerald-500 text-white' : 'bg-brand text-white shadow-lg shadow-brand/20 hover:scale-105 active:scale-95'}`}
+            >
+              {copied ? <><CheckIcon /> Copiado!</> : <><CopyIcon /> Copiar Link</>}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* KPI CARDS */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 mb-10">
+        <KPICard
+          label="Total"
+          value={metrics.total.toString()}
+          icon={<UsersIcon />}
+          isActive={filter === 'all'}
+          onClick={() => setFilter('all')}
+        />
+        <KPICard
+          label="Confirmados"
+          value={metrics.confirmed.toString()}
+          icon={<CheckCircleIcon />}
+          status="success"
+          isActive={filter === 'confirmed'}
+          onClick={() => setFilter('confirmed')}
+        />
+        <KPICard
+          label="Pendentes"
+          value={metrics.pending.toString()}
+          icon={<ClockIcon />}
+          status="warning"
+          isActive={filter === 'pending'}
+          onClick={() => setFilter('pending')}
+        />
+        <KPICard
+          label="Recusados"
+          value={metrics.declined.toString()}
+          icon={<XCircleIcon />}
+          isActive={filter === 'declined'}
+          onClick={() => setFilter('declined')}
+        />
+      </div>
+
+      {/* SEARCH AND FILTER */}
+      <div className="bg-white rounded-[2rem] border border-brand/5 shadow-sm overflow-hidden mb-10">
+        <div className="p-4 md:p-6 border-b border-brand/5 flex flex-col md:flex-row gap-4 items-center">
+          <div className="relative flex-1 w-full">
+            <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" />
             <input
               type="text"
-              placeholder="Buscar por nome..."
+              placeholder="Pesquisar convidado..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-11 pr-4 py-3 bg-slate-50 border-none rounded-xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner placeholder:text-slate-400 text-slate-700 outline-none"
+              className="w-full pl-12 pr-6 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-slate-700"
             />
           </div>
-
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <select
-                value={filter}
-                onChange={(e) => setFilter(e.target.value as any)}
-                className="appearance-none bg-slate-50 border-none text-slate-700 py-3 pl-4 pr-10 rounded-xl text-xs font-bold focus:ring-2 focus:ring-brand/20 shadow-inner cursor-pointer outline-none"
-              >
-                <option value="all">Todos os Status</option>
-                <option value="confirmed">Confirmados</option>
-                <option value="pending">Pendentes</option>
-                <option value="declined">Recusados</option>
-              </select>
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
-                <ChevronDownIcon />
-              </div>
-            </div>
-
-            <button
-              onClick={() => window.location.reload()}
-              className="p-3 bg-slate-50 text-slate-500 rounded-xl hover:bg-slate-100 transition-colors shadow-inner"
-              title="Atualizar"
-            >
-              <RefreshIcon />
-            </button>
-
-            <button
-              onClick={handleDeleteAllGuests}
-              disabled={metrics.total === 0}
-              className="flex items-center gap-2 px-4 py-3 border-2 border-rose-100 text-rose-600 rounded-xl text-xs font-black uppercase tracking-widest hover:border-rose-400 hover:bg-rose-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
-              title="Apagar todos os convidados"
-            >
-              🗑️ Apagar Tudo
-            </button>
-
-            <button
-              onClick={handleExportCSV}
-              className="flex items-center gap-2 px-4 py-3 bg-brand text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-brand/20 hover:bg-brand/90 transition-all"
-            >
-              <DownloadIcon />
-              XLSX
-            </button>
-          </div>
         </div>
 
-        {/* TABLE — desktop only */}
-        <div className="hidden md:block bg-white border border-brand/10 rounded-2xl overflow-hidden shadow-sm">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left text-sm">
-              <thead className="bg-slate-50 text-slate-400 font-black text-[10px] uppercase tracking-widest">
-                <tr>
-                  <th className="px-6 py-4">Nome</th>
-                  <th className="px-6 py-4">Tipo</th>
-                  <th className="px-6 py-4">Grupo</th>
-                  <th className="px-6 py-4">Status</th>
-                  <th className="px-6 py-4">Confirmado em</th>
-                  <th className="px-6 py-4 text-right">Ações</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {filteredPeople.length === 0 ? (
-                  <tr>
-                    <td colSpan={6} className="px-6 py-12 text-center">
-                      <div className="flex flex-col items-center justify-center text-gray-400">
-                        <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center mb-3">
-                          <SearchIcon className="w-6 h-6 text-slate-300" />
-                        </div>
-                        <p className="text-sm font-black text-slate-400 uppercase tracking-widest">Nenhum convidado encontrado</p>
-                      </div>
-                    </td>
-                  </tr>
-                ) : (
-                  filteredPeople.map((person) => (
-                    <tr key={person.uniqueId} className="hover:bg-brand/5 transition-colors group">
-                      <td className="px-6 py-4 text-slate-800 font-black tracking-tight">{person.name}</td>
-                      <td className="px-6 py-4 text-slate-500 font-bold flex items-center gap-2">
-                        {person.type === 'Principal' ? (
-                          <span className="inline-flex items-center gap-1.5 text-brand bg-brand/10 px-2 py-1 rounded-md text-[10px] uppercase tracking-widest font-black"><UserIcon /> Principal</span>
-                        ) : (
-                          <span className="inline-flex items-center gap-1.5 text-slate-400 bg-slate-100 px-2 py-1 rounded-md text-[10px] uppercase tracking-widest font-black"><UsersIconMini /> Acompanhante</span>
-                        )}
-                      </td>
-                      <td className="px-6 py-4 text-slate-500 font-bold text-xs uppercase tracking-widest">{person.groupName}</td>
-                      <td className="px-6 py-4"><StatusBadge status={person.status} /></td>
-                      <td className="px-6 py-4 text-slate-400 font-bold text-xs">{person.status === 'pending' ? '-' : person.updatedAt.toLocaleDateString()}</td>
-                      <td className="px-6 py-4 text-right">
-                        <button
-                          onClick={() => handleEditClick(guests.find(g => g.id === person.guestId)!)}
-                          className="p-3 text-slate-400 hover:text-brand hover:bg-brand/10 rounded-xl transition-all duration-200 shadow-inner group-hover:bg-white"
-                          title="Editar Convidado"
-                        >
-                          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                            <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
-                          </svg>
-                        </button>
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
-
-          {filteredPeople.length > 0 && (
-            <div className="bg-slate-50 px-6 py-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-slate-400 uppercase tracking-widest">
-              <p>Mostrando {filteredPeople.length} resultados</p>
-            </div>
-          )}
-        </div>
-
-        {/* MOBILE GUEST CARDS — visible only on small screens */}
-        <div className="md:hidden bg-white border border-brand/10 rounded-2xl overflow-hidden shadow-sm divide-y divide-slate-100">
+        {/* GUEST LIST - Unified Card Grid */}
+        <div className="p-4 md:p-8">
           {filteredPeople.length === 0 ? (
-            <div className="py-12 flex flex-col items-center justify-center text-slate-400 gap-3">
-              <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center">
-                <SearchIcon className="w-6 h-6 text-slate-300" />
-              </div>
+            <div className="py-20 flex flex-col items-center justify-center text-slate-300">
+              <UsersIcon className="w-16 h-16 mb-4 opacity-20" />
               <p className="text-[10px] font-black uppercase tracking-widest">Nenhum convidado encontrado</p>
             </div>
           ) : (
-            filteredPeople.map((person) => (
-              <div key={person.uniqueId} className="flex items-center gap-3 p-4 active:bg-brand/5 transition-colors">
-                {/* Avatar initial */}
-                <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm uppercase flex-shrink-0 ${person.status === 'confirmed' ? 'bg-emerald-100 text-emerald-700' :
-                  person.status === 'declined' ? 'bg-rose-100 text-rose-500' :
-                    'bg-slate-100 text-slate-500'
-                  }`}>
-                  {person.name.charAt(0)}
-                </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+              {filteredPeople.map((person) => (
+                <div
+                  key={person.uniqueId}
+                  className="bg-white rounded-[2rem] border border-brand/5 shadow-sm p-6 hover:-translate-y-1 hover:shadow-xl hover:shadow-brand/5 transition-all duration-300 group flex flex-col justify-between"
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm shadow-inner ${person.status === 'confirmed' ? 'bg-emerald-50 text-emerald-600' : person.status === 'declined' ? 'bg-rose-50 text-rose-500' : 'bg-slate-50 text-slate-400'}`}>
+                        {person.name.charAt(0).toUpperCase()}
+                      </div>
+                      <div className="min-w-0">
+                        <h4 className="text-sm font-black text-slate-800 tracking-tight truncate max-w-[120px]" title={person.name}>
+                          {person.name}
+                        </h4>
+                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest truncate">
+                          {person.groupName}
+                        </p>
+                      </div>
+                    </div>
+                    <StatusBadge status={person.status} mobile />
+                  </div>
 
-                <div className="flex-1 min-w-0">
-                  <p className="font-black text-slate-800 text-sm tracking-tight truncate">{person.name}</p>
-                  <div className="flex items-center gap-1.5 mt-1 flex-wrap">
-                    {/* Type */}
-                    {person.type === 'Principal' ? (
-                      <span className="text-brand bg-brand/10 px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-widest">Principal</span>
-                    ) : (
-                      <span className="text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded text-[9px] font-black uppercase tracking-widest">Acompanhante</span>
-                    )}
-                    {/* Status */}
-                    <StatusBadge status={person.status} />
-                    {/* Group */}
-                    {person.groupName !== person.name && (
-                      <span className="text-slate-400 text-[9px] font-bold truncate">{person.groupName}</span>
-                    )}
+                  <div className="flex items-center justify-between pt-4 border-t border-slate-50">
+                    <span className={`px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-widest ${person.type === 'Principal' ? 'bg-brand/10 text-brand' : 'bg-slate-100 text-slate-400'}`}>
+                      {person.type}
+                    </span>
+                    <button
+                      onClick={() => handleEditClick(guests.find(g => g.id === person.guestId)!)}
+                      className="w-9 h-9 bg-slate-50 text-slate-300 rounded-xl flex items-center justify-center hover:bg-brand hover:text-white hover:scale-110 transition-all shadow-inner group-hover:text-slate-500"
+                    >
+                      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
+                    </button>
                   </div>
                 </div>
-
-                <button
-                  onClick={() => handleEditClick(guests.find(g => g.id === person.guestId)!)}
-                  className="flex-shrink-0 p-2.5 text-slate-300 hover:text-brand hover:bg-brand/10 rounded-xl transition-all"
-                >
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
-                  </svg>
-                </button>
-              </div>
-            ))
-          )}
-          {filteredPeople.length > 0 && (
-            <div className="bg-slate-50 px-4 py-3 text-[9px] font-black text-slate-400 uppercase tracking-widest">
-              {filteredPeople.length} resultado(s)
+              ))}
             </div>
           )}
         </div>
+      </div>
 
-        {/* Guest Edit Modal */}
-        <GuestEditModal
-          guest={editingGuest}
-          isOpen={isEditModalOpen}
-          onClose={() => setIsEditModalOpen(false)}
-          onSave={handleSaveEdit}
-          onDelete={handleDeleteGuest}
-        />
+      {/* Guest Edit Modal */}
+      <GuestEditModal
+        guest={editingGuest}
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        onSave={handleSaveEdit}
+        onDelete={handleDeleteGuest}
+      />
 
-        {/* Confirm Dialog - Delete Single Guest */}
-        <ConfirmDialog
-          isOpen={deleteConfirmDialog.isOpen}
-          title={deleteConfirmDialog.person?.type === 'Principal' ? "Excluir Convidado Principal" : "Excluir Acompanhante"}
-          message={deleteConfirmDialog.person?.type === 'Principal'
-            ? `Deseja excluir "${deleteConfirmDialog.person.name}" e todo o seu grupo? Esta ação não pode ser desfeita.`
-            : `Deseja excluir o acompanhante "${deleteConfirmDialog.person?.name}" do grupo "${deleteConfirmDialog.person?.groupName}"?`
-          }
-          confirmText="Sim, excluir"
-          cancelText="Cancelar"
-          isDangerous={true}
-          onConfirm={() => deleteConfirmDialog.person && confirmDeleteGuest(deleteConfirmDialog.person)}
-          onCancel={() => setDeleteConfirmDialog({ isOpen: false })}
-        />
+      {/* Confirm Dialogs */}
+      <ConfirmDialog
+        isOpen={deleteConfirmDialog.isOpen}
+        title={deleteConfirmDialog.person?.type === 'Principal' ? "Excluir Convidado" : "Excluir Acompanhante"}
+        message={deleteConfirmDialog.person?.type === 'Principal'
+          ? `Deseja excluir "${deleteConfirmDialog.person.name}" e todo o seu grupo?`
+          : `Deseja excluir o acompanhante "${deleteConfirmDialog.person?.name}"?`
+        }
+        confirmText="Excluir"
+        cancelText="Voltar"
+        isDangerous={true}
+        onConfirm={() => deleteConfirmDialog.person && confirmDeleteGuest(deleteConfirmDialog.person)}
+        onCancel={() => setDeleteConfirmDialog({ isOpen: false })}
+      />
 
-        {/* Confirm Dialog - Delete All Guests */}
-        <ConfirmDialog
-          isOpen={deleteAllConfirmDialog.isOpen}
-          title={deleteAllConfirmDialog.step === 1 ? "Apagar Todos os Convidados" : "⚠️ Última Confirmação"}
-          message={deleteAllConfirmDialog.step === 1
-            ? `Tem certeza que deseja excluir TODOS os ${metrics.total} convidados? Esta ação é irreversível.`
-            : "Esta ação é PERMANENTE e não pode ser desfeita. Tem certeza que deseja continuar?"
-          }
-          confirmText={deleteAllConfirmDialog.step === 1 ? "Continuar" : "Sim, excluir tudo"}
-          cancelText="Cancelar"
-          isDangerous={true}
-          showWarning={deleteAllConfirmDialog.step === 2}
-          onConfirm={() => deleteAllConfirmDialog.step === 1 ? confirmDeleteAllFirstStep() : confirmDeleteAllGuests()}
-          onCancel={() => setDeleteAllConfirmDialog({ isOpen: false, step: 1 })}
-        />
-      </main>
-
-      {/* BOTTOM NAVIGATION BAR — mobile only */}
-      <nav className="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-brand/10 shadow-[0_-4px_20px_rgba(0,0,0,0.06)]">
-        <div className="flex items-stretch">
-          {/* Início */}
-          <a href="/dashboard" className="flex-1 flex flex-col items-center justify-center gap-1 py-3 px-1 relative text-brand">
-            <span className="absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 bg-brand rounded-full" />
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="scale-110">
-              <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" /><polyline points="9 22 9 12 15 12 15 22" />
-            </svg>
-            <span className="text-[9px] font-black uppercase tracking-widest leading-none text-brand">Início</span>
-          </a>
-          {/* Importar */}
-          <a href="/import" className="flex-1 flex flex-col items-center justify-center gap-1 py-3 px-1 text-slate-400">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" x2="12" y1="3" y2="15" />
-            </svg>
-            <span className="text-[9px] font-black uppercase tracking-widest leading-none">Importar</span>
-          </a>
-          {/* Configurações */}
-          <a href="/settings" className="flex-1 flex flex-col items-center justify-center gap-1 py-3 px-1 text-slate-400">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.1a2 2 0 0 1-1-1.72v-.51a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
-              <circle cx="12" cy="12" r="3" />
-            </svg>
-            <span className="text-[9px] font-black uppercase tracking-widest leading-none">Config.</span>
-          </a>
-          {/* Sair */}
-          <button onClick={logout} className="flex-1 flex flex-col items-center justify-center gap-1 py-3 px-1 text-rose-400">
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" /><polyline points="16 17 21 12 16 7" /><line x1="21" x2="9" y1="12" y2="12" />
-            </svg>
-            <span className="text-[9px] font-black uppercase tracking-widest leading-none text-rose-400">Sair</span>
-          </button>
-        </div>
-      </nav>
-    </div>
+      <ConfirmDialog
+        isOpen={deleteAllConfirmDialog.isOpen}
+        title={deleteAllConfirmDialog.step === 1 ? "Limpar Toda a Lista" : "Confirmação Final"}
+        message={deleteAllConfirmDialog.step === 1
+          ? `Tem certeza que deseja excluir TODOS os ${metrics.total} convidados?`
+          : "Esta ação apagará permanentemente todos os dados. Continuar?"
+        }
+        confirmText={deleteAllConfirmDialog.step === 1 ? "Sim, Continuar" : "Apagar Tudo"}
+        isDangerous={true}
+        onConfirm={() => deleteAllConfirmDialog.step === 1 ? confirmDeleteAllFirstStep() : confirmDeleteAllGuests()}
+        onCancel={() => setDeleteAllConfirmDialog({ isOpen: false, step: 1 })}
+      />
+    </SharedLayout>
   )
 }
 
-// --- SUBCOMPONENTS ---
-
-function NavItem({ label, icon, active = false, href }: { label: string, icon: React.ReactNode, active?: boolean, href?: string }) {
+function NavItem({ href, active, label, icon }: { href: string; active?: boolean; label: string; icon: React.ReactNode }) {
   return (
-    <a href={href || '#'} className={`flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${active ? 'bg-brand/10 text-brand' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'}`}>
-      <span className={active ? 'text-brand' : 'text-slate-400 group-hover:text-slate-500'}>{icon}</span>
+    <Link
+      href={href}
+      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${active
+        ? 'bg-brand/10 text-brand shadow-sm'
+        : 'text-slate-400 hover:bg-slate-50 hover:text-slate-600'
+        }`}
+    >
+      <span className={active ? 'text-brand' : 'text-slate-400'}>{icon}</span>
       {label}
-    </a>
+    </Link>
   )
 }
 
-// ... (KPI Card fix)
 function KPICard({
   label,
   value,
@@ -860,26 +617,18 @@ function KPICard({
   )
 }
 
-// ... (New Icons)
-const UserIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
-const UsersIconMini = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
+function StatusBadge({ status, mobile }: { status: GuestStatus; mobile?: boolean }) {
+  const config = {
+    confirmed: { label: 'Confirmado', icon: '✓', class: 'bg-emerald-50 text-emerald-600 border-emerald-100' },
+    pending: { label: 'Pendente', icon: '⏳', class: 'bg-amber-50 text-amber-600 border-amber-100' },
+    declined: { label: 'Recusado', icon: '✗', class: 'bg-rose-50 text-rose-100 border-rose-100' }
+  }
 
-function StatusBadge({ status }: { status: string }) {
-  const styles = {
-    confirmed: 'bg-emerald-50 text-emerald-600 border-emerald-100',
-    pending: 'bg-amber-50 text-amber-600 border-amber-100',
-    declined: 'bg-rose-50 text-rose-600 border-rose-100'
-  } as any
-
-  const labels = {
-    confirmed: 'Confirmado',
-    pending: 'Pendente',
-    declined: 'Recusado'
-  } as any
+  const { label, icon, class: className } = config[status]
 
   return (
-    <span className={`inline-flex items-center px-3 py-1 rounded-md text-[10px] font-black uppercase tracking-widest border-2 ${styles[status] || styles.pending}`}>
-      {labels[status]}
+    <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-lg border shadow-inner text-brand font-black uppercase tracking-widest ${className} ${mobile ? 'text-[8px] px-1.5 py-0.5' : 'text-[9px]'}`}>
+      <span className="scale-90">{icon}</span> {label}
     </span>
   )
 }
@@ -898,12 +647,14 @@ const ShareIcon = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="no
 const CopyIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2" /><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2" /></svg>
 const CheckIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
 const ExternalLinkIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" /><polyline points="15 3 21 3 21 9" /><line x1="10" x2="21" y1="14" y2="3" /></svg>
-const UsersIcon = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
+const UsersIcon = ({ className = "w-5 h-5" }: { className?: string }) => <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
 const CheckCircleIcon = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" /><polyline points="22 4 12 14.01 9 11.01" /></svg>
 const ClockIcon = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
 const XCircleIcon = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="m15 9-6 6" /><path d="m9 9 6 6" /></svg>
 const SearchIcon = ({ className = "w-5 h-5" }: { className?: string }) => <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
 const ChevronDownIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
 const RefreshIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8" /><path d="M3 3v5h5" /><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16" /><path d="M16 21h5v-5" /></svg>
+const UserIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" /><circle cx="12" cy="7" r="4" /></svg>
+const UsersIconMini = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2" /><circle cx="9" cy="7" r="4" /><path d="M22 21v-2a4 4 0 0 0-3-3.87" /><path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg>
 const DownloadIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" x2="12" y1="15" y2="3" /></svg>
 const TrashIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M3 6h18" /><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6" /><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2" /></svg>

@@ -1,9 +1,12 @@
 'use client'
 
-import { createContext, useContext, useState, ReactNode, useEffect } from 'react'
+import { createContext, useContext, useState, ReactNode, useEffect, useMemo } from 'react'
+import { useParams } from 'next/navigation'
+import { useAdmin } from './admin-context'
+import { useAuth } from './auth-context'
+import { supabase } from './supabase'
 
 export type GuestStatus = 'confirmed' | 'pending' | 'declined'
-
 export type GuestCategory = 'adult_paying' | 'child_paying' | 'child_not_paying'
 
 export type Companion = {
@@ -16,14 +19,14 @@ export type Guest = {
     id: string
     name: string
     email?: string
-    telefone?: string // Adicionado para detecção de duplicidade
-    grupo?: string // Adicionado para referência de grupo/família
-    companions: number // Mantém compatibilidade visual como "max allowed"
-    companionsList: Companion[] // Lista real de nomes
+    telefone?: string
+    grupo?: string
+    companions: number
+    companionsList: Companion[]
     status: GuestStatus
-    category: GuestCategory // Categoria do convidado principal
+    category: GuestCategory
     updatedAt: Date
-    confirmedAt?: Date // Data quando foi confirmado
+    confirmedAt?: Date
 }
 
 export type EventSettings = {
@@ -31,47 +34,38 @@ export type EventSettings = {
     coupleNames: string
     slug: string
     eventDate: string
-    eventTime?: string // Horário do evento (HH:mm)
+    eventTime?: string
     confirmationDeadline: string
     eventLocation: string
-    wazeLocation?: string // URL do Waze ou coordenadas para abrir no maps
+    wazeLocation?: string
     coverImage: string
-    coverImagePosition: number // Percentage 0-100 for Y axis
-    coverImageScale: number // 1.0 to 3.0
+    coverImagePosition: number
+    coverImageScale: number
     customMessage: string
-    giftList?: string // URL ou descrição da lista de presentes
-    giftListLinks?: { name: string; url: string }[] // Links para listas de presentes (ex: Amazon, Etna, etc)
+    giftList?: string
+    giftListLinks?: { name: string; url: string }[]
 }
 
 type EventContextType = {
     guests: Guest[]
     eventSettings: EventSettings
+    loading: boolean
     metrics: {
         total: number
         confirmed: number
         pending: number
         declined: number
-        totalPeople: number // Inclui acompanhantes
+        totalPeople: number
     }
-    addGuest: (guest: Omit<Guest, 'id' | 'updatedAt' | 'status'>) => void
-    addGuestsBatch: (guests: Omit<Guest, 'id' | 'updatedAt' | 'status'>[]) => { imported: number; duplicates: string[] }
-    removeGuest: (id: string) => void
-    updateGuestStatus: (id: string, status: GuestStatus) => void // Atualiza status GERAL do convite
-    updateGuest: (id: string, guest: Partial<Guest>) => void // Atualiza qualquer campo do guest
-    updateGuestCompanions: (id: string, companions: Companion[]) => void // Atualiza quem vai e quem não vai
-    removeCompanion: (guestId: string, companionIndex: number) => void // Remove um acompanhante específico
-    updateEventSettings: (settings: EventSettings) => void
+    addGuest: (guest: Omit<Guest, 'id' | 'updatedAt' | 'status'>) => Promise<void>
+    addGuestsBatch: (guests: Omit<Guest, 'id' | 'updatedAt' | 'status'>[]) => Promise<{ imported: number; duplicates: string[] }>
+    removeGuest: (id: string) => Promise<void>
+    updateGuestStatus: (id: string, status: GuestStatus) => Promise<void>
+    updateGuest: (id: string, guest: Partial<Guest>) => Promise<void>
+    updateGuestCompanions: (id: string, companions: Companion[]) => Promise<void>
+    removeCompanion: (guestId: string, companionIndex: number) => Promise<void>
 }
 
-const EventContext = createContext<EventContextType | undefined>(undefined)
-
-// Dados iniciais de exemplo adaptados
-const INITIAL_GUESTS: Guest[] = [
-    { id: '1', name: 'Roberto Almeida', email: 'roberto@email.com', companions: 0, companionsList: [], status: 'confirmed', category: 'adult_paying', updatedAt: new Date() },
-    { id: '2', name: 'Carlos & Família', email: 'carlos@email.com', companions: 2, companionsList: [{ name: 'Ana', isConfirmed: true }, { name: 'Junior', isConfirmed: true }], status: 'confirmed', category: 'adult_paying', updatedAt: new Date() },
-]
-
-// Configurações padrão do evento
 const DEFAULT_EVENT_SETTINGS: EventSettings = {
     eventType: 'casamento',
     coupleNames: 'Vanessa e Rodrigo',
@@ -89,100 +83,81 @@ const DEFAULT_EVENT_SETTINGS: EventSettings = {
     giftListLinks: []
 }
 
+const EventContext = createContext<EventContextType | undefined>(undefined)
+
 export function EventProvider({ children }: { children: ReactNode }) {
-    // Inicializa lazy para ler do localStorage se existir
-    const [guests, setGuests] = useState<Guest[]>(() => {
-        if (typeof window !== 'undefined') {
-            const saved = localStorage.getItem('rsvp_guests')
-            if (saved) {
-                try {
-                    // Precisamos converter strings de data de volta para objetos Date
-                    const parsed = JSON.parse(saved)
-                    const migratedGuests = parsed.map((g: any) => ({
-                        ...g,
-                        updatedAt: new Date(g.updatedAt),
-                        // Migration: Se status é 'confirmed' e não tem confirmedAt, usa updatedAt
-                        confirmedAt: g.confirmedAt ? new Date(g.confirmedAt) : (g.status === 'confirmed' ? new Date(g.updatedAt) : undefined),
-                        // Garante retrocompatibilidade se companionsList não existir em dados velhos
-                        companionsList: g.companionsList || []
-                    }))
-                    
-                    // Se houve migração, salva de volta
-                    const needsMigration = migratedGuests.some((g: Guest) => g.confirmedAt && !parsed.find((p: any) => p.id === g.id)?.confirmedAt)
-                    if (needsMigration) {
-                        localStorage.setItem('rsvp_guests', JSON.stringify(migratedGuests))
-                    }
-                    
-                    return migratedGuests
-                } catch (e) {
-                    console.error('Erro ao ler do localStorage', e)
-                }
-            }
+    const params = useParams()
+    const slug = params?.slug as string
+    const { user } = useAuth()
+    const { events } = useAdmin()
+
+    const eventIdFromParams = params?.id as string
+    const eventId = useMemo(() => {
+        if (eventIdFromParams) return eventIdFromParams
+        if (slug) {
+            const event = events.find(e => e.slug === slug || e.eventSettings.slug === slug)
+            return event?.id || null
         }
-        return INITIAL_GUESTS
-    })
-
-    // Inicializa eventSettings do localStorage
-    const [eventSettings, setEventSettings] = useState<EventSettings>(() => {
-        if (typeof window !== 'undefined') {
-            const saved = localStorage.getItem('rsvp_event_settings')
-            if (saved) {
-                try {
-                    return JSON.parse(saved)
-                } catch (e) {
-                    console.error('Erro ao ler configurações do evento', e)
-                }
-            }
+        // Se estamos no /dashboard (sem slug), procuramos o evento criado por este usuário
+        if (user) {
+            const userEvent = events.find(e => e.createdBy === user.email || e.createdBy === (user as any).id)
+            return userEvent?.id || null
         }
-        return DEFAULT_EVENT_SETTINGS
-    })
+        return null
+    }, [slug, events, eventIdFromParams, user])
 
-    // Salva no localStorage sempre que houver mudanças
-    useEffect(() => {
-        localStorage.setItem('rsvp_guests', JSON.stringify(guests))
-    }, [guests])
+    const [guests, setGuests] = useState<Guest[]>([])
+    const [eventSettings, setEventSettings] = useState<EventSettings>(DEFAULT_EVENT_SETTINGS)
+    const [loading, setLoading] = useState(false)
 
-    // Salva configurações no localStorage
     useEffect(() => {
-        localStorage.setItem('rsvp_event_settings', JSON.stringify(eventSettings))
-    }, [eventSettings])
+        const currentEvent = events.find(e => e.id === eventId || e.slug === slug)
+        if (currentEvent) {
+            setEventSettings(currentEvent.eventSettings)
+        }
+    }, [eventId, slug, events])
 
-    // Escuta mudanças de outras abas (Sincronização Dashboard <-> Página Pública)
     useEffect(() => {
-        const handleStorageChange = (e: StorageEvent) => {
-            if (e.key === 'rsvp_guests' && e.newValue) {
-                try {
-                    const newGuests = JSON.parse(e.newValue)
-                    setGuests(newGuests.map((g: any) => ({
-                        ...g,
-                        updatedAt: new Date(g.updatedAt),
-                        companionsList: g.companionsList || []
-                    })))
-                } catch (error) {
-                    console.error("Erro ao sincronizar abas:", error);
-                }
-            }
-            if (e.key === 'rsvp_event_settings' && e.newValue) {
-                try {
-                    setEventSettings(JSON.parse(e.newValue))
-                } catch (error) {
-                    console.error("Erro ao sincronizar configurações:", error);
-                }
+        if (!eventId) return
+
+        async function loadGuests() {
+            setLoading(true)
+            try {
+                const { data, error } = await supabase
+                    .from('guests')
+                    .select('*')
+                    .eq('event_id', eventId)
+                    .order('updated_at', { ascending: false })
+
+                if (error) throw error
+
+                setGuests((data || []).map(g => ({
+                    id: g.id,
+                    name: g.name,
+                    email: g.email || '',
+                    telefone: g.telefone || '',
+                    grupo: g.grupo || '',
+                    companions: g.companions_list?.length || 0,
+                    companionsList: g.companions_list || [],
+                    status: g.status as GuestStatus,
+                    category: g.category as GuestCategory,
+                    updatedAt: new Date(g.updated_at),
+                    confirmedAt: g.confirmed_at ? new Date(g.confirmed_at) : undefined
+                })))
+            } catch (error) {
+                console.error('Erro ao carregar convidados:', error)
+            } finally {
+                setLoading(false)
             }
         }
 
-        window.addEventListener('storage', handleStorageChange)
-        return () => window.removeEventListener('storage', handleStorageChange)
-    }, [])
+        loadGuests()
+    }, [eventId])
 
-    const metrics = {
-        total: guests.reduce((acc, curr) => {
-            // Conta 1 (titular) + todos os acompanhantes
-            return acc + 1 + (curr.companionsList?.length || 0)
-        }, 0),
+    const metrics = useMemo(() => ({
+        total: guests.reduce((acc, curr) => acc + 1 + (curr.companionsList?.length || 0), 0),
         confirmed: guests.reduce((acc, curr) => {
             if (curr.status === 'confirmed') {
-                // Conta 1 (titular) + acompanhantes confirmados
                 const confirmedCompanions = curr.companionsList ? curr.companionsList.filter(c => c.isConfirmed).length : 0
                 return acc + 1 + confirmedCompanions
             }
@@ -190,7 +165,6 @@ export function EventProvider({ children }: { children: ReactNode }) {
         }, 0),
         pending: guests.reduce((acc, curr) => {
             if (curr.status === 'pending') {
-                // Conta 1 (titular) + acompanhantes não confirmados
                 const unconfirmedCompanions = curr.companionsList ? curr.companionsList.filter(c => !c.isConfirmed).length : 0
                 return acc + 1 + unconfirmedCompanions
             }
@@ -198,7 +172,6 @@ export function EventProvider({ children }: { children: ReactNode }) {
         }, 0),
         declined: guests.reduce((acc, curr) => {
             if (curr.status === 'declined') {
-                // Conta 1 (titular) + todos os acompanhantes (todos declínam junto)
                 return acc + 1 + (curr.companionsList?.length || 0)
             }
             return acc
@@ -206,155 +179,154 @@ export function EventProvider({ children }: { children: ReactNode }) {
         totalPeople: guests
             .filter(g => g.status === 'confirmed')
             .reduce((acc, curr) => {
-                // Conta o titular (1) + acompanhantes marcados como isConfirmed
                 const confirmedCompanions = curr.companionsList ? curr.companionsList.filter(c => c.isConfirmed).length : 0
-
-                // Fallback: Se companionsList estiver vazia mas status='confirmed', 
-                // usa o numero 'companions' antigo para manter compatibilidade com dados legados
-                const legacyCount = (curr.companionsList.length === 0 && curr.companions > 0) ? curr.companions : confirmedCompanions
-
-                return acc + 1 + legacyCount
+                return acc + 1 + confirmedCompanions
             }, 0)
-    }
+    }), [guests])
 
-    function addGuest(data: Omit<Guest, 'id' | 'updatedAt' | 'status'>) {
+    async function addGuest(data: Omit<Guest, 'id' | 'updatedAt' | 'status'>) {
+        if (!eventId) return
+        const newId = Math.random().toString(36).substr(2, 9)
         const newGuest: Guest = {
             ...data,
-            id: Math.random().toString(36).substr(2, 9),
+            id: newId,
             status: 'pending',
             updatedAt: new Date(),
-            companionsList: data.companionsList || [] // Garante inicialização
+            companionsList: data.companionsList || []
         }
-        setGuests(prev => {
-            const updated = [newGuest, ...prev]
-            // Força atualização manual do storage para garantir persistência imediata mesmo antes do effect
-            localStorage.setItem('rsvp_guests', JSON.stringify(updated))
-            return updated
-        })
-    }
 
-    function addGuestsBatch(dataList: Omit<Guest, 'id' | 'updatedAt' | 'status'>[]) {
-        const duplicates: string[] = []
-        const imported: Guest[] = []
-
-        dataList.forEach(data => {
-            // Verificar duplicidade: nome + telefone
-            const isDuplicate = guests.some(g => {
-                const nameMatch = g.name.toLowerCase() === data.name.toLowerCase()
-                const phoneMatch = data.telefone && g.telefone && data.telefone === g.telefone
-
-                if (nameMatch && phoneMatch) return true
-                if (nameMatch && !data.telefone) return true // Se não tem telefone, apenas verifica nome
-                return false
+        try {
+            const { error } = await supabase.from('guests').insert({
+                id: newId,
+                event_id: eventId,
+                name: data.name,
+                email: data.email,
+                telefone: data.telefone,
+                grupo: data.grupo,
+                status: 'pending',
+                category: data.category,
+                companions_list: data.companionsList,
+                updated_at: new Date().toISOString()
             })
 
+            if (error) throw error
+            setGuests(prev => [newGuest, ...prev])
+        } catch (error) {
+            console.error('Erro ao adicionar convidado:', error)
+        }
+    }
+
+    async function addGuestsBatch(dataList: Omit<Guest, 'id' | 'updatedAt' | 'status'>[]) {
+        if (!eventId) return { imported: 0, duplicates: [] }
+        const duplicates: string[] = []
+        const toImport: any[] = []
+        const newGuests: Guest[] = []
+
+        dataList.forEach(data => {
+            const isDuplicate = guests.some(g => g.name.toLowerCase() === data.name.toLowerCase() && g.telefone === data.telefone)
             if (isDuplicate) {
-                duplicates.push(`${data.name}${data.telefone ? ` (${data.telefone})` : ''}`)
+                duplicates.push(data.name)
             } else {
-                const newGuest: Guest = {
-                    ...data,
-                    id: Math.random().toString(36).substr(2, 9),
+                const newId = Math.random().toString(36).substr(2, 9)
+                const now = new Date()
+                toImport.push({
+                    id: newId,
+                    event_id: eventId,
+                    name: data.name,
+                    email: data.email,
+                    telefone: data.telefone,
+                    grupo: data.grupo,
                     status: 'pending',
-                    updatedAt: new Date(),
+                    category: data.category,
+                    companions_list: data.companionsList || [],
+                    updated_at: now.toISOString()
+                })
+                newGuests.push({
+                    ...data,
+                    id: newId,
+                    status: 'pending',
+                    updatedAt: now,
                     companionsList: data.companionsList || []
-                }
-                imported.push(newGuest)
+                })
             }
         })
 
-        if (imported.length > 0) {
-            setGuests(prev => {
-                const updated = [...imported, ...prev]
-                localStorage.setItem('rsvp_guests', JSON.stringify(updated))
-                return updated
-            })
+        if (toImport.length > 0) {
+            try {
+                const { error } = await supabase.from('guests').insert(toImport)
+                if (error) throw error
+                setGuests(prev => [...newGuests, ...prev])
+            } catch (error) {
+                console.error('Erro no batch import:', error)
+            }
         }
 
-        return { imported: imported.length, duplicates }
+        return { imported: toImport.length, duplicates }
     }
 
-    function removeGuest(id: string) {
-        setGuests(prev => {
-            const updated = prev.filter(g => g.id !== id)
-            localStorage.setItem('rsvp_guests', JSON.stringify(updated))
-            return updated
-        })
+    async function removeGuest(id: string) {
+        try {
+            const { error } = await supabase.from('guests').delete().eq('id', id)
+            if (error) throw error
+            setGuests(prev => prev.filter(g => g.id !== id))
+        } catch (error) {
+            console.error('Erro ao remover convidado:', error)
+        }
     }
 
-    function updateGuestStatus(id: string, status: GuestStatus) {
-        setGuests(prev => {
-            const updated = prev.map(g =>
-                g.id === id ? { 
-                    ...g, 
-                    status, 
-                    updatedAt: new Date(),
-                    confirmedAt: status === 'confirmed' ? new Date() : g.confirmedAt
-                } : g
-            )
-            localStorage.setItem('rsvp_guests', JSON.stringify(updated))
-            // Dispara evento customizado para notificar a PRÓPRIA aba se necessário (StorageEvent só dispara para OUTRAS abas)
-            // Mas como estamos atualizando o state aqui, o React já cuida da re-renderização local.
-            return updated
-        })
+    async function updateGuestStatus(id: string, status: GuestStatus) {
+        try {
+            const now = new Date()
+            const { error } = await supabase.from('guests').update({
+                status,
+                updated_at: now.toISOString(),
+                confirmed_at: status === 'confirmed' ? now.toISOString() : null
+            }).eq('id', id)
+
+            if (error) throw error
+            setGuests(prev => prev.map(g => g.id === id ? { ...g, status, updatedAt: now, confirmedAt: status === 'confirmed' ? now : undefined } : g))
+        } catch (error) {
+            console.error('Erro ao atualizar status:', error)
+        }
     }
 
-    function updateGuest(id: string, guestData: Partial<Guest>) {
-        setGuests(prev => {
-            const updated = prev.map(g =>
-                g.id === id ? {
-                    ...g,
-                    ...guestData,
-                    updatedAt: new Date()
-                } : g
-            )
-            localStorage.setItem('rsvp_guests', JSON.stringify(updated))
-            return updated
-        })
+    async function updateGuest(id: string, guestData: Partial<Guest>) {
+        try {
+            const now = new Date()
+            const updates: any = { updated_at: now.toISOString() }
+            if (guestData.name) updates.name = guestData.name
+            if (guestData.email !== undefined) updates.email = guestData.email
+            if (guestData.telefone !== undefined) updates.telefone = guestData.telefone
+            if (guestData.grupo !== undefined) updates.grupo = guestData.grupo
+            if (guestData.status) updates.status = guestData.status
+            if (guestData.category) updates.category = guestData.category
+            if (guestData.companionsList) updates.companions_list = guestData.companionsList
+
+            const { error } = await supabase.from('guests').update(updates).eq('id', id)
+            if (error) throw error
+            setGuests(prev => prev.map(g => g.id === id ? { ...g, ...guestData, updatedAt: now } : g))
+        } catch (error) {
+            console.error('Erro ao atualizar convidado:', error)
+        }
     }
 
-    function updateGuestCompanions(id: string, companions: Companion[]) {
-        setGuests(prev => {
-            const updated = prev.map(g =>
-                g.id === id ? {
-                    ...g,
-                    companionsList: companions,
-                    updatedAt: new Date()
-                } : g
-            )
-            localStorage.setItem('rsvp_guests', JSON.stringify(updated))
-            return updated
-        })
+    async function updateGuestCompanions(id: string, companions: Companion[]) {
+        await updateGuest(id, { companionsList: companions })
     }
 
-    function removeCompanion(guestId: string, index: number) {
-        setGuests(prev => {
-            const updated = prev.map(g => {
-                if (g.id === guestId) {
-                    const newList = [...g.companionsList]
-                    newList.splice(index, 1)
-                    return {
-                        ...g,
-                        companionsList: newList,
-                        companions: Math.max(0, g.companions - 1),
-                        updatedAt: new Date()
-                    }
-                }
-                return g
-            })
-            localStorage.setItem('rsvp_guests', JSON.stringify(updated))
-            return updated
-        })
-    }
-
-    function updateEventSettings(settings: EventSettings) {
-        setEventSettings(settings)
-        localStorage.setItem('rsvp_event_settings', JSON.stringify(settings))
+    async function removeCompanion(guestId: string, index: number) {
+        const guest = guests.find(g => g.id === guestId)
+        if (!guest) return
+        const newList = [...guest.companionsList]
+        newList.splice(index, 1)
+        await updateGuest(guestId, { companionsList: newList })
     }
 
     return (
         <EventContext.Provider value={{
             guests,
             eventSettings,
+            loading,
             metrics,
             addGuest,
             addGuestsBatch,
@@ -362,8 +334,7 @@ export function EventProvider({ children }: { children: ReactNode }) {
             updateGuestStatus,
             updateGuest,
             updateGuestCompanions,
-            removeCompanion,
-            updateEventSettings
+            removeCompanion
         }}>
             {children}
         </EventContext.Provider>

@@ -1,41 +1,32 @@
 @import "tailwindcss";
-@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap');
 
 @theme {
-  --color-brand: #883545;
-  --color-primary: #883545;
-  --color-primary-soft: color-mix(in srgb, var(--color-brand) 10%, transparent);
-  /* #883545/10 */
+  --color-brand: #702431;
+  /* Burgundy from the second screenshot */
+  --color-brand-light: #fdf2f4;
+  --color-primary: #702431;
+  --color-primary-soft: #f8e8ea;
 
-  --color-background: #f8fafc;
-  /* slate-50 */
+  --color-background: #fdfbfb;
   --color-surface: #ffffff;
-  /* white */
 
-  --color-text-primary: #1e293b;
-  /* slate-800 */
-  --color-text-secondary: #64748b;
-  /* slate-500 */
-  --color-text-muted: #94a3b8;
-  /* slate-400 */
+  --color-text-primary: #2d1b1e;
+  --color-text-secondary: #5a4b4e;
+  --color-text-muted: #9c8e91;
 
-  --color-border-soft: color-mix(in srgb, var(--color-brand) 10%, transparent);
-  /* border-[#883545]/10 */
+  --color-border-soft: #f2e6e8;
 
-  --color-success: #10b981;
-  /* emerald-500 */
-  --color-warning: #f59e0b;
-  /* amber-500 */
-  --color-danger: #f43f5e;
-  /* rose-500 */
+  --color-success: #2f7d32;
+  --color-warning: #ed6c02;
+  --color-danger: #d32f2f;
 
-  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
+  --font-sans: var(--font-manrope), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-lora), serif;
 }
 
 @layer base {
   html {
     font-size: 14px;
-    /* Scale base down: 2xl → ~25px, sm → ~12px – cleaner look */
   }
 
   body {
@@ -45,6 +36,14 @@
     line-height: 1.55;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4 {
+    font-family: var(--font-serif);
+    font-weight: 700;
   }
 }
 

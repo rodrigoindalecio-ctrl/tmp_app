@@ -6,6 +6,12 @@ import { useEvent, Guest, GuestStatus, Companion, GuestCategory } from '@/lib/ev
 import { formatDate } from '@/lib/date-utils'
 import Image from 'next/image'
 
+// Icons
+const ArrowLeftIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 19-7-7 7-7" /><path d="M19 12H5" /></svg>
+const CheckIcon = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+const CheckIconBig = () => <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6 9 17l-5-5" /></svg>
+const ArrowRightIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" x2="19" y1="12" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
+
 // Icons White Version for Hero
 const HeartIconWhite = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" className="text-white"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" /></svg>
 const CalendarIconWhite = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-white"><rect width="18" height="18" x="3" y="4" rx="2" ry="2" /><line x1="16" x2="16" y1="2" y2="6" /><line x1="8" x2="8" y1="2" y2="6" /><line x1="3" x2="21" y1="10" y2="10" /></svg>
@@ -138,56 +144,62 @@ export default function PublicRSVPPageContent() {
     }
 
     return (
-        <div className="min-h-screen bg-background">
+        <div className="min-h-screen bg-slate-50/50 selection:bg-brand/20">
             {/* HERO SECTION - Public Page (Clean Banner) */}
             {eventSettings.coverImage && eventSettings.coverImage !== 'https://...' && (
-                <div className="relative h-[400px] md:h-[500px] w-full overflow-hidden rounded-3xl mb-8 shadow-lg">
+                <div className="relative h-[45vh] md:h-[55vh] w-full overflow-hidden shadow-2xl mb-[-4rem] md:mb-[-6rem]">
                     <Image
                         src={eventSettings.coverImage}
                         alt="Event Cover"
                         fill
-                        className="transition-all duration-300"
+                        className="transition-all duration-700 hover:scale-105"
                         style={{
                             objectFit: 'cover',
                             objectPosition: `50% ${eventSettings.coverImagePosition || 50}%`,
-                            transform: `scale(${eventSettings.coverImageScale || 1})`
+                            transform: `scale(${eventSettings.coverImageScale || 1.1})`
                         }}
                         priority
                     />
-                    <div className="absolute inset-0 bg-gradient-to-b from-black/30 via-transparent to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-50/80 via-transparent to-black/30" />
+                    <div className="absolute top-8 left-0 right-0 flex justify-center">
+                        <div className="bg-white/10 backdrop-blur-md px-6 py-2 rounded-full border border-white/20">
+                            <p className="text-[10px] font-black uppercase tracking-[0.4em] text-white drop-shadow-sm">Confirmar Presença ✨</p>
+                        </div>
+                    </div>
                 </div>
             )}
 
             <div className="relative z-10 w-full max-w-2xl mx-auto px-4 py-8 md:py-16">
-                {/* Fallback header if no image */}
+                {/* Fallback header if no image or standard intro */}
                 {(!eventSettings.coverImage || eventSettings.coverImage === 'https://...') && (
-                    <div className="text-center mb-12">
-                        <div className="flex items-center justify-center gap-3 mb-4 text-primary">
-                            <SparklesIcon />
-                            <p className="text-xs font-sans font-medium tracking-[0.3em] uppercase">
-                                Confirme sua presença
+                    <div className="text-center mb-16 animate-in fade-in duration-700">
+                        <div className="flex items-center justify-center gap-4 mb-6">
+                            <div className="h-px w-8 bg-brand/20" />
+                            <p className="text-[11px] font-black tracking-[0.4em] uppercase text-brand">
+                                RSVP ONLINE
                             </p>
-                            <SparklesIcon />
+                            <div className="h-px w-8 bg-brand/20" />
                         </div>
-                        <h1 className="text-4xl md:text-6xl font-serif font-light text-textPrimary tracking-tight mb-2">
+                        <h1 className="text-5xl md:text-7xl font-black text-slate-800 tracking-tighter mb-4">
                             {eventSettings.coupleNames}
                         </h1>
-                        <p className="text-textSecondary mb-6">
-                            {eventSettings.eventType === 'casamento' ? `Casamento de ${eventSettings.coupleNames}` : `Debutante ${eventSettings.coupleNames}`}
+                        <p className="text-slate-400 font-bold text-sm uppercase tracking-widest">
+                            {eventSettings.eventType === 'casamento' ? `Casamento de Amor` : `Festa de 15 Anos`}
                         </p>
                     </div>
                 )}
 
-                {/* Event Info Card - Always Visible */}
-                <div className="bg-gradient-to-br from-primary/10 to-primary/5 border border-primary/20 rounded-2xl p-6 mb-8 shadow-sm">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-                        <div className="flex items-center gap-4">
-                            <div className="p-3 bg-primary/10 rounded-full">
-                                <CalendarIconWhite />
+                {/* Event Info Card - High End */}
+                <div className="bg-white/70 backdrop-blur-xl border border-brand/5 rounded-[2rem] p-8 md:p-10 mb-8 shadow-2xl shadow-brand/5 relative overflow-hidden group">
+                    <div className="absolute top-0 right-0 w-32 h-32 bg-brand/5 rounded-full blur-3xl -mr-10 -mt-10 pointer-events-none group-hover:bg-brand/10 transition-colors" />
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-8 relative z-10">
+                        <div className="flex items-center gap-5">
+                            <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center text-brand shadow-inner group-hover:scale-110 transition-transform">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="4" rx="2" ry="2" /><line x1="16" x2="16" y1="2" y2="6" /><line x1="8" x2="8" y1="2" y2="6" /><line x1="3" x2="21" y1="10" y2="10" /></svg>
                             </div>
                             <div>
-                                <p className="text-xs text-primary/70 font-medium uppercase tracking-wide mb-1">Data e Horário</p>
-                                <p className="text-sm md:text-base font-semibold text-textPrimary">
+                                <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-1">Data e Horário</p>
+                                <p className="text-base font-black text-slate-800 tracking-tight">
                                     {formatDate(eventSettings.eventDate, {
                                         day: '2-digit',
                                         month: 'long',
@@ -197,14 +209,13 @@ export default function PublicRSVPPageContent() {
                                 </p>
                             </div>
                         </div>
-                        <div className="hidden md:block w-px h-12 bg-primary/20" />
-                        <div className="flex items-center gap-4">
-                            <div className="p-3 bg-primary/10 rounded-full">
-                                <PinIconWhite />
+                        <div className="flex items-center gap-5">
+                            <div className="w-14 h-14 bg-slate-50 rounded-2xl flex items-center justify-center text-brand shadow-inner group-hover:scale-110 transition-transform">
+                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" /><circle cx="12" cy="10" r="3" /></svg>
                             </div>
                             <div>
-                                <p className="text-xs text-primary/70 font-medium uppercase tracking-wide mb-1">Local</p>
-                                <p className="text-sm md:text-base font-semibold text-textPrimary">
+                                <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest mb-1">Onde será</p>
+                                <p className="text-base font-black text-slate-800 tracking-tight">
                                     {eventSettings.eventLocation}
                                 </p>
                             </div>
@@ -213,59 +224,64 @@ export default function PublicRSVPPageContent() {
                 </div>
 
                 {/* Main Card Container */}
-                <div className="bg-surface py-12 px-6 md:px-12 shadow-2xl rounded-[2.5rem] border border-borderSoft relative overflow-hidden">
-                    {/* Event Message (Header region inside card) */}
-                    <div className="text-center mb-10">
-                        <p className="text-textSecondary text-sm italic font-light leading-relaxed px-4">
-                            "{eventSettings.customMessage}"
-                        </p>
-                    </div>
+                <div className="bg-white py-14 px-8 md:px-16 shadow-2xl rounded-[3rem] border border-brand/5 relative animate-in fade-in slide-in-from-bottom-8 duration-700">
+                    {/* Event Message */}
+                    {eventSettings.customMessage && (
+                        <div className="text-center mb-12">
+                            <div className="inline-block relative">
+                                <svg className="absolute -top-4 -left-6 text-brand/10 w-8 h-8" fill="currentColor" viewBox="0 0 24 24"><path d="M14.017 21L14.017 18C14.017 16.899 14.899 16 16 16L18 16C18.899 16 19.81 15.19 19.81 14.222L19.81 13C19.81 11.452 18.51 10 17 10C15.489 10 14.017 11.452 14.017 13L12.017 13C12.017 10.243 14.26 8 17 8C19.739 8 21.81 10.243 21.81 13L21.81 14.222C21.81 17.583 19.14 20.25 15.779 20.25L14.017 21ZM5.011 21L5.011 18C5.011 16.899 5.892 16 6.994 16L8.994 16C9.893 16 10.803 15.19 10.803 14.222L10.803 13C10.803 11.452 9.504 10 7.994 10C6.483 10 5.011 11.452 5.011 13L3.011 13C3.011 10.243 5.253 8 7.994 8C10.733 8 12.803 10.243 12.803 13L12.803 14.222C12.803 17.583 10.133 20.25 6.772 20.25L5.011 21Z"></path></svg>
+                                <p className="text-slate-500 text-lg font-bold italic tracking-tight leading-relaxed max-w-sm mx-auto relative z-10">
+                                    {eventSettings.customMessage}
+                                </p>
+                            </div>
+                        </div>
+                    )}
 
                     {isExpired && step !== 'SUCCESS' ? (
                         <div className="text-center py-10 animate-in fade-in zoom-in-95 duration-500">
-                            <div className="flex justify-center mb-6 text-slate-400 opacity-60">
+                            <div className="w-20 h-20 bg-slate-50 rounded-full flex items-center justify-center mx-auto mb-8 text-slate-300 shadow-inner">
                                 <ExpirationIcon />
                             </div>
-                            <h3 className="text-2xl font-black text-slate-800 tracking-tight mb-3">
+                            <h3 className="text-2xl font-black text-slate-800 tracking-tight mb-3 uppercase">
                                 Prazo Encerrado
                             </h3>
-                            <p className="text-slate-500 text-sm leading-relaxed max-w-sm mx-auto font-medium">
-                                Sentimos muito, mas o prazo para confirmação de presença (RSVP) encerrou no dia {' '}
-                                <span className="font-bold">
+                            <p className="text-slate-400 text-[10px] leading-relaxed max-w-sm mx-auto font-black uppercase tracking-widest">
+                                Sentimos muito, mas o prazo expirou em {' '}
+                                <span className="text-brand">
                                     {new Date(eventSettings.confirmationDeadline + 'T12:00:00').toLocaleDateString('pt-BR')}
                                 </span>.
-                                <br />
-                                Por favor, entre em contato diretamente com os noivos.
+                                <br /><br />
+                                Entre em contato com os noivos.
                             </p>
                         </div>
                     ) : step === 'SEARCH' && (
                         <div className="relative animate-in fade-in zoom-in-95 duration-300 max-w-md mx-auto">
-                            <form onSubmit={handleSearch} className="space-y-6">
+                            <form onSubmit={handleSearch} className="space-y-8">
                                 <div>
-                                    <label htmlFor="search" className="block text-[10px] uppercase tracking-widest font-black text-slate-400 text-center mb-6">
-                                        Digite seu nome e sobrenome completos
+                                    <label htmlFor="search" className="block text-[10px] uppercase tracking-[0.3em] font-black text-slate-400 text-center mb-6">
+                                        Digite seu nome completo
                                     </label>
                                     <input
                                         id="search"
                                         type="text"
                                         required
-                                        className="block w-full rounded-2xl bg-slate-50 text-center text-lg py-5 px-4 font-bold text-slate-700 shadow-inner focus:ring-2 focus:ring-brand/20 outline-none transition-all placeholder:text-slate-400"
+                                        className="block w-full rounded-2xl bg-slate-50 text-center text-xl py-6 px-6 font-black text-slate-800 shadow-inner focus:ring-4 focus:ring-brand/10 outline-none transition-all placeholder:text-slate-300 tracking-tight"
                                         placeholder="Ex: Roberto Silva"
                                         value={searchTerm}
                                         onChange={e => setSearchTerm(e.target.value)}
                                         autoFocus
                                     />
                                     {error && (
-                                        <p className="mt-3 text-sm text-danger text-center animate-in shake font-bold">
-                                            {error}
+                                        <p className="mt-4 text-[10px] font-black uppercase text-rose-500 text-center animate-bounce tracking-widest">
+                                            ⚠️ {error}
                                         </p>
                                     )}
                                 </div>
                                 <button
                                     type="submit"
-                                    className="w-full flex justify-center py-5 px-4 rounded-[2rem] text-sm font-black uppercase tracking-widest text-white bg-brand hover:bg-brand/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand shadow-xl shadow-brand/20 transition-all hover:-translate-y-1"
+                                    className="group w-full flex justify-center py-6 px-4 rounded-3xl text-[11px] font-black uppercase tracking-[0.2em] text-white bg-slate-900 border-b-4 border-black hover:bg-slate-800 focus:outline-none transition-all hover:-translate-y-1 hover:shadow-2xl active:translate-y-0.5 active:border-b-0"
                                 >
-                                    Buscar Convite
+                                    Buscar Convite <span className="ml-2 group-hover:translate-x-1 transition-transform">✨</span>
                                 </button>
                             </form>
                         </div>
@@ -273,31 +289,33 @@ export default function PublicRSVPPageContent() {
 
                     {step === 'CONFIRM' && foundGuest && (
                         <div className="animate-in fade-in slide-in-from-bottom-8 duration-500">
-                            <div className="flex flex-col items-center mb-8">
-                                <div className="w-16 h-16 bg-brand/10 rounded-full flex items-center justify-center mb-6">
-                                    <UsersIcon />
+                            <div className="flex flex-col items-center mb-10">
+                                <div className="w-20 h-20 bg-brand/5 rounded-[2rem] flex items-center justify-center mb-8 shadow-inner group overflow-hidden">
+                                    <div className="group-hover:scale-125 transition-transform duration-500 text-brand">
+                                        <UsersIcon />
+                                    </div>
                                 </div>
-                                <h2 className="text-2xl font-black text-slate-800 tracking-tight text-center mb-2">
+                                <h2 className="text-3xl font-black text-slate-800 tracking-tighter text-center mb-2">
                                     Quem vai comparecer?
                                 </h2>
-                                <p className="text-sm font-bold text-slate-400 uppercase tracking-widest text-center">
-                                    Selecione todos que irão ao evento
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center">
+                                    Selecione quem irá ao evento
                                 </p>
                             </div>
 
                             <CompanionsSelectionForm
                                 guest={foundGuest}
-                                onConfirm={(updatedList, mainCat, companionCats) => {
-                                    updateGuestCompanions(foundGuest.id, updatedList)
-                                    updateGuestStatus(foundGuest.id, 'confirmed')
+                                onConfirm={async (updatedList, mainCat, companionCats) => {
+                                    await updateGuestCompanions(foundGuest.id, updatedList)
+                                    await updateGuestStatus(foundGuest.id, 'confirmed')
                                     setGuestMainCategory(mainCat || foundGuest.category)
                                     setGuestCompanionCategories(companionCats || [])
                                     setStep('EMAIL')
                                     setGuestEmail('')
                                     setEmailError('')
                                 }}
-                                onDeclineAll={() => {
-                                    updateGuestStatus(foundGuest.id, 'declined')
+                                onDeclineAll={async () => {
+                                    await updateGuestStatus(foundGuest.id, 'declined')
                                     setStep('SUCCESS')
                                 }}
                                 onBack={() => { setStep('SEARCH'); setSearchTerm(''); setError(''); }}
@@ -307,18 +325,18 @@ export default function PublicRSVPPageContent() {
 
                     {step === 'EMAIL' && foundGuest && (
                         <div className="animate-in fade-in slide-in-from-bottom-8 duration-500 max-w-md mx-auto">
-                            <div className="flex flex-col items-center mb-8">
-                                <div className="w-16 h-16 bg-brand/10 rounded-full flex items-center justify-center mb-6">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-brand">
+                            <div className="flex flex-col items-center mb-10">
+                                <div className="w-20 h-20 bg-emerald-50 rounded-[2rem] flex items-center justify-center mb-8 shadow-inner">
+                                    <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="text-emerald-500">
                                         <rect width="20" height="16" x="2" y="4" rx="2" />
                                         <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
                                     </svg>
                                 </div>
-                                <h2 className="text-2xl font-black text-slate-800 tracking-tight text-center mb-2">
-                                    Enviar Detalhes do Evento
+                                <h2 className="text-3xl font-black text-slate-800 tracking-tighter text-center mb-2">
+                                    Convite Digital
                                 </h2>
-                                <p className="text-sm font-bold text-slate-400 uppercase tracking-widest text-center">
-                                    Insira seu email para receber as informações do evento
+                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] text-center">
+                                    Receba os detalhes no seu email
                                 </p>
                             </div>
 
@@ -367,12 +385,12 @@ export default function PublicRSVPPageContent() {
                                     setEmailError('Erro ao enviar email. Tente novamente.')
                                     setIsSendingEmail(false)
                                 })
-                            }} className="space-y-4">
+                            }} className="space-y-6">
                                 <div>
                                     <input
                                         type="email"
                                         required
-                                        className="block w-full rounded-2xl bg-slate-50 text-center text-lg py-4 px-4 font-bold text-slate-700 shadow-inner focus:ring-2 focus:ring-brand/20 outline-none transition-all placeholder:text-slate-400"
+                                        className="block w-full rounded-2xl bg-slate-50 text-center text-lg py-5 px-4 font-black text-slate-700 shadow-inner focus:ring-4 focus:ring-brand/10 outline-none transition-all placeholder:text-slate-300"
                                         placeholder="seu@email.com"
                                         value={guestEmail}
                                         onChange={e => setGuestEmail(e.target.value)}
@@ -380,7 +398,7 @@ export default function PublicRSVPPageContent() {
                                         autoFocus
                                     />
                                     {emailError && (
-                                        <p className="mt-2 text-sm text-danger text-center font-bold">
+                                        <p className="mt-3 text-[10px] font-black text-rose-500 text-center uppercase tracking-widest">
                                             {emailError}
                                         </p>
                                     )}
@@ -389,48 +407,51 @@ export default function PublicRSVPPageContent() {
                                 <button
                                     type="submit"
                                     disabled={isSendingEmail}
-                                    className="w-full py-4 rounded-[2rem] bg-brand text-white font-black uppercase tracking-widest text-sm hover:bg-brand/90 disabled:opacity-50 disabled:cursor-not-allowed shadow-xl shadow-brand/20 transition-all"
+                                    className="w-full py-5 rounded-[2rem] bg-brand text-white font-black uppercase tracking-widest text-sm hover:bg-brand/90 disabled:opacity-50 disabled:cursor-not-allowed shadow-xl shadow-brand/20 transition-all hover:scale-105 active:scale-95"
                                 >
-                                    {isSendingEmail ? 'Enviando...' : 'Enviar Confirmação'}
+                                    {isSendingEmail ? 'Enviando...' : 'Receber Confirmado'}
                                 </button>
 
                                 <button
                                     type="button"
                                     onClick={() => setStep('SUCCESS')}
-                                    className="w-full text-xs font-bold text-slate-300 hover:text-brand transition-colors pt-2 uppercase tracking-widest"
+                                    className="w-full text-[10px] font-black text-slate-300 hover:text-brand transition-colors pt-2 uppercase tracking-[0.3em]"
                                 >
-                                    Pular esta etapa
+                                    Pular e concluir
                                 </button>
                             </form>
                         </div>
                     )}
 
                     {step === 'SUCCESS' && (
-                        <div className="text-center space-y-6 animate-in zoom-in-95 duration-500 py-4">
+                        <div className="text-center space-y-8 animate-in zoom-in-95 duration-700 py-6">
+                            <div className="w-24 h-24 bg-emerald-50 rounded-[2.5rem] flex items-center justify-center mx-auto mb-8 text-emerald-500 shadow-xl shadow-emerald-200/50 animate-bounce">
+                                <CheckIconBig />
+                            </div>
 
-                            <h3 className="text-3xl font-black text-slate-800 tracking-tight">
-                                Resposta Recebida!
+                            <h3 className="text-4xl font-black text-slate-800 tracking-tighter">
+                                Tudo certo! ✨
                             </h3>
 
-                            <p className="text-slate-500 leading-relaxed px-4 font-bold text-sm">
-                                Obrigado por confirmar. Sua resposta foi enviada com sucesso para os organizadores.
+                            <p className="text-slate-400 font-bold leading-relaxed px-4 text-sm uppercase tracking-widest">
+                                Sua confirmação foi recebida. Mal podemos esperar por esse momento!
                             </p>
 
                             <div className="pt-10">
                                 <button
                                     onClick={() => { setStep('SEARCH'); setSearchTerm(''); setFoundGuest(null); }}
-                                    className="px-8 py-4 bg-slate-100 text-slate-600 rounded-full text-xs font-black uppercase tracking-widest hover:bg-slate-200 transition-colors"
+                                    className="px-10 py-5 bg-slate-900 text-white rounded-[2rem] text-[11px] font-black uppercase tracking-[0.3em] hover:bg-slate-800 transition-all shadow-xl hover:-translate-y-1"
                                 >
-                                    Tudo bem!
+                                    Concluir
                                 </button>
                             </div>
                         </div>
                     )}
                 </div>
 
-                <div className="text-center mt-12 pb-8">
-                    <p className="text-[0.65rem] font-sans font-black tracking-widest text-slate-300 uppercase">
-                        Powered by RSVP Manager
+                <div className="text-center mt-12 pb-12">
+                    <p className="text-[10px] font-black tracking-[0.5em] text-slate-200 uppercase">
+                        Sua Vida Organizada • RSVP
                     </p>
                 </div>
             </div>
@@ -465,49 +486,51 @@ function CompanionsSelectionForm({ guest, onConfirm, onDeclineAll, onBack }: {
     }
 
     const handleConfirmClick = () => {
-        // No momento o titular é salvo implicitamente pela troca de status, 
-        // mas marcamos os acompanhantes conforme seleção.
         const updatedList = guest.companionsList.map((c: Companion, idx: number) => ({
             ...c,
             isConfirmed: confirmedCompanions[idx],
             category: companionCategories[idx]
         }))
-        // Passar também mainCategory e companionCategories para que possam ser usados no email
         onConfirm(updatedList, mainCategory, companionCategories)
     }
 
     return (
-        <div className="space-y-4 max-w-sm mx-auto">
-            <div className="space-y-4">
+        <div className="space-y-6 max-w-sm mx-auto">
+            <div className="space-y-6">
                 {/* TITULAR CARD */}
-                <div className={`p-6 rounded-2xl border-2 transition-all group ${isMainConfirmed ? 'bg-brand/5 border-brand/20 shadow-sm' : 'bg-slate-50 border-slate-100 opacity-70'}`}>
+                <div className={`p-8 rounded-[2.5rem] border-2 transition-all group ${isMainConfirmed ? 'bg-brand/5 border-brand/20 shadow-xl shadow-brand/5' : 'bg-slate-50 border-slate-100 grayscale'}`}>
                     <div
                         onClick={() => setIsMainConfirmed(!isMainConfirmed)}
-                        className="flex items-center justify-between pb-4 cursor-pointer"
+                        className="flex items-center justify-between pb-6 cursor-pointer"
                     >
-                        <div className="flex items-center gap-4">
+                        <div className="flex items-center gap-5">
                             <CheckCircleIcon checked={isMainConfirmed} />
                             <div>
-                                <p className="font-black text-slate-800 leading-tight">{guest.name}</p>
-                                <p className="text-[10px] uppercase tracking-widest font-bold text-slate-400 mt-1">Convidado Principal</p>
+                                <p className="font-black text-slate-800 tracking-tight text-lg">{guest.name}</p>
+                                <p className="text-[9px] uppercase tracking-widest font-black text-slate-400 mt-1">Convidado Principal</p>
                             </div>
                         </div>
                         <HeartIconSmall filled={isMainConfirmed} />
                     </div>
                     {isMainConfirmed && (
-                        <div className="pt-4 border-t border-brand/10">
-                            <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">
+                        <div className="pt-6 border-t border-brand/5 animate-in slide-in-from-top-2 duration-300">
+                            <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3 ml-1">
                                 Categoria
                             </label>
-                            <select
-                                value={mainCategory}
-                                onChange={(e) => setMainCategory(e.target.value as GuestCategory)}
-                                className="w-full rounded-xl bg-white border-2 border-slate-100 px-4 py-3 text-sm font-bold text-slate-700 shadow-inner focus:border-brand/30 focus:ring-2 focus:ring-brand/10 outline-none transition-all cursor-pointer"
-                            >
-                                <option value="adult_paying">Adulto Pagante</option>
-                                <option value="child_paying">Criança Pagante</option>
-                                <option value="child_not_paying">Criança Não Pagante</option>
-                            </select>
+                            <div className="relative group">
+                                <select
+                                    value={mainCategory}
+                                    onChange={(e) => setMainCategory(e.target.value as GuestCategory)}
+                                    className="w-full rounded-2xl bg-white border border-brand/10 px-5 py-4 text-sm font-black text-slate-700 shadow-inner focus:ring-4 focus:ring-brand/5 outline-none transition-all cursor-pointer appearance-none"
+                                >
+                                    <option value="adult_paying">Adulto Pagante</option>
+                                    <option value="child_paying">Criança Pagante</option>
+                                    <option value="child_not_paying">Criança Não Pagante</option>
+                                </select>
+                                <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-300">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
+                                </div>
+                            </div>
                         </div>
                     )}
                 </div>
@@ -516,63 +539,68 @@ function CompanionsSelectionForm({ guest, onConfirm, onDeclineAll, onBack }: {
                 {guest.companionsList.map((comp: Companion, idx: number) => (
                     <div
                         key={idx}
-                        className={`p-6 rounded-2xl border-2 transition-all group ${confirmedCompanions[idx] ? 'bg-brand/5 border-brand/20 shadow-sm' : 'bg-slate-50 border-slate-100 opacity-60 hover:opacity-100'}`}
+                        className={`p-8 rounded-[2.5rem] border-2 transition-all group ${confirmedCompanions[idx] ? 'bg-brand/5 border-brand/20 shadow-xl shadow-brand/5' : 'bg-slate-50 border-slate-100 grayscale hover:grayscale-0'}`}
                     >
                         <div
                             onClick={() => toggleCompanion(idx)}
-                            className="flex items-center justify-between pb-4 cursor-pointer"
+                            className="flex items-center justify-between pb-6 cursor-pointer"
                         >
-                            <div className="flex items-center gap-4">
+                            <div className="flex items-center gap-5">
                                 <CheckCircleIcon checked={confirmedCompanions[idx]} />
                                 <div>
-                                    <p className="font-black text-slate-800 leading-tight">{comp.name}</p>
-                                    <p className="text-[10px] uppercase tracking-widest font-bold text-slate-400 mt-1">Acompanhante</p>
+                                    <p className="font-black text-slate-800 tracking-tight text-lg">{comp.name}</p>
+                                    <p className="text-[9px] uppercase tracking-widest font-black text-slate-400 mt-1">Acompanhante</p>
                                 </div>
                             </div>
                             <HeartIconSmall filled={confirmedCompanions[idx]} />
                         </div>
                         {confirmedCompanions[idx] && (
-                            <div className="pt-4 border-t border-brand/10">
-                                <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">
+                            <div className="pt-6 border-t border-brand/5 animate-in slide-in-from-top-2 duration-300">
+                                <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-3 ml-1">
                                     Categoria
                                 </label>
-                                <select
-                                    value={companionCategories[idx]}
-                                    onChange={(e) => {
-                                        const newCategories = [...companionCategories]
-                                        newCategories[idx] = e.target.value as GuestCategory
-                                        setCompanionCategories(newCategories)
-                                    }}
-                                    className="w-full rounded-xl bg-white border-2 border-slate-100 px-4 py-3 text-sm font-bold text-slate-700 shadow-inner focus:border-brand/30 focus:ring-2 focus:ring-brand/10 outline-none transition-all cursor-pointer"
-                                >
-                                    <option value="adult_paying">Adulto Pagante</option>
-                                    <option value="child_paying">Criança Pagante</option>
-                                    <option value="child_not_paying">Criança Não Pagante</option>
-                                </select>
+                                <div className="relative group">
+                                    <select
+                                        value={companionCategories[idx]}
+                                        onChange={(e) => {
+                                            const newCategories = [...companionCategories]
+                                            newCategories[idx] = e.target.value as GuestCategory
+                                            setCompanionCategories(newCategories)
+                                        }}
+                                        className="w-full rounded-2xl bg-white border border-brand/10 px-5 py-4 text-sm font-black text-slate-700 shadow-inner focus:ring-4 focus:ring-brand/5 outline-none transition-all cursor-pointer appearance-none"
+                                    >
+                                        <option value="adult_paying">Adulto Pagante</option>
+                                        <option value="child_paying">Criança Pagante</option>
+                                        <option value="child_not_paying">Criança Não Pagante</option>
+                                    </select>
+                                    <div className="absolute right-5 top-1/2 -translate-y-1/2 pointer-events-none text-slate-300">
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="m6 9 6 6 6-6" /></svg>
+                                    </div>
+                                </div>
                             </div>
                         )}
                     </div>
                 ))}
             </div>
 
-            <div className="pt-8 space-y-4">
+            <div className="pt-8 space-y-6">
                 <button
                     onClick={handleConfirmClick}
-                    className="w-full py-5 rounded-[2rem] bg-brand text-white font-black uppercase text-sm tracking-widest hover:bg-brand/90 shadow-xl shadow-brand/20 transition-all flex items-center justify-center gap-2 hover:-translate-y-1"
+                    className="w-full py-6 rounded-3xl bg-brand text-white font-black uppercase text-xs tracking-[0.3em] hover:bg-brand/90 hover:scale-105 hover:shadow-2xl shadow-xl shadow-brand/20 transition-all flex items-center justify-center gap-3 active:scale-95"
                 >
-                    <HeartIconSmall filled /> Confirmar presença
+                    Confirmar presença ✨
                 </button>
 
                 <button
                     onClick={onDeclineAll}
-                    className="w-full py-4 rounded-[2rem] bg-white border-2 border-slate-100 text-[10px] font-black uppercase tracking-widest text-rose-500 hover:bg-rose-50 hover:border-rose-100 transition-colors flex items-center justify-center gap-2"
+                    className="w-full py-5 rounded-3xl bg-white border-2 border-slate-100 text-[10px] font-black uppercase tracking-[0.2em] text-rose-500 hover:bg-rose-50 hover:border-rose-100 transition-all flex items-center justify-center gap-2"
                 >
                     <XIcon /> Não poderei comparecer
                 </button>
 
                 <button
                     onClick={onBack}
-                    className="w-full text-[10px] font-black uppercase tracking-widest text-slate-300 hover:text-brand transition-colors pt-4"
+                    className="w-full text-[10px] font-black uppercase tracking-[0.4em] text-slate-300 hover:text-brand transition-colors pt-6"
                 >
                     ← Buscar outro nome
                 </button>
@@ -580,3 +608,4 @@ function CompanionsSelectionForm({ guest, onConfirm, onDeclineAll, onBack }: {
         </div>
     )
 }
+

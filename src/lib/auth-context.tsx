@@ -1,7 +1,8 @@
 'use client'
 
-import { createContext, useContext, useState, ReactNode } from 'react'
+import { createContext, useContext, useState, ReactNode, useEffect } from 'react'
 import { useRouter } from 'next/navigation'
+import { supabase } from './supabase'
 
 type User = {
   name: string
@@ -11,40 +12,39 @@ type User = {
 
 type AuthContextType = {
   user: User | null
-  login: (email: string, password: string) => void
-  register: (name: string, email: string, password: string) => void
+  login: (email: string, password: string) => Promise<void>
+  register: (name: string, email: string, password: string) => Promise<void>
   logout: () => void
   isAdmin?: boolean
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
 
-// Credenciais de admin
 const ADMIN_CREDENTIALS = {
   email: 'rodrigoindalecio@hotmail.com',
   password: 'Eu@784586'
 }
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  // Inicialização lazy do state lendo do localStorage
-  const [user, setUser] = useState<User | null>(() => {
+  const [user, setUser] = useState<User | null>(null)
+
+  // Initialize state from localStorage once mounted
+  useEffect(() => {
     if (typeof window !== 'undefined') {
       const saved = localStorage.getItem('rsvp_auth_user')
       if (saved) {
         try {
-          return JSON.parse(saved)
+          setUser(JSON.parse(saved))
         } catch (e) {
-          console.error(e)
+          console.error('Error parsing saved user:', e)
         }
       }
     }
-    return null
-  })
+  }, [])
 
   const router = useRouter()
 
-  function login(email: string, password: string) {
-    // Verificar se é admin
+  async function login(email: string, password: string) {
     if (email === ADMIN_CREDENTIALS.email && password === ADMIN_CREDENTIALS.password) {
       const adminUser = { name: 'Administrador', email, role: 'admin' as const }
       setUser(adminUser)
@@ -53,18 +53,55 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return
     }
 
-    // MOCK LOGIN para usuários regulares
-    const newUser = { name: 'Vanessa Bidinotti', email, role: 'user' as const }
-    setUser(newUser)
-    localStorage.setItem('rsvp_auth_user', JSON.stringify(newUser))
-    router.push('/dashboard')
+    try {
+      const { data, error } = await supabase
+        .from('admin_users')
+        .select('*')
+        .eq('email', email)
+        .maybeSingle()
+
+      if (error) throw error
+
+      if (data) {
+        const rsvpUser = {
+          name: data.name,
+          email: data.email,
+          role: (data.type === 'admin' ? 'admin' : 'user') as 'admin' | 'user'
+        }
+        setUser(rsvpUser)
+        localStorage.setItem('rsvp_auth_user', JSON.stringify(rsvpUser))
+
+        if (rsvpUser.role === 'admin') {
+          router.push('/admin/dashboard')
+        } else {
+          router.push('/dashboard')
+        }
+      } else {
+        alert('Acesso negado: Este e-mail não está autorizado.')
+      }
+    } catch (err) {
+      console.error('Erro no login Supabase:', err)
+      alert('Erro ao verificar suas credenciais. Tente novamente.')
+    }
   }
 
-  function register(name: string, email: string, password: string) {
-    // MOCK REGISTER
+  async function register(name: string, email: string, password: string) {
     const newUser = { name, email, role: 'user' as const }
     setUser(newUser)
     localStorage.setItem('rsvp_auth_user', JSON.stringify(newUser))
+
+    try {
+      await supabase.from('admin_users').insert({
+        id: Date.now().toString(),
+        name,
+        email,
+        type: 'noivos',
+        created_at: new Date().toISOString()
+      })
+    } catch (err) {
+      console.error('Erro ao registrar no Supabase:', err)
+    }
+
     router.push('/dashboard')
   }
 
