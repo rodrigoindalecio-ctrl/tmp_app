@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react'
-import { Guest, Companion } from '@/lib/event-context'
+import { Guest, Companion, GuestCategory } from '@/lib/event-context'
 
 interface GuestEditModalProps {
     guest: Guest | null
@@ -24,12 +24,20 @@ export function GuestEditModal({ guest, isOpen, onClose, onSave, onDelete }: Gue
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
     const [companionsList, setCompanionsList] = useState<Companion[]>([])
 
-    // Atualiza o state quando o guest prop muda
+    // Atualiza o state quando o guest prop muda - inicializa com 5 slots
     useEffect(() => {
         if (guest && formData?.id !== guest.id) {
             setFormData(guest)
-            // Inicializa a lista de acompanhantes com dados existentes
-            setCompanionsList(guest.companionsList || [])
+            // Inicializa com 5 slots, usando dados existentes se houver
+            const initialList: Companion[] = []
+            for (let i = 0; i < 5; i++) {
+                if (guest.companionsList?.[i]) {
+                    initialList.push(guest.companionsList[i])
+                } else {
+                    initialList.push({ name: '', isConfirmed: false, category: 'adult_paying' })
+                }
+            }
+            setCompanionsList(initialList)
         }
     }, [guest, formData?.id])
 
@@ -49,16 +57,17 @@ export function GuestEditModal({ guest, isOpen, onClose, onSave, onDelete }: Gue
         const currentList = companionsList || []
         let newList: Companion[] = []
 
-        // Preserva acompanhantes existentes até o novo número
-        for (let i = 0; i < newNumber; i++) {
+        // Sempre limita a 5 acompanhantes
+        const max = Math.min(newNumber, 5)
+        for (let i = 0; i < max; i++) {
             if (currentList[i]) {
                 newList.push(currentList[i])
             } else {
-                newList.push({ name: '', isConfirmed: false })
+                newList.push({ name: '', isConfirmed: false, category: 'adult_paying' })
             }
         }
 
-        setFormData({ ...formData, companions: newNumber })
+        setFormData({ ...formData, companions: max })
         setCompanionsList(newList)
     }
 
@@ -73,6 +82,13 @@ export function GuestEditModal({ guest, isOpen, onClose, onSave, onDelete }: Gue
     const handleCompanionConfirmedChange = (index: number, isConfirmed: boolean) => {
         const newList = [...companionsList]
         newList[index] = { ...newList[index], isConfirmed }
+        setCompanionsList(newList)
+    }
+
+    // Atualiza categoria do acompanhante
+    const handleCompanionCategoryChange = (index: number, category: GuestCategory) => {
+        const newList = [...companionsList]
+        newList[index] = { ...newList[index], category }
         setCompanionsList(newList)
     }
 
@@ -95,7 +111,7 @@ export function GuestEditModal({ guest, isOpen, onClose, onSave, onDelete }: Gue
         setTimeout(() => {
             const updatedGuest: Guest = {
                 ...formData,
-                companionsList: companionsList
+                companionsList: companionsList.filter(c => c.name.trim() !== '')
             }
             onSave(updatedGuest)
             setIsSaving(false)
@@ -203,60 +219,76 @@ export function GuestEditModal({ guest, isOpen, onClose, onSave, onDelete }: Gue
                         </select>
                     </div>
 
-                    {/* Número de Acompanhantes */}
+                    {/* Categoria */}
                     <div>
-                        <label htmlFor="companions" className="block text-sm font-medium text-textPrimary mb-2">
-                            Número de Acompanhantes
+                        <label htmlFor="category" className="block text-sm font-medium text-textPrimary mb-2">
+                            Categoria
                         </label>
-                        <input
-                            id="companions"
-                            type="number"
-                            min="0"
-                            value={formData.companions}
-                            onChange={(e) => handleCompanionsChange(parseInt(e.target.value) || 0)}
+                        <select
+                            id="category"
+                            value={formData.category}
+                            onChange={(e) => setFormData({ ...formData, category: e.target.value as GuestCategory })}
                             className="w-full rounded-lg border border-borderSoft px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all"
                             disabled={isSaving}
-                        />
+                        >
+                            <option value="adult_paying">Adulto Pagante</option>
+                            <option value="child_paying">Criança Pagante</option>
+                            <option value="child_not_paying">Criança Não Pagante</option>
+                        </select>
                     </div>
 
-                    {/* Lista de Acompanhantes */}
-                    {companionsList.length > 0 && (
-                        <div className="bg-blue-50/50 border border-blue-100 rounded-lg p-4 space-y-3">
-                            <h3 className="font-medium text-textPrimary text-sm">Acompanhantes</h3>
-                            {companionsList.map((companion, index) => (
-                                <div key={index} className="space-y-2">
-                                    <div className="flex items-end gap-2">
-                                        <div className="flex-1">
-                                            <label className="block text-xs font-medium text-textSecondary mb-1">
-                                                Acompanhante {index + 1}
-                                            </label>
-                                            <input
-                                                type="text"
-                                                value={companion.name}
-                                                onChange={(e) => handleCompanionNameChange(index, e.target.value)}
-                                                className="w-full rounded-lg border border-borderSoft px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all"
-                                                placeholder="Nome do acompanhante"
-                                                disabled={isSaving}
-                                            />
-                                        </div>
-                                    </div>
-                                    <div className="flex items-center gap-2">
+                    {/* Acompanhantes - 5 Slots Fixos */}
+                    <div className="bg-blue-50/50 border border-blue-100 rounded-lg p-4 space-y-4">
+                        <h3 className="font-medium text-textPrimary text-sm">Acompanhantes (Máximo 5)</h3>
+                        {companionsList.slice(0, 5).map((companion, index) => (
+                            <div key={index} className="space-y-2">
+                                <div className="grid grid-cols-3 gap-2 items-start">
+                                    <div className="col-span-2">
+                                        <label className="block text-xs font-medium text-textSecondary mb-1">
+                                            Acompanhante {index + 1}
+                                        </label>
                                         <input
-                                            type="checkbox"
-                                            id={`companion-confirmed-${index}`}
-                                            checked={companion.isConfirmed}
-                                            onChange={(e) => handleCompanionConfirmedChange(index, e.target.checked)}
-                                            className="w-4 h-4 rounded border-borderSoft cursor-pointer"
+                                            type="text"
+                                            value={companion.name}
+                                            onChange={(e) => handleCompanionNameChange(index, e.target.value)}
+                                            className="w-full rounded-lg border border-borderSoft px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all"
+                                            placeholder="Nome"
                                             disabled={isSaving}
                                         />
-                                        <label htmlFor={`companion-confirmed-${index}`} className="text-xs font-medium text-textSecondary cursor-pointer">
-                                            Confirmado
+                                    </div>
+                                    <div>
+                                        <label className="block text-xs font-medium text-textSecondary mb-1">
+                                            Categoria
                                         </label>
+                                        <select
+                                            value={companion.category || 'adult_paying'}
+                                            onChange={(e) => handleCompanionCategoryChange(index, e.target.value as GuestCategory)}
+                                            className="w-full rounded-lg border border-borderSoft px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all"
+                                            disabled={isSaving}
+                                        >
+                                            <option value="adult_paying">Adulto</option>
+                                            <option value="child_paying">Criança Pag.</option>
+                                            <option value="child_not_paying">Criança N.P.</option>
+                                        </select>
                                     </div>
                                 </div>
-                            ))}
-                        </div>
-                    )}
+                                <div className="flex items-center gap-2">
+                                    <input
+                                        type="checkbox"
+                                        id={`companion-confirmed-${index}`}
+                                        checked={companion.isConfirmed}
+                                        onChange={(e) => handleCompanionConfirmedChange(index, e.target.checked)}
+                                        className="w-4 h-4 rounded border-borderSoft cursor-pointer"
+                                        disabled={isSaving}
+                                    />
+                                    <label htmlFor={`companion-confirmed-${index}`} className="text-xs font-medium text-textSecondary cursor-pointer">
+                                        Confirmado
+                                    </label>
+                                </div>
+                                {companion.name && <div className="text-xs text-textSecondary">Status: {companion.isConfirmed ? '✓ Confirmado' : '⊘ Pendente'}</div>}
+                            </div>
+                        ))}
+                    </div>
 
                     {/* Buttons */}
                     <div className="flex flex-col gap-3 pt-4">

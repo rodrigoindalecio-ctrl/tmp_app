@@ -1,7 +1,7 @@
 'use client'
 
 import { useAuth } from '@/lib/auth-context'
-import { useEvent, Guest, GuestStatus } from '@/lib/event-context'
+import { useEvent, Guest, GuestStatus, GuestCategory } from '@/lib/event-context'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import Image from 'next/image'
@@ -46,6 +46,7 @@ export default function DashboardPage() {
       telefone: updatedGuest.telefone,
       grupo: updatedGuest.grupo,
       status: updatedGuest.status,
+      category: updatedGuest.category,
       companions: updatedGuest.companions,
       companionsList: updatedGuest.companionsList
     })
@@ -114,136 +115,166 @@ export default function DashboardPage() {
   }
 
   const handleExportCSV = async () => {
-    // Dynamic import para evitar problemas de módulo no Next.js client
-    const ExcelJS = (await import('exceljs')).default
-
-    const statusLabels: Record<GuestStatus, string> = {
-      'confirmed': 'Confirmado',
-      'pending': 'Pendente',
-      'declined': 'Recusado'
+    if (guests.length === 0) {
+      alert('Nenhum convidado para exportar')
+      return
     }
 
-    // Criar workbook
-    const workbook = new ExcelJS.Workbook()
-    const worksheet = workbook.addWorksheet('Convidados')
+    try {
+      // Dynamic import para evitar problemas de módulo no Next.js client
+      const ExcelJS = (await import('exceljs')).default
 
-    // Definir headers
-    const headers = ['Nome', 'Tipo', 'Grupo', 'Status', 'Email', 'Telefone', 'Confirmado Em']
-    worksheet.columns = headers.map(h => ({ header: h, key: h.toLowerCase().replace(/\s+/g, '_'), width: 20 }))
+      const workbook = new ExcelJS.Workbook()
 
-    // Estilo do header
-    const headerStyle = {
-      fill: {
-        type: 'pattern',
-        pattern: 'solid',
-        fgColor: { argb: 'FFF1E4E6' } // Rosa claro
-      },
-      font: {
-        bold: true,
-        color: { argb: 'FFD946A6' }, // Rosa escuro
-        size: 11,
-        name: 'Calibri'
-      },
-      alignment: {
-        horizontal: 'center' as const,
-        vertical: 'center' as const,
-        wrapText: true
-      },
-      border: {
-        top: { style: 'thin' as const, color: { argb: 'FFE4C1D0' } },
-        left: { style: 'thin' as const, color: { argb: 'FFE4C1D0' } },
-        bottom: { style: 'thin' as const, color: { argb: 'FFE4C1D0' } },
-        right: { style: 'thin' as const, color: { argb: 'FFE4C1D0' } }
-      }
-    }
-
-    // Aplicar estilos ao header
-    worksheet.getRow(1).eachCell((cell: any) => {
-      cell.fill = headerStyle.fill
-      cell.font = headerStyle.font
-      cell.alignment = headerStyle.alignment
-      cell.border = headerStyle.border
-    })
-
-    // Estilo das células de dados
-    const cellStyle = {
-      alignment: {
-        horizontal: 'left' as const,
-        vertical: 'center' as const,
-        wrapText: false
-      },
-      border: {
-        top: { style: 'thin' as const, color: { argb: 'FFF0F0F0' } },
-        left: { style: 'thin' as const, color: { argb: 'FFF0F0F0' } },
-        bottom: { style: 'thin' as const, color: { argb: 'FFF0F0F0' } },
-        right: { style: 'thin' as const, color: { argb: 'FFF0F0F0' } }
-      },
-      font: {
-        size: 10,
-        name: 'Calibri'
-      }
-    }
-
-    // Adicionar dados
-    allPeople.forEach(p => {
-      const guest = guests.find(g => g.id === p.guestId)
-      const confirmedDate = guest?.confirmedAt ? new Date(guest.confirmedAt).toLocaleDateString('pt-BR') : ''
-
-      const row = worksheet.addRow({
-        nome: p.name,
-        tipo: p.type,
-        grupo: p.groupName,
-        status: statusLabels[p.status],
-        email: guest?.email || '',
-        telefone: guest?.telefone || '',
-        confirmado_em: confirmedDate
-      })
-
-      // Aplicar estilos às células
-      row.eachCell((cell: any) => {
-        cell.fill = {
-          type: 'pattern' as const,
-          pattern: 'solid' as const,
-          fgColor: { argb: 'FFFAFAF8' } // Fundo muito claro
+      // ===== PREPARAR DADOS ABA 1 (COM ACOMPANHANTES) =====
+      const aba1Rows = guests.map((guest: any) => {
+        const row: any = {
+          nomePrincipal: guest.name,
+          categoria: guest.category === 'adult_paying' ? 'Adulto Pagante' : guest.category === 'child_paying' ? 'Criança Pagante' : 'Criança Não Pagante',
+          grupo: guest.grupo || '-',
+          email: guest.email || '',
+          telefone: guest.telefone || '',
+          status: guest.status === 'confirmed' ? 'Confirmado' : guest.status === 'pending' ? 'Pendente' : 'Declinou',
+          confirmadoEm: guest.status === 'confirmed' ? new Date().toLocaleDateString('pt-BR') : '',
+          acompanhante1: '',
+          categoriaAcomp1: '',
+          acompanhante2: '',
+          categoriaAcomp2: '',
+          acompanhante3: '',
+          categoriaAcomp3: '',
+          acompanhante4: '',
+          categoriaAcomp4: '',
+          acompanhante5: '',
+          categoriaAcomp5: ''
         }
-        cell.font = cellStyle.font
-        cell.alignment = cellStyle.alignment
-        cell.border = cellStyle.border
+
+        // Adicionar até 5 acompanhantes com suas categorias
+        if (guest.companionsList && guest.companionsList.length > 0) {
+          for (let i = 0; i < Math.min(5, guest.companionsList.length); i++) {
+            const companion = guest.companionsList[i]
+            if (companion && companion.name && companion.name.trim()) {
+              row[`acompanhante${i + 1}`] = companion.name
+              row[`categoriaAcomp${i + 1}`] = companion.category === 'adult_paying' ? 'Adulto Pagante' : companion.category === 'child_paying' ? 'Criança Pagante' : 'Criança Não Pagante'
+            }
+          }
+        }
+
+        return row
       })
-    })
 
-    // Definir altura do header
-    worksheet.getRow(1).height = 25
+      // ===== PREPARAR DADOS ABA 2 =====
+      const aba2Rows: any[] = []
 
-    // Ajustar larguras das colunas
-    worksheet.columns.forEach((column: any) => {
-      if (column.header === 'Nome' || column.header === 'Email') {
-        column.width = 28
-      } else if (column.header === 'Telefone') {
-        column.width = 16
-      } else if (column.header === 'Confirmado Em') {
-        column.width = 16
-      } else {
-        column.width = 14
-      }
-    })
+      guests.forEach((guest: any) => {
+        if (guest.status === 'confirmed') {
+          aba2Rows.push({
+            nome: guest.name,
+            categoria: guest.category === 'adult_paying' ? 'Adulto Pagante' : guest.category === 'child_paying' ? 'Criança Pagante' : 'Criança Não Pagante',
+            grupo: guest.grupo || '-'
+          })
+        }
 
-    // Congelar a primeira linha (header)
-    worksheet.views = [{ state: 'frozen', ySplit: 1 }]
+        if (guest.companionsList && guest.companionsList.length > 0) {
+          guest.companionsList.forEach((companion: any) => {
+            if (companion.isConfirmed && companion.name.trim()) {
+              aba2Rows.push({
+                nome: companion.name,
+                categoria: companion.category === 'adult_paying' ? 'Adulto Pagante' : companion.category === 'child_paying' ? 'Criança Pagante' : 'Criança Não Pagante',
+                grupo: guest.grupo || '-'
+              })
+            }
+          })
+        }
+      })
 
-    // Gerar arquivo
-    const buffer = await workbook.xlsx.writeBuffer()
-    const blob = new Blob([buffer], {
-      type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
-    })
-    const url = URL.createObjectURL(blob)
-    const link = document.createElement('a')
-    link.href = url
-    link.download = `lista_convidados_${new Date().toLocaleDateString('pt-BR').replace(/\//g, '-')}.xlsx`
-    document.body.appendChild(link)
-    link.click()
-    document.body.removeChild(link)
-    URL.revokeObjectURL(url)
+      // ===== CRIAR ABA 1 =====
+      const ws1 = workbook.addWorksheet('Convidados')
+
+      ws1.columns = [
+        { header: 'Nome Principal', key: 'nomePrincipal', width: 20 },
+        { header: 'Categoria', key: 'categoria', width: 15 },
+        { header: 'Grupo', key: 'grupo', width: 18 },
+        { header: 'Email', key: 'email', width: 25 },
+        { header: 'Telefone', key: 'telefone', width: 15 },
+        { header: 'Status', key: 'status', width: 12 },
+        { header: 'Confirmado Em', key: 'confirmadoEm', width: 12 },
+        { header: 'Acompanhante 1', key: 'acompanhante1', width: 18 },
+        { header: 'Categoria', key: 'categoriaAcomp1', width: 15 },
+        { header: 'Acompanhante 2', key: 'acompanhante2', width: 18 },
+        { header: 'Categoria', key: 'categoriaAcomp2', width: 15 },
+        { header: 'Acompanhante 3', key: 'acompanhante3', width: 18 },
+        { header: 'Categoria', key: 'categoriaAcomp3', width: 15 },
+        { header: 'Acompanhante 4', key: 'acompanhante4', width: 18 },
+        { header: 'Categoria', key: 'categoriaAcomp4', width: 15 },
+        { header: 'Acompanhante 5', key: 'acompanhante5', width: 18 },
+        { header: 'Categoria', key: 'categoriaAcomp5', width: 15 }
+      ]
+
+      // Formatação do header
+      const headerRow1 = ws1.getRow(1)
+      headerRow1.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 11 }
+      headerRow1.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF4472C4' } }
+      headerRow1.alignment = { horizontal: 'center', vertical: 'middle', wrapText: true }
+      headerRow1.height = 30
+
+      // Adicionar dados
+      aba1Rows.forEach((row: any, index: number) => {
+        const newRow = ws1.addRow(row)
+        newRow.font = { size: 10 }
+        newRow.alignment = { horizontal: 'left', vertical: 'middle' }
+        if ((index + 2) % 2 === 0) {
+          newRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF2F2F2' } }
+        }
+      })
+
+      // ===== CRIAR ABA 2 =====
+      const ws2 = workbook.addWorksheet('Convidados Confirmados')
+
+      ws2.columns = [
+        { header: 'Nome', key: 'nome', width: 25 },
+        { header: 'Categoria', key: 'categoria', width: 18 },
+        { header: 'Grupo', key: 'grupo', width: 15 }
+      ]
+
+      // Formatação do header
+      const headerRow2 = ws2.getRow(1)
+      headerRow2.font = { bold: true, color: { argb: 'FFFFFFFF' }, size: 11 }
+      headerRow2.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FF2F7D32' } }
+      headerRow2.alignment = { horizontal: 'center', vertical: 'middle' }
+      headerRow2.height = 25
+
+      // Adicionar dados
+      aba2Rows.forEach((row: any, index: number) => {
+        const newRow = ws2.addRow(row)
+        newRow.font = { size: 10 }
+        newRow.alignment = { horizontal: 'left', vertical: 'middle' }
+        if ((index + 2) % 2 === 0) {
+          newRow.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF2F2F2' } }
+        }
+      })
+
+      // ===== GERAR ARQUIVO =====
+      const buffer = await workbook.xlsx.writeBuffer()
+
+      const blob = new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' })
+
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      const filename = `convidados_${new Date().toISOString().split('T')[0]}.xlsx`
+      link.href = url
+      link.download = filename
+
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+
+      setTimeout(() => {
+        URL.revokeObjectURL(url)
+      }, 100)
+    } catch (error) {
+      console.error('❌ ERRO na exportação:', error)
+      alert('Erro ao exportar: ' + (error instanceof Error ? error.message : String(error)))
+    }
   }
 
   const handleDelete = (person: FlattenedGuest) => {
@@ -271,11 +302,11 @@ export default function DashboardPage() {
     guests.forEach(guest => {
       removeGuest(guest.id)
     })
-    
+
     if (typeof window !== 'undefined') {
       localStorage.setItem('rsvp_guests', JSON.stringify([]))
     }
-    
+
     setDeleteAllConfirmDialog({ isOpen: false, step: 1 })
   }
 
@@ -283,7 +314,7 @@ export default function DashboardPage() {
     if (!window.confirm(`Tem certeza que deseja excluir TODOS os ${metrics.total} convidados? Esta ação é irreversível.`)) {
       return
     }
-    
+
     if (!window.confirm('⚠️ AVISO: Esta ação é PERMANENTE e não pode ser desfeita. Deseja continuar?')) {
       return
     }
@@ -292,7 +323,7 @@ export default function DashboardPage() {
     guests.forEach(guest => {
       removeGuest(guest.id)
     })
-    
+
     // Também limpar localStorage
     if (typeof window !== 'undefined') {
       localStorage.setItem('rsvp_guests', JSON.stringify([]))
@@ -303,13 +334,13 @@ export default function DashboardPage() {
     <div className="min-h-screen bg-background flex font-sans text-textPrimary">
 
       {/* SIDEBAR */}
-      <aside className="w-64 bg-surface border-r border-borderSoft flex flex-col flex-shrink-0 hidden md:flex">
+      <aside className="w-64 bg-white border-r border-brand/10 flex flex-col flex-shrink-0 hidden md:flex shadow-sm">
         <div className="p-8">
           <div className="flex items-center gap-3 mb-10">
-            <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center text-white font-serif italic text-lg shadow-sm">
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center text-white font-black text-lg bg-brand shadow-sm">
               R
             </div>
-            <span className="font-medium text-lg tracking-tight">RSVP Manager</span>
+            <span className="font-black text-lg tracking-tight text-slate-800 uppercase tracking-widest">RSVP Manager</span>
           </div>
 
           <nav className="space-y-1">
@@ -319,16 +350,16 @@ export default function DashboardPage() {
           </nav>
         </div>
 
-        <div className="px-6 py-8 border-t border-borderSoft">
+        <div className="px-6 py-8 border-t border-brand/10 bg-slate-50/50 mt-auto">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm">
+            <div className="w-10 h-10 rounded-xl bg-brand/10 flex items-center justify-center text-brand font-black text-sm uppercase shadow-sm">
               {user.name.charAt(0)}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-medium truncate">{user.name}</p>
-              <p className="text-xs text-textSecondary truncate">{user.email}</p>
+              <p className="text-sm font-black text-slate-800 tracking-tight truncate">{user.name}</p>
+              <p className="text-[10px] font-bold text-slate-400 tracking-widest uppercase truncate">{user.email}</p>
             </div>
-            <button onClick={logout} className="text-textSecondary hover:text-danger transition-colors">
+            <button onClick={logout} className="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all shadow-inner">
               <LogOutIcon />
             </button>
           </div>
@@ -339,17 +370,17 @@ export default function DashboardPage() {
       <main className="flex-1 p-8 max-w-[1600px] mx-auto w-full">
 
         {/* MOBILE USER PROFILE (Visible only on small screens) */}
-        <div className="md:hidden flex items-center justify-between gap-3 mb-8 p-4 bg-surface border border-borderSoft rounded-xl shadow-sm">
+        <div className="md:hidden flex items-center justify-between gap-3 mb-8 p-4 bg-white border-2 border-slate-100 rounded-2xl shadow-sm">
           <div className="flex items-center gap-3 min-w-0">
-            <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm flex-shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-brand/10 flex items-center justify-center text-brand font-black text-sm uppercase flex-shrink-0">
               {user.name.charAt(0)}
             </div>
             <div className="min-w-0">
-              <p className="text-sm font-medium truncate">{user.name}</p>
-              <p className="text-xs text-textSecondary truncate">{user.email}</p>
+              <p className="text-sm font-black text-slate-800 tracking-tight truncate">{user.name}</p>
+              <p className="text-[10px] font-bold text-slate-400 tracking-widest uppercase truncate">{user.email}</p>
             </div>
           </div>
-          <button onClick={logout} className="p-2 text-textSecondary hover:text-danger hover:bg-danger/10 rounded-lg transition-colors">
+          <button onClick={logout} className="p-3 text-slate-400 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-all shadow-inner">
             <LogOutIcon />
           </button>
         </div>
@@ -391,10 +422,10 @@ export default function DashboardPage() {
                 {eventSettings.eventType === 'casamento' ? 'Casamento' : 'Debutante'}
               </span>
             </div>
-            <h1 className="text-3xl md:text-4xl font-serif text-textPrimary mb-3">
+            <h1 className="text-3xl md:text-4xl font-black text-slate-800 mb-3 tracking-tight">
               {eventSettings.coupleNames}
             </h1>
-            <div className="flex flex-col sm:flex-row sm:items-center gap-4 text-sm text-textSecondary">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-4 text-xs font-bold text-slate-500 uppercase tracking-widest">
               <div className="flex items-center gap-1.5">
                 <CalendarIcon />
                 <span>{formatDate(eventSettings.eventDate, {
@@ -415,11 +446,11 @@ export default function DashboardPage() {
           </div>
 
           <div className="flex items-center gap-3">
-            <button onClick={() => router.push('/import')} className="flex items-center gap-2 px-4 py-2 bg-surface border border-borderSoft rounded-lg text-sm font-medium hover:bg-background transition-colors shadow-sm text-textPrimary">
+            <button onClick={() => router.push('/import')} className="flex items-center gap-2 px-4 py-3 bg-white border-2 border-slate-100 rounded-xl text-xs font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 hover:border-slate-200 transition-all shadow-sm">
               <UploadIcon className="w-4 h-4" />
               Importar
             </button>
-            <button onClick={() => router.push('/settings')} className="flex items-center gap-2 px-4 py-2 bg-surface border border-borderSoft rounded-lg text-sm font-medium hover:bg-background transition-colors shadow-sm text-textPrimary">
+            <button onClick={() => router.push('/settings')} className="flex items-center gap-2 px-4 py-3 bg-white border-2 border-slate-100 rounded-xl text-xs font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 hover:border-slate-200 transition-all shadow-sm">
               <SettingsIcon className="w-4 h-4" />
               Configurações
             </button>
@@ -427,19 +458,19 @@ export default function DashboardPage() {
         </header>
 
         {/* SHARE CARD */}
-        <div className="bg-primary/10 border border-primary/30 rounded-2xl p-6 mb-10">
+        <div className="bg-brand/5 border border-brand/10 rounded-2xl p-6 mb-10 shadow-sm">
           <div className="flex items-start gap-4">
-            <div className="p-3 bg-surface rounded-full text-primary shadow-sm mt-1 flex-shrink-0">
+            <div className="p-3 bg-white rounded-xl text-brand shadow-sm mt-1 flex-shrink-0">
               <ShareIcon />
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="text-primary/90 font-medium text-lg mb-1">Compartilhe com seus convidados</h3>
-              <p className="text-primary/70 text-sm mb-6 max-w-2xl">
+              <h3 className="text-brand font-black text-lg mb-1 tracking-tight">Compartilhe com seus convidados</h3>
+              <p className="text-slate-500 text-sm mb-6 max-w-2xl font-medium">
                 Envie este link para seus convidados confirmarem presença. Eles poderão acessar a página pública sem necessidade de login.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-2 max-w-3xl">
-                <div className="flex-1 bg-surface border border-primary/30 rounded-lg px-4 py-3 text-sm text-textSecondary font-mono overflow-x-auto whitespace-nowrap scrollbar-hide">
+                <div className="flex-1 bg-white border-2 border-slate-100 rounded-xl px-4 py-4 text-sm text-slate-500 font-bold overflow-x-auto whitespace-nowrap scrollbar-hide">
                   {typeof window !== 'undefined' ?
                     `${window.location.origin}/evento/${eventSettings.slug || user.name.toLowerCase().replace(/\s+/g, '-')}` :
                     `https://app-rsvp.com/evento/${eventSettings.slug || user.name.toLowerCase().replace(/\s+/g, '-')}`
@@ -448,7 +479,7 @@ export default function DashboardPage() {
                 <div className="flex gap-2">
                   <button
                     onClick={handleCopyLink}
-                    className="flex-1 sm:flex-none px-6 py-2 bg-primary hover:bg-primary/90 text-white font-medium rounded-lg transition-all shadow-sm shadow-primary/20 flex items-center justify-center gap-2 min-w-[100px]"
+                    className="flex-1 sm:flex-none px-6 py-4 bg-brand hover:bg-brand/90 text-white font-black uppercase tracking-widest text-xs rounded-xl transition-all shadow-lg shadow-brand/20 flex items-center justify-center gap-2 min-w-[100px]"
                   >
                     {copied ? (
                       <>
@@ -462,7 +493,7 @@ export default function DashboardPage() {
                   </button>
                   <button
                     onClick={() => window.open(`/evento/${eventSettings.slug || user.name.toLowerCase().replace(/\s+/g, '-')}`, '_blank')}
-                    className="p-3 bg-surface border border-primary/30 text-primary rounded-lg hover:bg-primary/5 transition-colors flex-shrink-0"
+                    className="p-4 bg-white border-2 border-slate-100 text-brand rounded-xl hover:border-brand/20 hover:bg-brand/5 transition-all flex-shrink-0"
                     title="Abrir em nova aba"
                   >
                     <ExternalLinkIcon />
@@ -510,9 +541,9 @@ export default function DashboardPage() {
         </div>
 
         {/* FILTERS & SEARCH */}
-        <div className="bg-white rounded-t-2xl border border-b-0 border-[#E6E2DC] p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
+        <div className="bg-white rounded-t-2xl border border-b-0 border-brand/10 p-4 flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="relative flex-1 max-w-md">
-            <div className="absolute left-3 top-1/2 -translate-y-1/2 text-textSecondary">
+            <div className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">
               <SearchIcon />
             </div>
             <input
@@ -520,7 +551,7 @@ export default function DashboardPage() {
               placeholder="Buscar por nome..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-borderSoft text-sm focus:outline-none focus:border-primary focus:ring-1 focus:ring-primary transition-all placeholder-textSecondary"
+              className="w-full pl-11 pr-4 py-3 bg-slate-50 border-none rounded-xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner placeholder:text-slate-400 text-slate-700 outline-none"
             />
           </div>
 
@@ -529,21 +560,21 @@ export default function DashboardPage() {
               <select
                 value={filter}
                 onChange={(e) => setFilter(e.target.value as any)}
-                className="appearance-none bg-surface border border-borderSoft text-textPrimary py-2.5 pl-4 pr-10 rounded-lg text-sm font-medium focus:outline-none hover:border-textSecondary transition-colors cursor-pointer"
+                className="appearance-none bg-slate-50 border-none text-slate-700 py-3 pl-4 pr-10 rounded-xl text-xs font-bold focus:ring-2 focus:ring-brand/20 shadow-inner cursor-pointer outline-none"
               >
                 <option value="all">Todos os Status</option>
                 <option value="confirmed">Confirmados</option>
                 <option value="pending">Pendentes</option>
                 <option value="declined">Recusados</option>
               </select>
-              <div className="absolute right-3 top-1/2 -translate-y-1/2 text-textSecondary pointer-events-none">
+              <div className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">
                 <ChevronDownIcon />
               </div>
             </div>
 
             <button
               onClick={() => window.location.reload()}
-              className="p-2.5 bg-surface border border-borderSoft rounded-lg text-textSecondary hover:bg-background transition-colors"
+              className="p-3 bg-slate-50 text-slate-500 rounded-xl hover:bg-slate-100 transition-colors shadow-inner"
               title="Atualizar"
             >
               <RefreshIcon />
@@ -552,7 +583,7 @@ export default function DashboardPage() {
             <button
               onClick={handleDeleteAllGuests}
               disabled={metrics.total === 0}
-              className="flex items-center gap-2 px-4 py-2.5 bg-surface border border-red-200 text-red-600 rounded-lg text-sm font-medium hover:border-red-400 hover:bg-red-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              className="flex items-center gap-2 px-4 py-3 border-2 border-rose-100 text-rose-600 rounded-xl text-xs font-black uppercase tracking-widest hover:border-rose-400 hover:bg-rose-50 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               title="Apagar todos os convidados"
             >
               🗑️ Apagar Tudo
@@ -560,7 +591,7 @@ export default function DashboardPage() {
 
             <button
               onClick={handleExportCSV}
-              className="flex items-center gap-2 px-4 py-2.5 bg-surface border border-borderSoft rounded-lg text-sm font-medium text-textPrimary hover:bg-background transition-colors"
+              className="flex items-center gap-2 px-4 py-3 bg-brand text-white rounded-xl text-xs font-black uppercase tracking-widest shadow-lg shadow-brand/20 hover:bg-brand/90 transition-all"
             >
               <DownloadIcon />
               XLSX
@@ -569,10 +600,10 @@ export default function DashboardPage() {
         </div>
 
         {/* TABLE */}
-        <div className="bg-surface border border-borderSoft rounded-b-2xl overflow-hidden shadow-sm">
+        <div className="bg-white border border-brand/10 rounded-2xl overflow-hidden shadow-sm">
           <div className="overflow-x-auto">
             <table className="w-full text-left text-sm">
-              <thead className="bg-background text-textSecondary font-medium">
+              <thead className="bg-slate-50 text-slate-400 font-black text-[10px] uppercase tracking-widest">
                 <tr>
                   <th className="px-6 py-4">Nome</th>
                   <th className="px-6 py-4">Tipo</th>
@@ -582,48 +613,48 @@ export default function DashboardPage() {
                   <th className="px-6 py-4 text-right">Ações</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-borderSoft">
+              <tbody className="divide-y divide-slate-100">
                 {filteredPeople.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="px-6 py-12 text-center">
                       <div className="flex flex-col items-center justify-center text-gray-400">
-                        <div className="w-12 h-12 bg-gray-50 rounded-full flex items-center justify-center mb-3">
-                          <SearchIcon className="w-6 h-6 opacity-50" />
+                        <div className="w-12 h-12 bg-slate-50 rounded-xl flex items-center justify-center mb-3">
+                          <SearchIcon className="w-6 h-6 text-slate-300" />
                         </div>
-                        <p className="text-base font-medium text-gray-600">Nenhum convidado encontrado</p>
+                        <p className="text-sm font-black text-slate-400 uppercase tracking-widest">Nenhum convidado encontrado</p>
                       </div>
                     </td>
                   </tr>
                 ) : (
                   filteredPeople.map((person) => (
-                    <tr key={person.uniqueId} className="hover:bg-primary/5 transition-colors group">
-                      <td className="px-6 py-4 text-textPrimary font-medium">
+                    <tr key={person.uniqueId} className="hover:bg-brand/5 transition-colors group">
+                      <td className="px-6 py-4 text-slate-800 font-black tracking-tight">
                         {person.name}
                       </td>
-                      <td className="px-6 py-4 text-textSecondary flex items-center gap-2">
+                      <td className="px-6 py-4 text-slate-500 font-bold flex items-center gap-2">
                         {person.type === 'Principal' ? (
-                          <span className="inline-flex items-center gap-1.5 text-primary">
+                          <span className="inline-flex items-center gap-1.5 text-brand bg-brand/10 px-2 py-1 rounded-md text-[10px] uppercase tracking-widest font-black">
                             <UserIcon /> Principal
                           </span>
                         ) : (
-                          <span className="inline-flex items-center gap-1.5 text-textSecondary">
+                          <span className="inline-flex items-center gap-1.5 text-slate-400 bg-slate-100 px-2 py-1 rounded-md text-[10px] uppercase tracking-widest font-black">
                             <UsersIconMini /> Acompanhante
                           </span>
                         )}
                       </td>
-                      <td className="px-6 py-4 text-textSecondary">
+                      <td className="px-6 py-4 text-slate-500 font-bold text-xs uppercase tracking-widest">
                         {person.groupName}
                       </td>
                       <td className="px-6 py-4">
                         <StatusBadge status={person.status} />
                       </td>
-                      <td className="px-6 py-4 text-textSecondary/50 text-xs">
+                      <td className="px-6 py-4 text-slate-400 font-bold text-xs">
                         {person.status === 'pending' ? '-' : person.updatedAt.toLocaleDateString()}
                       </td>
                       <td className="px-6 py-4 text-right">
                         <button
                           onClick={() => handleEditClick(guests.find(g => g.id === person.guestId)!)}
-                          className="p-2 text-blue-500 hover:text-blue-700 hover:bg-blue-50 rounded-lg transition-all duration-200"
+                          className="p-3 text-slate-400 hover:text-brand hover:bg-brand/10 rounded-xl transition-all duration-200 shadow-inner group-hover:bg-white"
                           title="Editar Convidado"
                         >
                           <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
@@ -640,11 +671,11 @@ export default function DashboardPage() {
 
           {/* Pagination Footer Mock */}
           {filteredPeople.length > 0 && (
-            <div className="bg-background px-6 py-4 border-t border-borderSoft flex items-center justify-between text-xs text-textSecondary">
+            <div className="bg-slate-50 px-6 py-4 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-slate-400 uppercase tracking-widest">
               <p>Mostrando {filteredPeople.length} resultados</p>
               <div className="flex gap-2">
-                <button className="px-3 py-1 bg-surface border border-borderSoft rounded hover:bg-background disabled:opacity-50" disabled>Anterior</button>
-                <button className="px-3 py-1 bg-surface border border-borderSoft rounded hover:bg-background disabled:opacity-50" disabled>Próxima</button>
+                <button className="px-4 py-2 bg-white border-2 border-slate-100 rounded-xl hover:bg-slate-50 disabled:opacity-50 shadow-sm" disabled>Anterior</button>
+                <button className="px-4 py-2 bg-white border-2 border-slate-100 rounded-xl hover:bg-slate-50 disabled:opacity-50 shadow-sm" disabled>Próxima</button>
               </div>
             </div>
           )}
@@ -678,7 +709,7 @@ export default function DashboardPage() {
         <ConfirmDialog
           isOpen={deleteAllConfirmDialog.isOpen}
           title={deleteAllConfirmDialog.step === 1 ? "Apagar Todos os Convidados" : "⚠️ Última Confirmação"}
-          message={deleteAllConfirmDialog.step === 1 
+          message={deleteAllConfirmDialog.step === 1
             ? `Tem certeza que deseja excluir TODOS os ${metrics.total} convidados? Esta ação é irreversível.`
             : "Esta ação é PERMANENTE e não pode ser desfeita. Tem certeza que deseja continuar?"
           }
@@ -698,23 +729,23 @@ export default function DashboardPage() {
 
 function NavItem({ label, icon, active = false, href }: { label: string, icon: React.ReactNode, active?: boolean, href?: string }) {
   return (
-    <a href={href || '#'} className={`flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors ${active ? 'bg-primary/10 text-primary' : 'text-textSecondary hover:bg-primary/10 hover:text-primary'}`}>
-      <span className={active ? 'text-primary' : 'text-textSecondary group-hover:text-primary'}>{icon}</span>
+    <a href={href || '#'} className={`flex items-center gap-3 px-4 py-3 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${active ? 'bg-brand/10 text-brand' : 'text-slate-500 hover:bg-slate-50 hover:text-slate-700'}`}>
+      <span className={active ? 'text-brand' : 'text-slate-400 group-hover:text-slate-500'}>{icon}</span>
       {label}
     </a>
   )
 }
 
 // ... (KPI Card fix)
-function KPICard({ 
-  label, 
-  value, 
-  subValue, 
-  icon, 
+function KPICard({
+  label,
+  value,
+  subValue,
+  icon,
   status,
   isActive = false,
-  onClick 
-}: { 
+  onClick
+}: {
   label: string
   value: string
   subValue?: string
@@ -734,22 +765,21 @@ function KPICard({
   return (
     <button
       onClick={onClick}
-      className={`bg-white p-6 rounded-2xl border-2 shadow-[0_2px_10px_rgb(0,0,0,0.02)] flex flex-col justify-between h-32 relative overflow-hidden group hover:-translate-y-1 transition-all duration-300 text-left ${
-        isActive 
-          ? 'border-rose-400 bg-rose-50/30' 
-          : 'border-[#E6E2DC] hover:border-rose-200'
-      }`}
+      className={`bg-white p-4 lg:p-6 rounded-xl border border-brand/10 shadow-sm flex flex-col justify-between h-32 relative overflow-hidden group hover:-translate-y-1 transition-all duration-300 text-left ${isActive
+        ? 'border-brand/40 bg-brand/5'
+        : 'hover:border-brand/20'
+        }`}
     >
       <div className="flex justify-between items-start">
-        <span className="text-sm text-gray-500 font-medium">{label}</span>
-        <div className={`p-2 rounded-lg ${colorClass}`}>
+        <span className="text-[10px] text-slate-400 font-black uppercase tracking-widest">{label}</span>
+        <div className={`p-2 rounded-xl text-brand`}>
           {icon}
         </div>
       </div>
       <div>
-        <span className="text-3xl font-serif text-[#2E2E2E]">{value}</span>
+        <span className="text-3xl font-black text-slate-800 tracking-tight">{value}</span>
         {subValue && (
-          <span className={`text-xs ml-2 font-medium ${status === 'success' ? 'text-green-600' : status === 'warning' ? 'text-amber-600' : 'text-gray-400'}`}>
+          <span className={`text-[10px] font-black uppercase tracking-widest ml-2 ${status === 'success' ? 'text-emerald-500' : status === 'warning' ? 'text-amber-500' : 'text-slate-400'}`}>
             {subValue}
           </span>
         )}
@@ -764,9 +794,9 @@ const UsersIconMini = () => <svg width="16" height="16" viewBox="0 0 24 24" fill
 
 function StatusBadge({ status }: { status: string }) {
   const styles = {
-    confirmed: 'bg-green-50 text-green-700 border-green-100',
-    pending: 'bg-amber-50 text-amber-700 border-amber-100',
-    declined: 'bg-red-50 text-red-700 border-red-100'
+    confirmed: 'bg-emerald-50 text-emerald-600 border-emerald-100',
+    pending: 'bg-amber-50 text-amber-600 border-amber-100',
+    declined: 'bg-rose-50 text-rose-600 border-rose-100'
   } as any
 
   const labels = {
@@ -776,7 +806,7 @@ function StatusBadge({ status }: { status: string }) {
   } as any
 
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium border ${styles[status] || styles.pending}`}>
+    <span className={`inline-flex items-center px-3 py-1 rounded-md text-[10px] font-black uppercase tracking-widest border-2 ${styles[status] || styles.pending}`}>
       {labels[status]}
     </span>
   )

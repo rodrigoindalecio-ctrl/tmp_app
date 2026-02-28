@@ -24,7 +24,7 @@ const createTransporter = () => {
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json()
-        const { email, guestName, eventSettings, confirmedCompanions, confirmedNames, giftListLinks } = body
+        const { email, guestName, eventSettings, confirmedCompanions, confirmedNames, confirmedDetails, giftListLinks } = body
 
         // Validar email
         const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
@@ -263,7 +263,19 @@ export async function POST(request: NextRequest) {
 
             <div class="confirmation-badge">
                 ✓ Sua confirmação foi recebida com sucesso para <strong>${confirmedCompanions} pessoa${confirmedCompanions > 1 ? 's' : ''}</strong>
-                ${confirmedNames && confirmedNames.length > 0 ? `
+                ${confirmedDetails && confirmedDetails.length > 0 ? `
+                <div class="confirmed-names">
+                    <h4>Confirmados:</h4>
+                    <ul>
+                        ${confirmedDetails.map((detail: any) => {
+                            const categoryLabel = detail.category === 'adult_paying' ? 'Adulto Pagante' : 
+                                                detail.category === 'child_paying' ? 'Criança Pagante' : 
+                                                'Criança Não Pagante'
+                            return `<li>${detail.name} <span style="font-size: 12px; color: #999;">(${categoryLabel})</span></li>`
+                        }).join('')}
+                    </ul>
+                </div>
+                ` : confirmedNames && confirmedNames.length > 0 ? `
                 <div class="confirmed-names">
                     <h4>Confirmados:</h4>
                     <ul>
@@ -271,6 +283,7 @@ export async function POST(request: NextRequest) {
                     </ul>
                 </div>
                 ` : ''}
+            </div>
             </div>
 
             <div class="event-info">

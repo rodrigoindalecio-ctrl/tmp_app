@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { useEvent, GuestStatus, Guest } from '@/lib/event-context'
+import { useEvent, GuestStatus, Guest, GuestCategory } from '@/lib/event-context'
 import { GuestEditModal } from './guest-edit-modal'
 
 export function GuestList() {
@@ -43,6 +43,12 @@ export function GuestList() {
         declined: 'Recusado',
     }
 
+    const categoryLabels: Record<GuestCategory, string> = {
+        'adult_paying': 'Adulto Pagante',
+        'child_paying': 'Criança Pagante',
+        'child_not_paying': 'Criança Não Pagante'
+    }
+
     return (
         <div className="bg-white rounded-2xl shadow-sm border border-borderSoft overflow-hidden">
             <div className="p-6 border-b border-borderSoft flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-gray-50/50">
@@ -69,6 +75,7 @@ export function GuestList() {
                     <thead className="bg-gray-50 text-textSecondary uppercase tracking-wider text-xs font-medium border-b border-borderSoft">
                         <tr>
                             <th className="px-6 py-4">Convidado</th>
+                            <th className="px-6 py-4">Categoria</th>
                             <th className="px-6 py-4">Acompanhantes</th>
                             <th className="px-6 py-4">Status</th>
                             <th className="px-6 py-4 text-right">Ações</th>
@@ -77,7 +84,7 @@ export function GuestList() {
                     <tbody className="divide-y divide-borderSoft">
                         {filteredGuests.length === 0 ? (
                             <tr>
-                                <td colSpan={4} className="px-6 py-8 text-center text-textSecondary italic">
+                                <td colSpan={5} className="px-6 py-8 text-center text-textSecondary italic">
                                     Nenhum convidado encontrado.
                                 </td>
                             </tr>
@@ -87,6 +94,11 @@ export function GuestList() {
                                     <td className="px-6 py-4">
                                         <div className="font-medium text-textPrimary">{guest.name}</div>
                                         <div className="text-xs text-textSecondary">{guest.email || '-'}</div>
+                                    </td>
+                                    <td className="px-6 py-4">
+                                        <span className="text-xs font-medium text-textSecondary bg-gray-100 px-2.5 py-1 rounded-full">
+                                            {categoryLabels[guest.category]}
+                                        </span>
                                     </td>
                                     <td className="px-6 py-4 text-textSecondary">
                                         {guest.companions > 0 ? `+${guest.companions}` : '-'}

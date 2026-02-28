@@ -4,7 +4,7 @@ import { useAuth } from '@/lib/auth-context'
 import { useEvent, GuestStatus } from '@/lib/event-context'
 import { useRouter } from 'next/navigation'
 import { useEffect, useState, useRef } from 'react'
-import { parseGuestsList, generateImportTemplate, ParseSheetResult, parseCompanionsList } from '@/lib/utils/parseSheets'
+import { parseGuestsList, generateImportTemplate, ParseSheetResult } from '@/lib/utils/parseSheets'
 
 export default function ImportPage() {
     const { user, logout } = useAuth()
@@ -18,10 +18,20 @@ export default function ImportPage() {
     const [manualName, setManualName] = useState('')
     const [manualTelefone, setManualTelefone] = useState('')
     const [manualEmail, setManualEmail] = useState('')
-    const [manualCompanions, setManualCompanions] = useState('')
     const [manualRestricoes, setManualRestricoes] = useState('')
     const [manualGrupo, setManualGrupo] = useState('')
-    const [pendingGuest, setPendingGuest] = useState<{ name: string, telefone: string, email: string, companionsList: string[], restricoes: string, grupo: string } | null>(null)
+    const [manualCategory, setManualCategory] = useState('adult_paying')
+    
+    // Acompanhantes (5 posições)
+    const [manualCompanions, setManualCompanions] = useState<Array<{ name: string; category: string }>>([
+      { name: '', category: 'adult_paying' },
+      { name: '', category: 'adult_paying' },
+      { name: '', category: 'adult_paying' },
+      { name: '', category: 'adult_paying' },
+      { name: '', category: 'adult_paying' }
+    ])
+    
+    const [pendingGuest, setPendingGuest] = useState<{ name: string, telefone: string, email: string, companionsList: any[], restricoes: string, grupo: string, category: string } | null>(null)
 
     // File upload states
     const [isDragging, setIsDragging] = useState(false)
@@ -51,8 +61,14 @@ export default function ImportPage() {
             return
         }
 
-        // Separa acompanhantes aceitando múltiplos separadores
-        const companionsList = parseCompanionsList(manualCompanions)
+        // Filtra acompanhantes que têm nome preenchido
+        const companionsList = manualCompanions
+            .filter(c => c.name.trim())
+            .map(c => ({
+                name: c.name.trim(),
+                category: c.category as any,
+                isConfirmed: false
+            }))
 
         setPendingGuest({
             name: manualName,
@@ -60,7 +76,8 @@ export default function ImportPage() {
             email: manualEmail,
             companionsList,
             restricoes: manualRestricoes,
-            grupo: manualGrupo
+            grupo: manualGrupo,
+            category: manualCategory
         })
         setStep('review')
     }
@@ -74,7 +91,8 @@ export default function ImportPage() {
             telefone: pendingGuest.telefone,
             grupo: pendingGuest.grupo || undefined,
             companions: pendingGuest.companionsList.length,
-            companionsList: pendingGuest.companionsList.map(name => ({ name, isConfirmed: false }))
+            companionsList: pendingGuest.companionsList as any,
+            category: pendingGuest.category as any
         })
 
         setImportedCount(1 + pendingGuest.companionsList.length) // 1 titular + N acompanhantes
@@ -82,9 +100,16 @@ export default function ImportPage() {
         setManualName('')
         setManualTelefone('')
         setManualEmail('')
-        setManualCompanions('')
+        setManualCompanions([
+          { name: '', category: 'adult_paying' },
+          { name: '', category: 'adult_paying' },
+          { name: '', category: 'adult_paying' },
+          { name: '', category: 'adult_paying' },
+          { name: '', category: 'adult_paying' }
+        ])
         setManualRestricoes('')
         setManualGrupo('')
+        setManualCategory('adult_paying')
         setPendingGuest(null)
     }
 
@@ -101,10 +126,10 @@ export default function ImportPage() {
     }
 
     // --- MODEL DOWNLOAD ---
-    const handleDownloadModel = () => {
+    const handleDownloadModel = async () => {
         try {
-            const templateData = generateImportTemplate()
-            const blob = new Blob([new Uint8Array(templateData)], { 
+            const templateData = await generateImportTemplate()
+            const blob = new Blob([templateData], { 
                 type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' 
             })
             const url = URL.createObjectURL(blob)
@@ -434,14 +459,53 @@ export default function ImportPage() {
                                 </div>
 
                                 <div>
-                                    <label className="block text-xs font-medium text-textSecondary mb-1">Acompanhantes</label>
-                                    <input
-                                        type="text"
-                                        placeholder="Nomes separados por vírgula"
-                                        className="w-full px-4 py-3 rounded-lg border border-borderSoft focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder-textSecondary text-sm"
-                                        value={manualCompanions}
-                                        onChange={(e) => setManualCompanions(e.target.value)}
-                                    />
+                                    <label className="block text-xs font-medium text-textSecondary mb-1">Categoria</label>
+                                    <select
+                                        value={manualCategory}
+                                        onChange={(e) => setManualCategory(e.target.value)}
+                                        className="w-full px-4 py-3 rounded-lg border border-borderSoft focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm"
+                                    >
+                                        <option value="adult_paying">Adulto Pagante</option>
+                                        <option value="child_paying">Criança Pagante</option>
+                                        <option value="child_not_paying">Criança Não Pagante</option>
+                                    </select>
+                                </div>
+
+                                <div>
+                                    <label className="block text-xs font-medium text-textSecondary mb-3">Acompanhantes (até 5)</label>
+                                    <div className="space-y-3 bg-background/50 p-4 rounded-lg border border-borderSoft">
+                                        {manualCompanions.map((companion, idx) => (
+                                            <div key={idx} className="grid grid-cols-3 gap-3">
+                                                <div className="col-span-2">
+                                                    <input
+                                                        type="text"
+                                                        placeholder={`Acompanhante ${idx + 1}`}
+                                                        className="w-full px-3 py-2 rounded-lg border border-borderSoft focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder-textSecondary text-sm"
+                                                        value={companion.name}
+                                                        onChange={(e) => {
+                                                            const newCompanions = [...manualCompanions]
+                                                            newCompanions[idx].name = e.target.value
+                                                            setManualCompanions(newCompanions)
+                                                        }}
+                                                    />
+                                                </div>
+                                                <select
+                                                    value={companion.category}
+                                                    onChange={(e) => {
+                                                        const newCompanions = [...manualCompanions]
+                                                        newCompanions[idx].category = e.target.value
+                                                        setManualCompanions(newCompanions)
+                                                    }}
+                                                    className="px-3 py-2 rounded-lg border border-borderSoft focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all text-sm"
+                                                >
+                                                    <option value="adult_paying">Adulto</option>
+                                                    <option value="child_paying">Criança Pag.</option>
+                                                    <option value="child_not_paying">Criança N.Pag.</option>
+                                                </select>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <p className="text-xs text-textSecondary mt-2">Deixe em branco os acompanhantes que não será adicionar</p>
                                 </div>
 
                                 <div>
@@ -523,12 +587,20 @@ export default function ImportPage() {
                             {pendingGuest.companionsList.length > 0 && (
                                 <div className="p-4 bg-background rounded-lg border border-borderSoft">
                                     <p className="text-xs font-medium text-textSecondary mb-3">Acompanhantes ({pendingGuest.companionsList.length})</p>
-                                    <div className="flex flex-wrap gap-2">
-                                        {pendingGuest.companionsList.map((companion, idx) => (
-                                            <span key={idx} className="px-3 py-1 bg-primary/10 text-primary rounded-full text-sm font-medium">
-                                                {companion}
-                                            </span>
-                                        ))}
+                                    <div className="space-y-2">
+                                        {pendingGuest.companionsList.map((companion, idx) => {
+                                            const categoryLabels: Record<string, string> = {
+                                                'adult_paying': 'Adulto Pagante',
+                                                'child_paying': 'Criança Pagante',
+                                                'child_not_paying': 'Criança Não Pagante'
+                                            }
+                                            return (
+                                                <div key={idx} className="flex items-center justify-between px-3 py-2 bg-primary/5 rounded-lg">
+                                                    <span className="text-sm font-medium text-textPrimary">{companion.name}</span>
+                                                    <span className="text-xs px-2 py-1 bg-primary/10 text-primary rounded-full">{categoryLabels[companion.category] || 'Adulto Pagante'}</span>
+                                                </div>
+                                            )
+                                        })}
                                     </div>
                                 </div>
                             )}

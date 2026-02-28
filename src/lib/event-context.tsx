@@ -4,9 +4,12 @@ import { createContext, useContext, useState, ReactNode, useEffect } from 'react
 
 export type GuestStatus = 'confirmed' | 'pending' | 'declined'
 
+export type GuestCategory = 'adult_paying' | 'child_paying' | 'child_not_paying'
+
 export type Companion = {
     name: string
     isConfirmed: boolean
+    category?: GuestCategory
 }
 
 export type Guest = {
@@ -18,6 +21,7 @@ export type Guest = {
     companions: number // Mantém compatibilidade visual como "max allowed"
     companionsList: Companion[] // Lista real de nomes
     status: GuestStatus
+    category: GuestCategory // Categoria do convidado principal
     updatedAt: Date
     confirmedAt?: Date // Data quando foi confirmado
 }
@@ -63,8 +67,8 @@ const EventContext = createContext<EventContextType | undefined>(undefined)
 
 // Dados iniciais de exemplo adaptados
 const INITIAL_GUESTS: Guest[] = [
-    { id: '1', name: 'Roberto Almeida', email: 'roberto@email.com', companions: 0, companionsList: [], status: 'confirmed', updatedAt: new Date() },
-    { id: '2', name: 'Carlos & Família', email: 'carlos@email.com', companions: 2, companionsList: [{ name: 'Ana', isConfirmed: true }, { name: 'Junior', isConfirmed: true }], status: 'confirmed', updatedAt: new Date() },
+    { id: '1', name: 'Roberto Almeida', email: 'roberto@email.com', companions: 0, companionsList: [], status: 'confirmed', category: 'adult_paying', updatedAt: new Date() },
+    { id: '2', name: 'Carlos & Família', email: 'carlos@email.com', companions: 2, companionsList: [{ name: 'Ana', isConfirmed: true }, { name: 'Junior', isConfirmed: true }], status: 'confirmed', category: 'adult_paying', updatedAt: new Date() },
 ]
 
 // Configurações padrão do evento

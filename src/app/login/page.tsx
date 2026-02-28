@@ -12,18 +12,12 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-[calc(100vh-80px)] items-center justify-center py-12 px-6 lg:px-8">
       <div className="w-full max-w-md space-y-8">
-        {/* ADMIN HINT */}
-        <div className="bg-purple-50 border border-purple-200 rounded-lg p-4 text-center">
-          <p className="text-xs font-medium text-purple-700 uppercase tracking-wide">🔐 Acesso Admin</p>
-          <p className="text-xs text-purple-600 mt-2">Utilise as credenciais de administrador para gerenciar todos os eventos</p>
-        </div>
-
-        <div className="bg-surface p-10 rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-borderSoft space-y-8">
+        <div className="bg-white p-10 rounded-2xl shadow-xl border border-brand/10 space-y-8">
           <div className="text-center">
-            <h2 className="text-3xl font-serif text-textPrimary tracking-tight">
+            <h2 className="text-3xl font-black text-slate-800 tracking-tight">
               Bem-vindo
             </h2>
-            <p className="mt-2 text-sm text-textSecondary uppercase tracking-widest">
+            <p className="mt-2 text-[10px] text-slate-400 uppercase tracking-widest font-black">
               Acesse sua conta para continuar
             </p>
           </div>
@@ -31,7 +25,7 @@ export default function LoginPage() {
           <form className="mt-8 space-y-6" onSubmit={(e) => { e.preventDefault(); login(email, password); }}>
             <div className="space-y-5">
               <div>
-                <label htmlFor="email" className="block text-sm font-medium text-textPrimary mb-1.5">
+                <label htmlFor="email" className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-1.5 block">
                   E-mail
                 </label>
                 <input
@@ -42,13 +36,13 @@ export default function LoginPage() {
                   required
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  className="block w-full rounded-lg border-borderSoft bg-background text-textPrimary px-4 py-3 placeholder-textSecondary/50 focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all duration-200 sm:text-sm"
+                  className="w-full px-4 py-4 bg-slate-50 border-none rounded-xl text-sm font-bold focus:ring-2 focus:ring-brand/20 shadow-inner text-slate-700 transition-all outline-none placeholder:text-slate-400"
                   placeholder="seu@email.com"
                 />
               </div>
 
               <div>
-                <label htmlFor="password" className="block text-sm font-medium text-textPrimary mb-1.5">
+                <label htmlFor="password" className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 mb-1.5 block">
                   Senha
                 </label>
                 <input
@@ -59,7 +53,7 @@ export default function LoginPage() {
                   required
                   value={password}
                   onChange={e => setPassword(e.target.value)}
-                  className="block w-full rounded-lg border-borderSoft bg-background text-textPrimary px-4 py-3 placeholder-textSecondary/50 focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all duration-200 sm:text-sm"
+                  className="w-full px-4 py-4 bg-slate-50 border-none rounded-xl text-sm font-bold focus:ring-2 focus:ring-brand/20 shadow-inner text-slate-700 transition-all outline-none placeholder:text-slate-400"
                   placeholder="••••••••"
                 />
               </div>
@@ -68,7 +62,7 @@ export default function LoginPage() {
             <div>
               <button
                 type="submit"
-                className="w-full flex justify-center py-3.5 px-4 border border-transparent rounded-lg text-sm font-medium text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2 transition-all duration-300 shadow-lg shadow-primary/20 transform hover:-translate-y-0.5"
+                className="w-full flex justify-center py-4 px-4 rounded-xl text-sm font-bold text-white bg-brand hover:bg-brand/90 transition-all duration-300 shadow-lg shadow-brand/20 transform hover:-translate-y-1"
               >
                 Entrar no Painel
               </button>
@@ -76,9 +70,9 @@ export default function LoginPage() {
           </form>
 
           <div className="mt-6 text-center">
-            <p className="text-sm text-textSecondary">
+            <p className="text-sm text-slate-500 font-medium">
               Ainda não tem uma conta?{' '}
-              <Link href="/register" className="font-semibold text-primary hover:text-primary/80 transition-colors uppercase text-xs tracking-wide">
+              <Link href="/register" className="font-black text-brand hover:text-brand/80 transition-colors uppercase text-[10px] tracking-widest">
                 Criar Evento
               </Link>
             </p>

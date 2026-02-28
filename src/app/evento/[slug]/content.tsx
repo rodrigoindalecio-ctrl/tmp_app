@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useParams } from 'next/navigation'
-import { useEvent, Guest, GuestStatus, Companion } from '@/lib/event-context'
+import { useEvent, Guest, GuestStatus, Companion, GuestCategory } from '@/lib/event-context'
 import { formatDate } from '@/lib/date-utils'
 import Image from 'next/image'
 
@@ -72,6 +72,8 @@ export default function PublicRSVPPageContent() {
     const [guestEmail, setGuestEmail] = useState('')
     const [emailError, setEmailError] = useState('')
     const [isSendingEmail, setIsSendingEmail] = useState(false)
+    const [guestMainCategory, setGuestMainCategory] = useState<GuestCategory>('adult_paying')
+    const [guestCompanionCategories, setGuestCompanionCategories] = useState<GuestCategory[]>([])
 
     // Verifica se o prazo já venceu
     // Adicionamos o final do dia (23:59:59) para garantir que o dia do prazo ainda seja válido
@@ -221,15 +223,15 @@ export default function PublicRSVPPageContent() {
 
                     {isExpired && step !== 'SUCCESS' ? (
                         <div className="text-center py-10 animate-in fade-in zoom-in-95 duration-500">
-                            <div className="flex justify-center mb-6 text-textSecondary opacity-60">
+                            <div className="flex justify-center mb-6 text-slate-400 opacity-60">
                                 <ExpirationIcon />
                             </div>
-                            <h3 className="text-2xl font-serif font-light text-textPrimary mb-3">
+                            <h3 className="text-2xl font-black text-slate-800 tracking-tight mb-3">
                                 Prazo Encerrado
                             </h3>
-                            <p className="text-textSecondary text-sm leading-relaxed max-w-sm mx-auto">
+                            <p className="text-slate-500 text-sm leading-relaxed max-w-sm mx-auto font-medium">
                                 Sentimos muito, mas o prazo para confirmação de presença (RSVP) encerrou no dia {' '}
-                                <span className="font-semibold">
+                                <span className="font-bold">
                                     {new Date(eventSettings.confirmationDeadline + 'T12:00:00').toLocaleDateString('pt-BR')}
                                 </span>.
                                 <br />
@@ -240,28 +242,28 @@ export default function PublicRSVPPageContent() {
                         <div className="relative animate-in fade-in zoom-in-95 duration-300 max-w-md mx-auto">
                             <form onSubmit={handleSearch} className="space-y-6">
                                 <div>
-                                    <label htmlFor="search" className="block text-sm font-medium text-textSecondary text-center mb-6">
+                                    <label htmlFor="search" className="block text-[10px] uppercase tracking-widest font-black text-slate-400 text-center mb-6">
                                         Digite seu nome e sobrenome completos
                                     </label>
                                     <input
                                         id="search"
                                         type="text"
                                         required
-                                        className="block w-full rounded-2xl border-borderSoft bg-background/50 text-center text-lg py-5 px-4 placeholder:text-textSecondary/50 focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all"
+                                        className="block w-full rounded-2xl bg-slate-50 text-center text-lg py-5 px-4 font-bold text-slate-700 shadow-inner focus:ring-2 focus:ring-brand/20 outline-none transition-all placeholder:text-slate-400"
                                         placeholder="Ex: Roberto Silva"
                                         value={searchTerm}
                                         onChange={e => setSearchTerm(e.target.value)}
                                         autoFocus
                                     />
                                     {error && (
-                                        <p className="mt-3 text-sm text-danger text-center animate-in shake">
+                                        <p className="mt-3 text-sm text-danger text-center animate-in shake font-bold">
                                             {error}
                                         </p>
                                     )}
                                 </div>
                                 <button
                                     type="submit"
-                                    className="w-full flex justify-center py-5 px-4 border border-transparent rounded-[2rem] text-sm font-semibold tracking-wide text-white bg-primary hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary shadow-xl shadow-primary/20 transition-all hover:-translate-y-0.5"
+                                    className="w-full flex justify-center py-5 px-4 rounded-[2rem] text-sm font-black uppercase tracking-widest text-white bg-brand hover:bg-brand/90 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-brand shadow-xl shadow-brand/20 transition-all hover:-translate-y-1"
                                 >
                                     Buscar Convite
                                 </button>
@@ -272,22 +274,24 @@ export default function PublicRSVPPageContent() {
                     {step === 'CONFIRM' && foundGuest && (
                         <div className="animate-in fade-in slide-in-from-bottom-8 duration-500">
                             <div className="flex flex-col items-center mb-8">
-                                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-6">
+                                <div className="w-16 h-16 bg-brand/10 rounded-full flex items-center justify-center mb-6">
                                     <UsersIcon />
                                 </div>
-                                <h2 className="text-2xl font-serif font-light text-textPrimary text-center mb-2">
+                                <h2 className="text-2xl font-black text-slate-800 tracking-tight text-center mb-2">
                                     Quem vai comparecer?
                                 </h2>
-                                <p className="text-sm text-textSecondary text-center">
+                                <p className="text-sm font-bold text-slate-400 uppercase tracking-widest text-center">
                                     Selecione todos que irão ao evento
                                 </p>
                             </div>
 
                             <CompanionsSelectionForm
                                 guest={foundGuest}
-                                onConfirm={(updatedList) => {
+                                onConfirm={(updatedList, mainCat, companionCats) => {
                                     updateGuestCompanions(foundGuest.id, updatedList)
                                     updateGuestStatus(foundGuest.id, 'confirmed')
+                                    setGuestMainCategory(mainCat || foundGuest.category)
+                                    setGuestCompanionCategories(companionCats || [])
                                     setStep('EMAIL')
                                     setGuestEmail('')
                                     setEmailError('')
@@ -304,16 +308,16 @@ export default function PublicRSVPPageContent() {
                     {step === 'EMAIL' && foundGuest && (
                         <div className="animate-in fade-in slide-in-from-bottom-8 duration-500 max-w-md mx-auto">
                             <div className="flex flex-col items-center mb-8">
-                                <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mb-6">
-                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-primary">
+                                <div className="w-16 h-16 bg-brand/10 rounded-full flex items-center justify-center mb-6">
+                                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-brand">
                                         <rect width="20" height="16" x="2" y="4" rx="2" />
                                         <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
                                     </svg>
                                 </div>
-                                <h2 className="text-2xl font-serif font-light text-textPrimary text-center mb-2">
+                                <h2 className="text-2xl font-black text-slate-800 tracking-tight text-center mb-2">
                                     Enviar Detalhes do Evento
                                 </h2>
-                                <p className="text-sm text-textSecondary text-center">
+                                <p className="text-sm font-bold text-slate-400 uppercase tracking-widest text-center">
                                     Insira seu email para receber as informações do evento
                                 </p>
                             </div>
@@ -321,7 +325,7 @@ export default function PublicRSVPPageContent() {
                             <form onSubmit={(e) => {
                                 e.preventDefault()
                                 setEmailError('')
-                                
+
                                 // Validação de email
                                 const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
                                 if (!guestEmail.trim()) {
@@ -334,10 +338,16 @@ export default function PublicRSVPPageContent() {
                                 }
 
                                 setIsSendingEmail(true)
-                                
-                                // Construir lista de confirmados (Principal + Acompanhantes)
-                                const confirmedNames = [foundGuest.name, ...foundGuest.companionsList.filter(c => c.isConfirmed).map(c => c.name)].filter(n => n)
-                                
+
+                                // Construir lista de confirmados (Principal + Acompanhantes) com categorias
+                                const confirmedDetails = [
+                                    { name: foundGuest.name, category: guestMainCategory },
+                                    ...foundGuest.companionsList
+                                        .map((c, idx) => ({ name: c.name, category: guestCompanionCategories[idx], isConfirmed: c.isConfirmed }))
+                                        .filter(c => c.isConfirmed)
+                                ]
+                                const confirmedNames = confirmedDetails.map(c => c.name)
+
                                 // Enviar email
                                 fetch('/api/send-confirmation-email', {
                                     method: 'POST',
@@ -347,7 +357,8 @@ export default function PublicRSVPPageContent() {
                                         guestName: foundGuest.name,
                                         eventSettings: eventSettings,
                                         confirmedCompanions: foundGuest.companionsList.filter(c => c.isConfirmed).length + 1,
-                                        confirmedNames: confirmedNames
+                                        confirmedNames: confirmedNames,
+                                        confirmedDetails: confirmedDetails
                                     })
                                 }).then(() => {
                                     setIsSendingEmail(false)
@@ -361,7 +372,7 @@ export default function PublicRSVPPageContent() {
                                     <input
                                         type="email"
                                         required
-                                        className="block w-full rounded-2xl border-borderSoft bg-background/50 text-center text-lg py-4 px-4 placeholder:text-textSecondary/50 focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all"
+                                        className="block w-full rounded-2xl bg-slate-50 text-center text-lg py-4 px-4 font-bold text-slate-700 shadow-inner focus:ring-2 focus:ring-brand/20 outline-none transition-all placeholder:text-slate-400"
                                         placeholder="seu@email.com"
                                         value={guestEmail}
                                         onChange={e => setGuestEmail(e.target.value)}
@@ -369,7 +380,7 @@ export default function PublicRSVPPageContent() {
                                         autoFocus
                                     />
                                     {emailError && (
-                                        <p className="mt-2 text-sm text-danger text-center">
+                                        <p className="mt-2 text-sm text-danger text-center font-bold">
                                             {emailError}
                                         </p>
                                     )}
@@ -378,7 +389,7 @@ export default function PublicRSVPPageContent() {
                                 <button
                                     type="submit"
                                     disabled={isSendingEmail}
-                                    className="w-full py-4 rounded-[2rem] bg-primary text-white font-semibold tracking-wide hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed shadow-xl shadow-primary/20 transition-all"
+                                    className="w-full py-4 rounded-[2rem] bg-brand text-white font-black uppercase tracking-widest text-sm hover:bg-brand/90 disabled:opacity-50 disabled:cursor-not-allowed shadow-xl shadow-brand/20 transition-all"
                                 >
                                     {isSendingEmail ? 'Enviando...' : 'Enviar Confirmação'}
                                 </button>
@@ -386,7 +397,7 @@ export default function PublicRSVPPageContent() {
                                 <button
                                     type="button"
                                     onClick={() => setStep('SUCCESS')}
-                                    className="w-full text-xs text-textSecondary/50 hover:text-primary transition-colors pt-2"
+                                    className="w-full text-xs font-bold text-slate-300 hover:text-brand transition-colors pt-2 uppercase tracking-widest"
                                 >
                                     Pular esta etapa
                                 </button>
@@ -397,18 +408,18 @@ export default function PublicRSVPPageContent() {
                     {step === 'SUCCESS' && (
                         <div className="text-center space-y-6 animate-in zoom-in-95 duration-500 py-4">
 
-                            <h3 className="text-3xl font-serif font-light text-textPrimary">
+                            <h3 className="text-3xl font-black text-slate-800 tracking-tight">
                                 Resposta Recebida!
                             </h3>
 
-                            <p className="text-textSecondary leading-relaxed px-4">
+                            <p className="text-slate-500 leading-relaxed px-4 font-bold text-sm">
                                 Obrigado por confirmar. Sua resposta foi enviada com sucesso para os organizadores.
                             </p>
 
                             <div className="pt-10">
                                 <button
                                     onClick={() => { setStep('SEARCH'); setSearchTerm(''); setFoundGuest(null); }}
-                                    className="px-8 py-4 bg-background text-textPrimary rounded-full text-sm font-medium hover:bg-borderSoft transition-colors"
+                                    className="px-8 py-4 bg-slate-100 text-slate-600 rounded-full text-xs font-black uppercase tracking-widest hover:bg-slate-200 transition-colors"
                                 >
                                     Tudo bem!
                                 </button>
@@ -418,7 +429,7 @@ export default function PublicRSVPPageContent() {
                 </div>
 
                 <div className="text-center mt-12 pb-8">
-                    <p className="text-[0.65rem] font-sans font-medium tracking-[0.2em] text-textSecondary/50 uppercase">
+                    <p className="text-[0.65rem] font-sans font-black tracking-widest text-slate-300 uppercase">
                         Powered by RSVP Manager
                     </p>
                 </div>
@@ -429,7 +440,7 @@ export default function PublicRSVPPageContent() {
 
 function CompanionsSelectionForm({ guest, onConfirm, onDeclineAll, onBack }: {
     guest: Guest,
-    onConfirm: (updatedCompanions: Companion[]) => void,
+    onConfirm: (updatedCompanions: Companion[], mainCategory?: GuestCategory, companionCategories?: GuestCategory[]) => void,
     onDeclineAll: () => void,
     onBack: () => void
 }) {
@@ -437,10 +448,14 @@ function CompanionsSelectionForm({ guest, onConfirm, onDeclineAll, onBack }: {
     const [isMainConfirmed, setIsMainConfirmed] = useState<boolean>(
         guest.status === 'pending' || guest.status === 'confirmed'
     )
+    const [mainCategory, setMainCategory] = useState<GuestCategory>(guest.category || 'adult_paying')
     const [confirmedCompanions, setConfirmedCompanions] = useState<boolean[]>(
         guest.status === 'pending'
             ? guest.companionsList.map(() => true)
             : guest.companionsList.map(c => c.isConfirmed)
+    )
+    const [companionCategories, setCompanionCategories] = useState<GuestCategory[]>(
+        guest.companionsList.map(c => c.category || 'adult_paying')
     )
 
     const toggleCompanion = (index: number) => {
@@ -454,44 +469,88 @@ function CompanionsSelectionForm({ guest, onConfirm, onDeclineAll, onBack }: {
         // mas marcamos os acompanhantes conforme seleção.
         const updatedList = guest.companionsList.map((c: Companion, idx: number) => ({
             ...c,
-            isConfirmed: confirmedCompanions[idx]
+            isConfirmed: confirmedCompanions[idx],
+            category: companionCategories[idx]
         }))
-        onConfirm(updatedList)
+        // Passar também mainCategory e companionCategories para que possam ser usados no email
+        onConfirm(updatedList, mainCategory, companionCategories)
     }
 
     return (
         <div className="space-y-4 max-w-sm mx-auto">
-            <div className="space-y-3">
+            <div className="space-y-4">
                 {/* TITULAR CARD */}
-                <div
-                    onClick={() => setIsMainConfirmed(!isMainConfirmed)}
-                        className={`flex items-center justify-between p-5 rounded-2xl border transition-all cursor-pointer group ${isMainConfirmed ? 'bg-primary/10 border-primary/30' : 'bg-surface border-borderSoft'}`}
+                <div className={`p-6 rounded-2xl border-2 transition-all group ${isMainConfirmed ? 'bg-brand/5 border-brand/20 shadow-sm' : 'bg-slate-50 border-slate-100 opacity-70'}`}>
+                    <div
+                        onClick={() => setIsMainConfirmed(!isMainConfirmed)}
+                        className="flex items-center justify-between pb-4 cursor-pointer"
                     >
                         <div className="flex items-center gap-4">
                             <CheckCircleIcon checked={isMainConfirmed} />
                             <div>
-                                <p className="font-semibold text-textPrimary leading-tight">{guest.name}</p>
-                                <p className="text-xs text-textSecondary mt-0.5">Convidado Principal</p>
+                                <p className="font-black text-slate-800 leading-tight">{guest.name}</p>
+                                <p className="text-[10px] uppercase tracking-widest font-bold text-slate-400 mt-1">Convidado Principal</p>
                             </div>
                         </div>
                         <HeartIconSmall filled={isMainConfirmed} />
                     </div>
+                    {isMainConfirmed && (
+                        <div className="pt-4 border-t border-brand/10">
+                            <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">
+                                Categoria
+                            </label>
+                            <select
+                                value={mainCategory}
+                                onChange={(e) => setMainCategory(e.target.value as GuestCategory)}
+                                className="w-full rounded-xl bg-white border-2 border-slate-100 px-4 py-3 text-sm font-bold text-slate-700 shadow-inner focus:border-brand/30 focus:ring-2 focus:ring-brand/10 outline-none transition-all cursor-pointer"
+                            >
+                                <option value="adult_paying">Adulto Pagante</option>
+                                <option value="child_paying">Criança Pagante</option>
+                                <option value="child_not_paying">Criança Não Pagante</option>
+                            </select>
+                        </div>
+                    )}
+                </div>
 
                 {/* COMPANIONS CARDS */}
                 {guest.companionsList.map((comp: Companion, idx: number) => (
                     <div
                         key={idx}
-                        onClick={() => toggleCompanion(idx)}
-                        className={`flex items-center justify-between p-5 rounded-2xl border transition-all cursor-pointer group ${confirmedCompanions[idx] ? 'bg-primary/10 border-primary/30 shadow-sm' : 'bg-surface border-borderSoft opacity-70 hover:opacity-100 hover:border-primary/20'}`}
+                        className={`p-6 rounded-2xl border-2 transition-all group ${confirmedCompanions[idx] ? 'bg-brand/5 border-brand/20 shadow-sm' : 'bg-slate-50 border-slate-100 opacity-60 hover:opacity-100'}`}
                     >
-                        <div className="flex items-center gap-4">
-                            <CheckCircleIcon checked={confirmedCompanions[idx]} />
-                            <div>
-                                <p className="font-semibold text-textPrimary leading-tight">{comp.name}</p>
-                                <p className="text-xs text-textSecondary mt-0.5">Acompanhante</p>
+                        <div
+                            onClick={() => toggleCompanion(idx)}
+                            className="flex items-center justify-between pb-4 cursor-pointer"
+                        >
+                            <div className="flex items-center gap-4">
+                                <CheckCircleIcon checked={confirmedCompanions[idx]} />
+                                <div>
+                                    <p className="font-black text-slate-800 leading-tight">{comp.name}</p>
+                                    <p className="text-[10px] uppercase tracking-widest font-bold text-slate-400 mt-1">Acompanhante</p>
+                                </div>
                             </div>
+                            <HeartIconSmall filled={confirmedCompanions[idx]} />
                         </div>
-                        <HeartIconSmall filled={confirmedCompanions[idx]} />
+                        {confirmedCompanions[idx] && (
+                            <div className="pt-4 border-t border-brand/10">
+                                <label className="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-2 ml-1">
+                                    Categoria
+                                </label>
+                                <select
+                                    value={companionCategories[idx]}
+                                    onChange={(e) => {
+                                        const newCategories = [...companionCategories]
+                                        newCategories[idx] = e.target.value as GuestCategory
+                                        setCompanionCategories(newCategories)
+                                    }}
+                                    className="w-full rounded-xl bg-white border-2 border-slate-100 px-4 py-3 text-sm font-bold text-slate-700 shadow-inner focus:border-brand/30 focus:ring-2 focus:ring-brand/10 outline-none transition-all cursor-pointer"
+                                >
+                                    <option value="adult_paying">Adulto Pagante</option>
+                                    <option value="child_paying">Criança Pagante</option>
+                                    <option value="child_not_paying">Criança Não Pagante</option>
+                                </select>
+                            </div>
+                        )}
                     </div>
                 ))}
             </div>
@@ -499,21 +558,21 @@ function CompanionsSelectionForm({ guest, onConfirm, onDeclineAll, onBack }: {
             <div className="pt-8 space-y-4">
                 <button
                     onClick={handleConfirmClick}
-                    className="w-full py-5 rounded-[2rem] bg-primary text-white font-semibold tracking-wide hover:bg-primary/90 shadow-xl shadow-primary/20 transition-all flex items-center justify-center gap-2"
+                    className="w-full py-5 rounded-[2rem] bg-brand text-white font-black uppercase text-sm tracking-widest hover:bg-brand/90 shadow-xl shadow-brand/20 transition-all flex items-center justify-center gap-2 hover:-translate-y-1"
                 >
                     <HeartIconSmall filled /> Confirmar presença
                 </button>
 
                 <button
                     onClick={onDeclineAll}
-                    className="w-full py-3 text-sm font-medium text-textSecondary hover:text-danger transition-colors flex items-center justify-center gap-2"
+                    className="w-full py-4 rounded-[2rem] bg-white border-2 border-slate-100 text-[10px] font-black uppercase tracking-widest text-rose-500 hover:bg-rose-50 hover:border-rose-100 transition-colors flex items-center justify-center gap-2"
                 >
                     <XIcon /> Não poderei comparecer
                 </button>
 
                 <button
                     onClick={onBack}
-                    className="w-full text-xs text-textSecondary/50 hover:text-primary transition-colors pt-4"
+                    className="w-full text-[10px] font-black uppercase tracking-widest text-slate-300 hover:text-brand transition-colors pt-4"
                 >
                     ← Buscar outro nome
                 </button>

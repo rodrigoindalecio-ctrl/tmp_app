@@ -1,40 +1,30 @@
 @import "tailwindcss";
-
-@font-face {
-  font-family: 'Arabella';
-  src: url('/Arabella.ttf') format('truetype');
-}
-
-@font-face {
-  font-family: 'Impara';
-  src: url('/Impara-ExtraBold.otf') format('opentype');
-}
+@import url('https://fonts.googleapis.com/css2?family=Manrope:wght@200..800&display=swap');
 
 @theme {
-  --color-brand: #6D191F;
-  --color-primary: #C6A664;
-  --color-primary-soft: #EFE7D8;
+  --color-brand: #883545;
+  --color-primary: #883545;
+  --color-primary-soft: color-mix(in srgb, var(--color-brand) 10%, transparent); /* #883545/10 */
 
-  --color-background: #FAFAF8;
-  --color-surface: #FFFFFF;
+  --color-background: #f8fafc; /* slate-50 */
+  --color-surface: #ffffff; /* white */
 
-  --color-text-primary: #2E2E2E;
-  --color-text-secondary: #6B6B6B;
+  --color-text-primary: #1e293b; /* slate-800 */
+  --color-text-secondary: #64748b; /* slate-500 */
+  --color-text-muted: #94a3b8; /* slate-400 */
 
-  --color-border-soft: #E6E2DC;
+  --color-border-soft: color-mix(in srgb, var(--color-brand) 10%, transparent); /* border-[#883545]/10 */
 
-  --color-success: #4CAF50;
-  --color-warning: #F2B705;
-  --color-danger: #E74C3C;
+  --color-success: #10b981; /* emerald-500 */
+  --color-warning: #f59e0b; /* amber-500 */
+  --color-danger: #f43f5e; /* rose-500 */
 
-  --font-serif: var(--font-playfair), ui-serif, Georgia, Cambria, "Times New Roman", Times, serif;
-  --font-sans: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
-  --font-arabella: 'Arabella', cursive;
-  --font-impara: 'Impara', sans-serif;
+  --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 
 @layer base {
   body {
+    font-family: var(--font-sans);
     background-color: var(--color-background);
     color: var(--color-text-primary);
   }

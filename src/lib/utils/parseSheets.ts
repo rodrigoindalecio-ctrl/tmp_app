@@ -40,6 +40,7 @@ export interface RawGuestRow {
 export interface ParsedGuest extends Omit<Guest, 'id' | 'status' | 'updatedAt'> {
   telefone: string // Para detecção de duplicidade
   grupo?: string
+  category: any // Será 'adult_paying' | 'child_paying' | 'child_not_paying'
 }
 
 export interface ImportError {
@@ -69,7 +70,8 @@ export const OPTIONAL_COLUMNS = {
   email: 'Email',
   acompanhantes: 'Acompanhantes',
   restricoes: 'Restrições Alimentares',
-  grupo: 'Grupo'
+  grupo: 'Grupo',
+  categoria: 'Categoria'
 }
 
 // ==========================================
@@ -182,10 +184,43 @@ function processRows(rows: RawGuestRow[]): ParseSheetResult {
     }
     processedPhones.add(duplicateKey)
 
-    // Parse acompanhantes
-    const acompanhantesStr = normalizedRow['acompanhantes'] || ''
-    const companionsList = parseCompanionsList(acompanhantesStr)
-      .map((name: string) => ({ name, isConfirmed: false }))
+    // Parse acompanhantes (5 colunas de nomes + 5 colunas de categorias)
+    const companionsList: any[] = []
+    for (let i = 1; i <= 5; i++) {
+      const nameKey = `acompanhante${i}`
+      const categoryKey = `categoriaacomp${i}`
+      const companionName = normalizedRow[nameKey] || ''
+      const companionCategoryStr = normalizedRow[categoryKey] || 'adulto pagante'
+
+      if (companionName.trim()) {
+        // Parse categoria do acompanhante
+        let companionCategory = 'adult_paying' // Default
+        if (companionCategoryStr.toLowerCase().includes('criança') && companionCategoryStr.toLowerCase().includes('não')) {
+          companionCategory = 'child_not_paying'
+        } else if (companionCategoryStr.toLowerCase().includes('criança')) {
+          companionCategory = 'child_paying'
+        } else {
+          companionCategory = 'adult_paying'
+        }
+
+        companionsList.push({
+          name: companionName.trim(),
+          isConfirmed: false,
+          category: companionCategory as any
+        })
+      }
+    }
+
+    // Parse categoria (validar e converter)
+    const categoriaStr = normalizedRow['categoria'] || 'adulto pagante'
+    let category = 'adult_paying' // Default
+    if (categoriaStr.toLowerCase().includes('criança') && categoriaStr.toLowerCase().includes('não')) {
+      category = 'child_not_paying'
+    } else if (categoriaStr.toLowerCase().includes('criança')) {
+      category = 'child_paying'
+    } else {
+      category = 'adult_paying'
+    }
 
     // Montar guest
     const guest: ParsedGuest = {
@@ -195,6 +230,7 @@ function processRows(rows: RawGuestRow[]): ParseSheetResult {
       companionsList,
       telefone,
       grupo: normalizedRow['grupo'] || undefined,
+      category: category,
       // status, id, updatedAt serão adicionados pelo context
     }
 
@@ -315,51 +351,210 @@ export function detectDuplicatesWithExisting(
  * Gera planilha modelo para download
  * Sem status (importação)
  */
-export function generateImportTemplate(): Uint8Array {
+export async function generateImportTemplate(): Promise<Uint8Array> {
+  // Dynamic import para evitar problemas no servidor
+  const ExcelJS = (await import('exceljs')).default
+
+  const workbook = new ExcelJS.Workbook()
+  const worksheet = workbook.addWorksheet('Convidados')
+
+  // Definir colunas com width
+  // Ordem ajustada: Nome Principal, Categoria, Telefone, Email, Restrições, Grupo, Acompanhantes...
+  worksheet.columns = [
+    { header: 'Nome Principal', key: 'nomeprincipal', width: 25 },
+    { header: 'Categoria', key: 'categoria', width: 20 },
+    { header: 'Telefone', key: 'telefone', width: 18 },
+    { header: 'Email', key: 'email', width: 25 },
+    { header: 'Restrições Alimentares', key: 'restricoes', width: 25 },
+    { header: 'Grupo', key: 'grupo', width: 20 },
+    { header: 'Acompanhante 1', key: 'acompanhante1', width: 20 },
+    { header: 'Categoria Acomp. 1', key: 'categoriaacomp1', width: 18 },
+    { header: 'Acompanhante 2', key: 'acompanhante2', width: 20 },
+    { header: 'Categoria Acomp. 2', key: 'categoriaacomp2', width: 18 },
+    { header: 'Acompanhante 3', key: 'acompanhante3', width: 20 },
+    { header: 'Categoria Acomp. 3', key: 'categoriaacomp3', width: 18 },
+    { header: 'Acompanhante 4', key: 'acompanhante4', width: 20 },
+    { header: 'Categoria Acomp. 4', key: 'categoriaacomp4', width: 18 },
+    { header: 'Acompanhante 5', key: 'acompanhante5', width: 20 },
+    { header: 'Categoria Acomp. 5', key: 'categoriaacomp5', width: 18 }
+  ]
+
+  // Estilo do header
+  const headerStyle = {
+    fill: {
+      type: 'pattern' as const,
+      pattern: 'solid' as const,
+      fgColor: { argb: 'FFD946A6' } // Rosa escuro (match com tema)
+    },
+    font: {
+      bold: true,
+      color: { argb: 'FFFFFFFF' }, // Branco
+      size: 12,
+      name: 'Calibri'
+    },
+    alignment: {
+      horizontal: 'center' as const,
+      vertical: 'middle' as const,
+      wrapText: true
+    },
+    border: {
+      top: { style: 'thin' as const, color: { argb: 'FFA93878' } },
+      left: { style: 'thin' as const, color: { argb: 'FFA93878' } },
+      bottom: { style: 'thin' as const, color: { argb: 'FFA93878' } },
+      right: { style: 'thin' as const, color: { argb: 'FFA93878' } }
+    }
+  }
+
+  // Aplicar estilo ao header
+  const headerRow = worksheet.getRow(1)
+  headerRow.height = 42
+  headerRow.eachCell((cell: any) => {
+    cell.fill = headerStyle.fill
+    cell.font = headerStyle.font
+    cell.alignment = headerStyle.alignment
+    cell.border = headerStyle.border
+  })
+
+  // Estilo das células de dados
+  const cellStyle = {
+    fill: {
+      type: 'pattern' as const,
+      pattern: 'solid' as const,
+      fgColor: { argb: 'FFFAFAF8' } // Cinza muito claro
+    },
+    alignment: {
+      horizontal: 'left' as const,
+      vertical: 'center' as const,
+      wrapText: false
+    },
+    border: {
+      top: { style: 'thin' as const, color: { argb: 'FFF0F0F0' } },
+      left: { style: 'thin' as const, color: { argb: 'FFF0F0F0' } },
+      bottom: { style: 'thin' as const, color: { argb: 'FFF0F0F0' } },
+      right: { style: 'thin' as const, color: { argb: 'FFF0F0F0' } }
+    },
+    font: {
+      size: 11,
+      name: 'Calibri'
+    }
+  }
+
+  // Adicionar dados de exemplo
   const templateData = [
     {
-      'Nome Principal': 'Roberto Silva',
-      'Telefone': '11987654321',
-      'Email': 'roberto@email.com',
-      'Acompanhantes': 'Maria Silva;João Silva',
-      'Restrições Alimentares': '-',
-      'Grupo': 'Família Silva'
+      nomeprincipal: 'Roberto Silva',
+      telefone: '11987654321',
+      email: 'roberto@email.com',
+      categoria: 'Adulto Pagante',
+      acompanhante1: 'Maria Silva',
+      categoriaacomp1: 'Adulto Pagante',
+      acompanhante2: 'João Silva',
+      categoriaacomp2: 'Criança Pagante',
+      acompanhante3: '',
+      categoriaacomp3: '',
+      acompanhante4: '',
+      categoriaacomp4: '',
+      acompanhante5: '',
+      categoriaacomp5: '',
+      restricoes: '-',
+      grupo: 'Família Silva'
     },
     {
-      'Nome Principal': 'Ana Souza',
-      'Telefone': '11998765432',
-      'Email': 'ana@email.com',
-      'Acompanhantes': '',
-      'Restrições Alimentares': 'Vegetariana',
-      'Grupo': 'Ana + Esposo'
+      nomeprincipal: 'Ana Souza',
+      telefone: '11998765432',
+      email: 'ana@email.com',
+      categoria: 'Criança Não Pagante',
+      acompanhante1: '',
+      categoriaacomp1: '',
+      acompanhante2: '',
+      categoriaacomp2: '',
+      acompanhante3: '',
+      categoriaacomp3: '',
+      acompanhante4: '',
+      categoriaacomp4: '',
+      acompanhante5: '',
+      categoriaacomp5: '',
+      restricoes: 'Vegetariana',
+      grupo: 'Ana + Esposo'
     },
     {
-      'Nome Principal': '',
-      'Telefone': '',
-      'Email': '',
-      'Acompanhantes': '',
-      'Restrições Alimentares': '',
-      'Grupo': ''
+      nomeprincipal: 'Mariana Costa',
+      telefone: '11912345678',
+      email: 'mariana@email.com',
+      categoria: 'Criança Pagante',
+      acompanhante1: 'Pedro Costa',
+      categoriaacomp1: 'Criança Não Pagante',
+      acompanhante2: '',
+      categoriaacomp2: '',
+      acompanhante3: '',
+      categoriaacomp3: '',
+      acompanhante4: '',
+      categoriaacomp4: '',
+      acompanhante5: '',
+      categoriaacomp5: '',
+      restricoes: '-',
+      grupo: 'Mariana'
+    },
+    {
+      nomeprincipal: '',
+      telefone: '',
+      email: '',
+      categoria: '',
+      acompanhante1: '',
+      categoriaacomp1: '',
+      acompanhante2: '',
+      categoriaacomp2: '',
+      acompanhante3: '',
+      categoriaacomp3: '',
+      acompanhante4: '',
+      categoriaacomp4: '',
+      acompanhante5: '',
+      categoriaacomp5: '',
+      restricoes: '',
+      grupo: ''
     }
   ]
 
-  const worksheet = XLSX.utils.json_to_sheet(templateData)
-  
-  // Auto-ajustar largura das colunas
-  const colWidths = [
-    { wch: 25 }, // Nome Principal
-    { wch: 18 }, // Telefone
-    { wch: 25 }, // Email
-    { wch: 40 }, // Acompanhantes
-    { wch: 25 }, // Restrições
-    { wch: 20 }  // Grupo
+  templateData.forEach((data) => {
+    const row = worksheet.addRow(data)
+    row.eachCell((cell: any) => {
+      cell.fill = cellStyle.fill
+      cell.font = cellStyle.font
+      cell.alignment = cellStyle.alignment
+      cell.border = cellStyle.border
+    })
+  })
+
+  // Adicionar Data Validation (dropdown) nas colunas de Categoria
+  // Aplicar a todas as linhas de dados (de 2 até 501 = 500 linhas)
+  const categoriaOptions = ['Adulto Pagante', 'Criança Pagante', 'Criança Não Pagante']
+  // Colunas: B (categoria principal), H, J, L, N, P (categoria acompanhantes 1-5)
+  const categoriaCols = ['B', 'H', 'J', 'L', 'N', 'P']
+
+  for (const col of categoriaCols) {
+    for (let rowNum = 2; rowNum <= 501; rowNum++) {
+      const cell = worksheet.getCell(`${col}${rowNum}`)
+      cell.dataValidation = {
+        type: 'list' as const,
+        formulae: [`"${categoriaOptions.join(',')}"`],
+        showErrorMessage: true,
+        errorTitle: 'Categoria Inválida',
+        error: 'Selecione uma das opções: Adulto Pagante, Criança Pagante ou Criança Não Pagante'
+      }
+    }
+  }
+
+  // Congelar a primeira linha (header)
+  worksheet.views = [
+    {
+      state: 'frozen' as const,
+      ySplit: 1
+    }
   ]
-  worksheet['!cols'] = colWidths
 
-  const workbook = XLSX.utils.book_new()
-  XLSX.utils.book_append_sheet(workbook, worksheet, 'Convidados')
-
-  return XLSX.write(workbook, { bookType: 'xlsx', type: 'array' })
+  // Gerar buffer
+  const buffer = await workbook.xlsx.writeBuffer()
+  return new Uint8Array(buffer as ArrayBuffer)
 }
 
 /**
