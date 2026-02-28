@@ -12,12 +12,12 @@ export default function LoginPage() {
   return (
     <div className="flex min-h-[calc(100vh-80px)] items-center justify-center py-12 px-6 lg:px-8">
       <div className="w-full max-w-md space-y-8">
-        <div className="bg-white p-10 rounded-2xl shadow-xl border border-brand/10 space-y-8">
+        <div className="bg-white p-8 rounded-2xl shadow-xl border border-brand/10 space-y-6">
           <div className="text-center">
-            <h2 className="text-3xl font-black text-slate-800 tracking-tight">
+            <h2 className="text-xl font-black text-slate-800 tracking-tight">
               Bem-vindo
             </h2>
-            <p className="mt-2 text-[10px] text-slate-400 uppercase tracking-widest font-black">
+            <p className="mt-1 text-[9px] text-slate-400 uppercase tracking-widest font-black">
               Acesse sua conta para continuar
             </p>
           </div>

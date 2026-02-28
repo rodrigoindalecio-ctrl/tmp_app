@@ -4,29 +4,47 @@
 @theme {
   --color-brand: #883545;
   --color-primary: #883545;
-  --color-primary-soft: color-mix(in srgb, var(--color-brand) 10%, transparent); /* #883545/10 */
+  --color-primary-soft: color-mix(in srgb, var(--color-brand) 10%, transparent);
+  /* #883545/10 */
 
-  --color-background: #f8fafc; /* slate-50 */
-  --color-surface: #ffffff; /* white */
+  --color-background: #f8fafc;
+  /* slate-50 */
+  --color-surface: #ffffff;
+  /* white */
 
-  --color-text-primary: #1e293b; /* slate-800 */
-  --color-text-secondary: #64748b; /* slate-500 */
-  --color-text-muted: #94a3b8; /* slate-400 */
+  --color-text-primary: #1e293b;
+  /* slate-800 */
+  --color-text-secondary: #64748b;
+  /* slate-500 */
+  --color-text-muted: #94a3b8;
+  /* slate-400 */
 
-  --color-border-soft: color-mix(in srgb, var(--color-brand) 10%, transparent); /* border-[#883545]/10 */
+  --color-border-soft: color-mix(in srgb, var(--color-brand) 10%, transparent);
+  /* border-[#883545]/10 */
 
-  --color-success: #10b981; /* emerald-500 */
-  --color-warning: #f59e0b; /* amber-500 */
-  --color-danger: #f43f5e; /* rose-500 */
+  --color-success: #10b981;
+  /* emerald-500 */
+  --color-warning: #f59e0b;
+  /* amber-500 */
+  --color-danger: #f43f5e;
+  /* rose-500 */
 
   --font-sans: "Manrope", ui-sans-serif, system-ui, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
 }
 
 @layer base {
+  html {
+    font-size: 14px;
+    /* Scale base down: 2xl → ~25px, sm → ~12px – cleaner look */
+  }
+
   body {
     font-family: var(--font-sans);
     background-color: var(--color-background);
     color: var(--color-text-primary);
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
   }
 }
 
