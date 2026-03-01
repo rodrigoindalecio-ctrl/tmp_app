@@ -299,16 +299,21 @@ export default function EventContent({ slug }: EventContentProps) {
                     </div>
 
                     <div className="space-y-4 pt-4">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Para receber confirmação</label>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-brand ml-1 flex items-center gap-1">
+                            E-mail Obrigatório
+                            <span className="w-1 h-1 bg-brand rounded-full animate-pulse"></span>
+                        </label>
                         <input
                             required
                             type="email"
                             value={guestEmail}
                             onChange={(e) => setGuestEmail(e.target.value)}
-                            placeholder="Seu e-mail..."
+                            placeholder="Seu melhor e-mail..."
                             className="w-full px-6 py-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-brand/10 focus:border-brand transition-all outline-none shadow-sm"
                         />
-                        <p className="text-[9px] text-slate-400 italic ml-1">* Enviaremos os detalhes do evento para este e-mail.</p>
+                        <p className="text-[10px] text-slate-500 font-medium ml-1">
+                            * Você receberá o resumo da confirmação, local e informações do evento neste e-mail.
+                        </p>
                     </div>
 
                     <div className="pt-4">
