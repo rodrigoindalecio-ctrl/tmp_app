@@ -347,6 +347,12 @@ export default function DashboardPage() {
       subtitle={`${eventSettings.eventType === 'casamento' ? '💒' : '👑'} ${eventSettings.eventType === 'casamento' ? 'Casamento' : 'Debutante'}`}
       headerActions={
         <>
+          <Link
+            href="/import"
+            className="flex items-center gap-2 px-4 py-2.5 bg-brand/5 text-brand border border-brand/10 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-brand/10 transition-all"
+          >
+            <UploadIcon className="w-4 h-4" /> Importar
+          </Link>
           <button
             onClick={handleExportCSV}
             className="flex items-center gap-2 px-4 py-2.5 bg-brand text-white rounded-xl text-[9px] font-black uppercase tracking-widest shadow-lg shadow-brand/20 hover:bg-brand/90 transition-all"
@@ -358,7 +364,7 @@ export default function DashboardPage() {
             disabled={metrics.total === 0}
             className="flex items-center gap-2 px-4 py-2.5 border border-rose-100 text-rose-500 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-rose-50 transition-all disabled:opacity-50"
           >
-            🗑️ Limpar Lista
+            <TrashIcon /> Limpar Lista
           </button>
         </>
       }
