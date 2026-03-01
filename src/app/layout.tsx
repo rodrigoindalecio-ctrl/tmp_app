@@ -1,5 +1,5 @@
 import './globals.css'
-import type { Metadata } from 'next'
+import type { Metadata, Viewport } from 'next'
 import { Manrope, Lora } from 'next/font/google'
 import { AuthProvider } from '@/lib/auth-context'
 import { EventProvider } from '@/lib/event-context'
@@ -19,9 +19,23 @@ const lora = Lora({
   weight: ['400', '500', '600', '700'],
 })
 
+
+export const viewport: Viewport = {
+  width: 'device-width',
+  initialScale: 1,
+  maximumScale: 1,
+  userScalable: false,
+  viewportFit: 'cover',
+}
+
 export const metadata: Metadata = {
   title: 'App RSVP | Vanessa Bidinotti',
   description: 'Gestão exclusiva de eventos e convidados',
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: 'default',
+    title: 'RSVP Manager',
+  },
 }
 
 export default function RootLayout({

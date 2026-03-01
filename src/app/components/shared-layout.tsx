@@ -48,38 +48,38 @@ export function SharedLayout({
     const isEventPage = pathname.includes('/admin/evento/') || pathname.includes('/admin/users') || pathname.includes('/admin/novo-evento')
 
     return (
-        <div className="min-h-screen bg-background flex flex-col font-sans text-textPrimary">
+        <div className="min-h-screen bg-background flex flex-col font-sans text-textPrimary overflow-x-hidden max-w-[100vw]">
             {/* ── TOP NAVIGATION (New Premium Style) ─────────────────── */}
             <header className="bg-white border-b border-brand/5 sticky top-0 z-50 h-20 flex items-center shadow-sm">
                 <div className="container mx-auto px-6 flex items-center justify-between relative h-full">
                     {/* Left Side: Back button or Logo */}
-                    <div className="flex items-center gap-4 min-w-[120px]">
+                    <div className="flex items-center gap-4 flex-1">
                         {isEventPage ? (
                             <button
                                 onClick={() => router.push('/admin/dashboard')}
-                                className="flex items-center gap-2 px-4 py-2 bg-brand/5 text-brand rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-brand/10 transition-all border border-brand/10 shadow-sm group"
+                                className="flex items-center gap-2 px-3 py-1.5 bg-brand/5 text-brand rounded-full text-[9px] font-black uppercase tracking-widest hover:bg-brand/10 transition-all border border-brand/10 shadow-sm group whitespace-nowrap"
                             >
                                 <span className="group-hover:-translate-x-1 transition-transform">←</span>
-                                <span>Dashboard</span>
+                                <span>Painel</span>
                             </button>
                         ) : (
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-2 flex-shrink-0">
                                 <div className="w-8 h-8 rounded-lg bg-brand flex items-center justify-center text-white text-xs">❤️</div>
-                                <span className="font-serif font-black text-xs text-brand uppercase tracking-tighter">RSVP Manager</span>
+                                <span className="font-serif font-black text-[10px] text-brand uppercase tracking-tighter hidden sm:block">RSVP Manager</span>
                             </div>
                         )}
                     </div>
 
-                    {/* Center: Title (Responsive Focus) */}
-                    <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-center max-w-[50%]">
-                        <h1 className="text-sm md:text-base font-serif font-black text-slate-800 tracking-tight truncate leading-tight">
+                    {/* Center: Title */}
+                    <div className="flex-[2] flex flex-col items-center justify-center text-center px-2 min-w-0">
+                        <h1 className="text-xs md:text-base font-serif font-black text-slate-800 tracking-tight truncate leading-tight w-full">
                             {title || 'Painel'}
                         </h1>
-                        {subtitle && <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-0.5 truncate">{subtitle}</p>}
+                        {subtitle && <p className="text-[7px] md:text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-0.5 truncate w-full">{subtitle}</p>}
                     </div>
 
                     {/* Right Side: Hamburger Menu & Profile */}
-                    <div className="flex items-center gap-4 min-w-[120px] justify-end">
+                    <div className="flex items-center gap-4 flex-1 justify-end">
                         <button
                             onClick={() => setIsMenuOpen(!isMenuOpen)}
                             className="w-10 h-10 flex flex-col items-center justify-center gap-1.5 rounded-xl border border-slate-100 bg-white hover:border-brand/20 transition-all shadow-sm group"
