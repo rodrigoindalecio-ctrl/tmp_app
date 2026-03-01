@@ -53,7 +53,7 @@ export default function EventContent({ slug }: EventContentProps) {
     const handleSelectGuest = (guest: Guest) => {
         setSelectedGuest(guest)
         setIsMainGuestConfirmed(guest.status === 'confirmed')
-        setGuestEmail(guest.email || '')
+        setGuestEmail('')
 
         // Initialize companions confirmations
         const initialComps: { [key: number]: boolean } = {}
