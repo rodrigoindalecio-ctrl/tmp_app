@@ -9,7 +9,7 @@ import { SharedLayout } from '@/app/components/shared-layout'
 
 export default function ImportPage() {
     const { user, logout } = useAuth()
-    const { addGuest, addGuestsBatch } = useEvent()
+    const { addGuest, addGuestsBatch, loading: eventLoading } = useEvent()
     const router = useRouter()
     const fileInputRef = useRef<HTMLInputElement>(null)
 
@@ -83,10 +83,10 @@ export default function ImportPage() {
         setStep('review')
     }
 
-    const confirmAdd = () => {
+    const confirmAdd = async () => {
         if (!pendingGuest) return
 
-        addGuest({
+        const success = await addGuest({
             name: pendingGuest.name,
             email: pendingGuest.email || undefined,
             telefone: pendingGuest.telefone,
@@ -95,6 +95,11 @@ export default function ImportPage() {
             companionsList: pendingGuest.companionsList as any,
             category: pendingGuest.category as any
         })
+
+        if (!success) {
+            alert('Erro ao salvar convidado no banco de dados.')
+            return
+        }
 
         setImportedCount(1 + pendingGuest.companionsList.length) // 1 titular + N acompanhantes
         setStep('success')
@@ -210,310 +215,317 @@ export default function ImportPage() {
             title="Importar Convidados"
             subtitle="Adicione convidados via Excel ou manualmente"
         >
-            <main className="max-w-[1200px] mx-auto w-full animate-in fade-in duration-500">
-                <div className="mb-8">
-                    <button
-                        onClick={() => {
-                            if (step === 'review' || step === 'input') setStep('choose')
-                            else router.back()
-                        }}
-                        className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-brand transition-all"
-                    >
-                        <ArrowLeftIcon />
-                        Voltar
-                    </button>
+            {eventLoading ? (
+                <div className="flex flex-col items-center justify-center min-h-[400px]">
+                    <div className="w-12 h-12 border-4 border-brand/20 border-t-brand rounded-full animate-spin mb-4" />
+                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Carregando dados do evento...</p>
                 </div>
-
-                {step === 'choose' && (
-                    <div className="max-w-4xl mx-auto py-4 animate-in fade-in duration-500">
-                        <div className="text-center mb-12">
-                            <h2 className="text-3xl font-black text-slate-800 tracking-tight mb-2">Lista de Presença</h2>
-                            <p className="text-slate-400 font-bold text-sm uppercase tracking-widest">Escolha como quer adicionar seus convidados:</p>
-                        </div>
-
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                            <button
-                                onClick={() => {
-                                    setMethod('excel')
-                                    setStep('input')
-                                }}
-                                className="bg-white p-12 rounded-[2.5rem] border border-brand/5 hover:border-brand/20 hover:shadow-xl hover:shadow-brand/5 transition-all flex flex-col items-center text-center group"
-                            >
-                                <div className="w-20 h-20 bg-blue-50 rounded-[1.5rem] flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                                    <FileSpreadsheetIcon />
-                                </div>
-                                <h3 className="text-xl font-black text-slate-800 mb-2 tracking-tight">Planilha Excel</h3>
-                                <p className="text-xs text-slate-400 font-bold uppercase tracking-widest leading-relaxed px-4">Importe múltiplos convidados de uma só vez usando nosso modelo.</p>
-                            </button>
-
-                            <button
-                                onClick={() => {
-                                    setMethod('manual')
-                                    setStep('input')
-                                }}
-                                className="bg-white p-12 rounded-[2.5rem] border border-brand/5 hover:border-brand/20 hover:shadow-xl hover:shadow-brand/5 transition-all flex flex-col items-center text-center group"
-                            >
-                                <div className="w-20 h-20 bg-brand/5 rounded-[1.5rem] flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
-                                    <UserPlusIcon />
-                                </div>
-                                <h3 className="text-xl font-black text-slate-800 mb-2 tracking-tight">Manualmente</h3>
-                                <p className="text-xs text-slate-400 font-bold uppercase tracking-widest leading-relaxed px-4">Adicione convidados um a um com seus respectivos acompanhantes.</p>
-                            </button>
-                        </div>
+            ) : (
+                <main className="max-w-[1200px] mx-auto w-full animate-in fade-in duration-500">
+                    <div className="mb-8">
+                        <button
+                            onClick={() => {
+                                if (step === 'review' || step === 'input') setStep('choose')
+                                else router.back()
+                            }}
+                            className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-brand transition-all"
+                        >
+                            <ArrowLeftIcon />
+                            Voltar
+                        </button>
                     </div>
-                )}
 
-                {step === 'input' && (
-                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-in slide-in-from-bottom-4 duration-500">
-                        {method === 'excel' && (
-                            <div className="bg-white p-8 rounded-[2.5rem] border border-brand/5 shadow-sm flex flex-col lg:col-span-1">
-                                <div className="mb-8">
-                                    <h2 className="text-xl font-black text-slate-800 tracking-tight mb-1">Importar Excel</h2>
-                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Siga o modelo para evitar erros</p>
-                                </div>
+                    {step === 'choose' && (
+                        <div className="max-w-4xl mx-auto py-4 animate-in fade-in duration-500">
+                            <div className="text-center mb-12">
+                                <h2 className="text-3xl font-black text-slate-800 tracking-tight mb-2">Lista de Presença</h2>
+                                <p className="text-slate-400 font-bold text-sm uppercase tracking-widest">Escolha como quer adicionar seus convidados:</p>
+                            </div>
 
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 <button
-                                    onClick={handleDownloadModel}
-                                    className="w-full flex items-center justify-center gap-2 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-100 transition-all mb-8 shadow-inner"
+                                    onClick={() => {
+                                        setMethod('excel')
+                                        setStep('input')
+                                    }}
+                                    className="bg-white p-12 rounded-[2.5rem] border border-brand/5 hover:border-brand/20 hover:shadow-xl hover:shadow-brand/5 transition-all flex flex-col items-center text-center group"
                                 >
-                                    <DownloadIcon />
-                                    Baixar modelo (.xlsx)
+                                    <div className="w-20 h-20 bg-blue-50 rounded-[1.5rem] flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                                        <FileSpreadsheetIcon />
+                                    </div>
+                                    <h3 className="text-xl font-black text-slate-800 mb-2 tracking-tight">Planilha Excel</h3>
+                                    <p className="text-xs text-slate-400 font-bold uppercase tracking-widest leading-relaxed px-4">Importe múltiplos convidados de uma só vez usando nosso modelo.</p>
                                 </button>
 
-                                <div
-                                    className={`flex-1 min-h-[300px] border-2 border-dashed rounded-[2rem] flex flex-col items-center justify-center p-8 transition-all cursor-pointer ${isDragging ? 'border-brand bg-brand/5 scale-[0.98]' : 'border-slate-100 hover:border-brand/30 hover:bg-slate-50/50'}`}
-                                    onDragOver={handleDragOver}
-                                    onDragLeave={handleDragLeave}
-                                    onDrop={handleDrop}
-                                    onClick={() => fileInputRef.current?.click()}
+                                <button
+                                    onClick={() => {
+                                        setMethod('manual')
+                                        setStep('input')
+                                    }}
+                                    className="bg-white p-12 rounded-[2.5rem] border border-brand/5 hover:border-brand/20 hover:shadow-xl hover:shadow-brand/5 transition-all flex flex-col items-center text-center group"
                                 >
-                                    <input
-                                        type="file"
-                                        ref={fileInputRef}
-                                        className="hidden"
-                                        accept=".xlsx,.xls,.csv"
-                                        onChange={handleFileSelect}
-                                    />
-
-                                    {importStatus === 'processing' ? (
-                                        <div className="text-center">
-                                            <div className="w-12 h-12 border-4 border-brand/20 border-t-brand rounded-full animate-spin mx-auto mb-4" />
-                                            <p className="text-[10px] font-black uppercase tracking-widest text-brand">Validando arquivo...</p>
-                                        </div>
-                                    ) : (
-                                        <div className="text-center">
-                                            <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 text-slate-300 shadow-sm border border-slate-50">
-                                                <UploadCloudIcon />
-                                            </div>
-                                            <p className="text-sm font-black text-slate-800 mb-1">Upload de Arquivo</p>
-                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Arraste ou clique para selecionar</p>
-                                        </div>
-                                    )}
-                                </div>
+                                    <div className="w-20 h-20 bg-brand/5 rounded-[1.5rem] flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                                        <UserPlusIcon />
+                                    </div>
+                                    <h3 className="text-xl font-black text-slate-800 mb-2 tracking-tight">Manualmente</h3>
+                                    <p className="text-xs text-slate-400 font-bold uppercase tracking-widest leading-relaxed px-4">Adicione convidados um a um com seus respectivos acompanhantes.</p>
+                                </button>
                             </div>
-                        )}
+                        </div>
+                    )}
 
-                        {method === 'manual' && (
-                            <div className="bg-white p-8 rounded-[2.5rem] border border-brand/5 shadow-sm lg:col-span-1">
-                                <div className="mb-8">
-                                    <h2 className="text-xl font-black text-slate-800 tracking-tight mb-1">Adicionar Manual</h2>
-                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Preencha as informações obrigatórias</p>
+                    {step === 'input' && (
+                        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-in slide-in-from-bottom-4 duration-500">
+                            {method === 'excel' && (
+                                <div className="bg-white p-8 rounded-[2.5rem] border border-brand/5 shadow-sm flex flex-col lg:col-span-1">
+                                    <div className="mb-8">
+                                        <h2 className="text-xl font-black text-slate-800 tracking-tight mb-1">Importar Excel</h2>
+                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Siga o modelo para evitar erros</p>
+                                    </div>
+
+                                    <button
+                                        onClick={handleDownloadModel}
+                                        className="w-full flex items-center justify-center gap-2 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-100 transition-all mb-8 shadow-inner"
+                                    >
+                                        <DownloadIcon />
+                                        Baixar modelo (.xlsx)
+                                    </button>
+
+                                    <div
+                                        className={`flex-1 min-h-[300px] border-2 border-dashed rounded-[2rem] flex flex-col items-center justify-center p-8 transition-all cursor-pointer ${isDragging ? 'border-brand bg-brand/5 scale-[0.98]' : 'border-slate-100 hover:border-brand/30 hover:bg-slate-50/50'}`}
+                                        onDragOver={handleDragOver}
+                                        onDragLeave={handleDragLeave}
+                                        onDrop={handleDrop}
+                                        onClick={() => fileInputRef.current?.click()}
+                                    >
+                                        <input
+                                            type="file"
+                                            ref={fileInputRef}
+                                            className="hidden"
+                                            accept=".xlsx,.xls,.csv"
+                                            onChange={handleFileSelect}
+                                        />
+
+                                        {importStatus === 'processing' ? (
+                                            <div className="text-center">
+                                                <div className="w-12 h-12 border-4 border-brand/20 border-t-brand rounded-full animate-spin mx-auto mb-4" />
+                                                <p className="text-[10px] font-black uppercase tracking-widest text-brand">Validando arquivo...</p>
+                                            </div>
+                                        ) : (
+                                            <div className="text-center">
+                                                <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 text-slate-300 shadow-sm border border-slate-50">
+                                                    <UploadCloudIcon />
+                                                </div>
+                                                <p className="text-sm font-black text-slate-800 mb-1">Upload de Arquivo</p>
+                                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Arraste ou clique para selecionar</p>
+                                            </div>
+                                        )}
+                                    </div>
                                 </div>
+                            )}
 
-                                <form onSubmit={handleManualAdd} className="space-y-6">
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Nome Principal *</label>
-                                            <input
-                                                type="text"
-                                                required
-                                                placeholder="Nome do convidado"
-                                                className="w-full px-5 py-3.5 bg-slate-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-slate-700"
-                                                value={manualName}
-                                                onChange={(e) => setManualName(e.target.value)}
-                                            />
-                                        </div>
-                                        <div>
-                                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Telefone *</label>
-                                            <input
-                                                type="tel"
-                                                required
-                                                placeholder="(00) 00000-0000"
-                                                className="w-full px-5 py-3.5 bg-slate-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-slate-700"
-                                                value={manualTelefone}
-                                                onChange={(e) => setManualTelefone(e.target.value)}
-                                            />
-                                        </div>
+                            {method === 'manual' && (
+                                <div className="bg-white p-8 rounded-[2.5rem] border border-brand/5 shadow-sm lg:col-span-1">
+                                    <div className="mb-8">
+                                        <h2 className="text-xl font-black text-slate-800 tracking-tight mb-1">Adicionar Manual</h2>
+                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Preencha as informações obrigatórias</p>
                                     </div>
 
-                                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                        <div>
-                                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Email</label>
-                                            <input
-                                                type="email"
-                                                placeholder="contato@email.com"
-                                                className="w-full px-5 py-3.5 bg-slate-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-slate-700"
-                                                value={manualEmail}
-                                                onChange={(e) => setManualEmail(e.target.value)}
-                                            />
+                                    <form onSubmit={handleManualAdd} className="space-y-6">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Nome Principal *</label>
+                                                <input
+                                                    type="text"
+                                                    required
+                                                    placeholder="Nome do convidado"
+                                                    className="w-full px-5 py-3.5 bg-slate-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-slate-700"
+                                                    value={manualName}
+                                                    onChange={(e) => setManualName(e.target.value)}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Telefone *</label>
+                                                <input
+                                                    type="tel"
+                                                    required
+                                                    placeholder="(00) 00000-0000"
+                                                    className="w-full px-5 py-3.5 bg-slate-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-slate-700"
+                                                    value={manualTelefone}
+                                                    onChange={(e) => setManualTelefone(e.target.value)}
+                                                />
+                                            </div>
                                         </div>
-                                        <div>
-                                            <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Grupo</label>
-                                            <input
-                                                type="text"
-                                                placeholder="ex: Família Noiva"
-                                                className="w-full px-5 py-3.5 bg-slate-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-slate-700"
-                                                value={manualGrupo}
-                                                onChange={(e) => setManualGrupo(e.target.value)}
-                                            />
-                                        </div>
-                                    </div>
 
-                                    <div>
-                                        <label className="block text-xs font-medium text-textSecondary mb-3">Acompanhantes (até 5)</label>
-                                        <div className="space-y-3 bg-slate-50/50 p-6 rounded-2xl border border-slate-100">
-                                            {manualCompanions.map((companion, idx) => (
-                                                <div key={idx} className="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                                                    <div className="sm:col-span-2">
-                                                        <input
-                                                            type="text"
-                                                            placeholder={`Nome do Acompanhante ${idx + 1}`}
-                                                            className="w-full px-4 py-2.5 bg-white border border-slate-100 rounded-xl text-xs font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-sm outline-none text-slate-700"
-                                                            value={companion.name}
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                            <div>
+                                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Email</label>
+                                                <input
+                                                    type="email"
+                                                    placeholder="contato@email.com"
+                                                    className="w-full px-5 py-3.5 bg-slate-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-slate-700"
+                                                    value={manualEmail}
+                                                    onChange={(e) => setManualEmail(e.target.value)}
+                                                />
+                                            </div>
+                                            <div>
+                                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Grupo</label>
+                                                <input
+                                                    type="text"
+                                                    placeholder="ex: Família Noiva"
+                                                    className="w-full px-5 py-3.5 bg-slate-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-slate-700"
+                                                    value={manualGrupo}
+                                                    onChange={(e) => setManualGrupo(e.target.value)}
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label className="block text-xs font-medium text-textSecondary mb-3">Acompanhantes (até 5)</label>
+                                            <div className="space-y-3 bg-slate-50/50 p-6 rounded-2xl border border-slate-100">
+                                                {manualCompanions.map((companion, idx) => (
+                                                    <div key={idx} className="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                                                        <div className="sm:col-span-2">
+                                                            <input
+                                                                type="text"
+                                                                placeholder={`Nome do Acompanhante ${idx + 1}`}
+                                                                className="w-full px-4 py-2.5 bg-white border border-slate-100 rounded-xl text-xs font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-sm outline-none text-slate-700"
+                                                                value={companion.name}
+                                                                onChange={(e) => {
+                                                                    const newCompanions = [...manualCompanions]
+                                                                    newCompanions[idx].name = e.target.value
+                                                                    setManualCompanions(newCompanions)
+                                                                }}
+                                                            />
+                                                        </div>
+                                                        <select
+                                                            value={companion.category}
                                                             onChange={(e) => {
                                                                 const newCompanions = [...manualCompanions]
-                                                                newCompanions[idx].name = e.target.value
+                                                                newCompanions[idx].category = e.target.value
                                                                 setManualCompanions(newCompanions)
                                                             }}
-                                                        />
+                                                            className="px-4 py-2.5 bg-white border border-slate-100 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-500 outline-none"
+                                                        >
+                                                            <option value="adult_paying">Adulto</option>
+                                                            <option value="child_paying">Criança Pag.</option>
+                                                            <option value="child_not_paying">Não Pagante</option>
+                                                        </select>
                                                     </div>
-                                                    <select
-                                                        value={companion.category}
-                                                        onChange={(e) => {
-                                                            const newCompanions = [...manualCompanions]
-                                                            newCompanions[idx].category = e.target.value
-                                                            setManualCompanions(newCompanions)
-                                                        }}
-                                                        className="px-4 py-2.5 bg-white border border-slate-100 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-500 outline-none"
-                                                    >
-                                                        <option value="adult_paying">Adulto</option>
-                                                        <option value="child_paying">Criança Pag.</option>
-                                                        <option value="child_not_paying">Não Pagante</option>
-                                                    </select>
-                                                </div>
-                                            ))}
+                                                ))}
+                                            </div>
                                         </div>
-                                    </div>
 
-                                    <div className="pt-4">
+                                        <div className="pt-4">
+                                            <button
+                                                type="submit"
+                                                className="w-full py-4 bg-brand text-white font-black uppercase tracking-widest text-[10px] rounded-2xl transition-all shadow-lg shadow-brand/20 hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2"
+                                            >
+                                                Revisar Convidado <ArrowRightIcon />
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            )}
+                        </div>
+                    )}
+
+                    {step === 'review' && (
+                        <div className="max-w-4xl mx-auto animate-in slide-in-from-right-8 duration-500">
+                            <div className="bg-white p-8 rounded-[2.5rem] border border-brand/5 shadow-sm mb-6">
+                                <div className="flex flex-col sm:flex-row items-center justify-between gap-6 mb-8">
+                                    <div>
+                                        <h2 className="text-2xl font-black text-slate-800 tracking-tight mb-1">Revisar Importação</h2>
+                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Confirme os dados antes de salvar</p>
+                                    </div>
+                                    <div className="flex gap-3 w-full sm:w-auto">
                                         <button
-                                            type="submit"
-                                            className="w-full py-4 bg-brand text-white font-black uppercase tracking-widest text-[10px] rounded-2xl transition-all shadow-lg shadow-brand/20 hover:scale-[1.02] active:scale-95 flex items-center justify-center gap-2"
+                                            onClick={() => setStep('input')}
+                                            className="flex-1 sm:flex-none px-6 py-3 bg-slate-50 text-[10px] font-black uppercase tracking-widest text-slate-400 rounded-xl hover:bg-slate-100 transition-all border border-slate-100"
                                         >
-                                            Revisar Convidado <ArrowRightIcon />
+                                            Corrigir
+                                        </button>
+                                        <button
+                                            onClick={pendingGuest ? confirmAdd : confirmBatch}
+                                            className="flex-1 sm:flex-none px-8 py-3 bg-brand text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg shadow-brand/20 hover:scale-105 transition-all flex items-center justify-center gap-2"
+                                        >
+                                            <CheckIcon /> Salvar Agora
                                         </button>
                                     </div>
-                                </form>
-                            </div>
-                        )}
-                    </div>
-                )}
-
-                {step === 'review' && (
-                    <div className="max-w-4xl mx-auto animate-in slide-in-from-right-8 duration-500">
-                        <div className="bg-white p-8 rounded-[2.5rem] border border-brand/5 shadow-sm mb-6">
-                            <div className="flex flex-col sm:flex-row items-center justify-between gap-6 mb-8">
-                                <div>
-                                    <h2 className="text-2xl font-black text-slate-800 tracking-tight mb-1">Revisar Importação</h2>
-                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Confirme os dados antes de salvar</p>
                                 </div>
-                                <div className="flex gap-3 w-full sm:w-auto">
-                                    <button
-                                        onClick={() => setStep('input')}
-                                        className="flex-1 sm:flex-none px-6 py-3 bg-slate-50 text-[10px] font-black uppercase tracking-widest text-slate-400 rounded-xl hover:bg-slate-100 transition-all border border-slate-100"
-                                    >
-                                        Corrigir
-                                    </button>
-                                    <button
-                                        onClick={pendingGuest ? confirmAdd : confirmBatch}
-                                        className="flex-1 sm:flex-none px-8 py-3 bg-brand text-white text-[10px] font-black uppercase tracking-widest rounded-xl shadow-lg shadow-brand/20 hover:scale-105 transition-all flex items-center justify-center gap-2"
-                                    >
-                                        <CheckIcon /> Salvar Agora
-                                    </button>
-                                </div>
-                            </div>
 
-                            <div className="border border-slate-100 rounded-[2rem] overflow-hidden shadow-inner bg-slate-50/30">
-                                <table className="w-full text-left text-sm">
-                                    <thead className="bg-slate-50 border-b border-slate-100 text-[9px] font-black text-slate-400 uppercase tracking-widest">
-                                        <tr>
-                                            <th className="px-8 py-4">Nome</th>
-                                            <th className="px-8 py-4">Status</th>
-                                            <th className="px-8 py-4 text-right">Membros</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody className="divide-y divide-slate-100">
-                                        {pendingGuest ? (
+                                <div className="border border-slate-100 rounded-[2rem] overflow-hidden shadow-inner bg-slate-50/30">
+                                    <table className="w-full text-left text-sm">
+                                        <thead className="bg-slate-50 border-b border-slate-100 text-[9px] font-black text-slate-400 uppercase tracking-widest">
                                             <tr>
-                                                <td className="px-8 py-5">
-                                                    <p className="font-black text-slate-800 tracking-tight">{pendingGuest.name}</p>
-                                                    <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">{pendingGuest.telefone}</p>
-                                                </td>
-                                                <td className="px-8 py-5">
-                                                    <span className="bg-amber-100 text-amber-700 px-2 py-1 rounded text-[9px] font-black uppercase tracking-widest">Pendente</span>
-                                                </td>
-                                                <td className="px-8 py-5 text-right font-black text-brand">{1 + pendingGuest.companionsList.length}</td>
+                                                <th className="px-8 py-4">Nome</th>
+                                                <th className="px-8 py-4">Status</th>
+                                                <th className="px-8 py-4 text-right">Membros</th>
                                             </tr>
-                                        ) : parseResult?.convidados.map((guest, idx) => (
-                                            <tr key={idx}>
-                                                <td className="px-8 py-4">
-                                                    <p className="font-black text-slate-800 tracking-tight">{guest.name}</p>
-                                                    <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">{guest.telefone}</p>
-                                                </td>
-                                                <td className="px-8 py-4">
-                                                    <span className="bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-[9px] font-black uppercase tracking-widest">Válido</span>
-                                                </td>
-                                                <td className="px-8 py-4 text-right font-black text-brand">{1 + (guest.companionsList?.length || 0)}</td>
-                                            </tr>
-                                        ))}
-                                    </tbody>
-                                </table>
+                                        </thead>
+                                        <tbody className="divide-y divide-slate-100">
+                                            {pendingGuest ? (
+                                                <tr>
+                                                    <td className="px-8 py-5">
+                                                        <p className="font-black text-slate-800 tracking-tight">{pendingGuest.name}</p>
+                                                        <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">{pendingGuest.telefone}</p>
+                                                    </td>
+                                                    <td className="px-8 py-5">
+                                                        <span className="bg-amber-100 text-amber-700 px-2 py-1 rounded text-[9px] font-black uppercase tracking-widest">Pendente</span>
+                                                    </td>
+                                                    <td className="px-8 py-5 text-right font-black text-brand">{1 + pendingGuest.companionsList.length}</td>
+                                                </tr>
+                                            ) : parseResult?.convidados.map((guest, idx) => (
+                                                <tr key={idx}>
+                                                    <td className="px-8 py-4">
+                                                        <p className="font-black text-slate-800 tracking-tight">{guest.name}</p>
+                                                        <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">{guest.telefone}</p>
+                                                    </td>
+                                                    <td className="px-8 py-4">
+                                                        <span className="bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-[9px] font-black uppercase tracking-widest">Válido</span>
+                                                    </td>
+                                                    <td className="px-8 py-4 text-right font-black text-brand">{1 + (guest.companionsList?.length || 0)}</td>
+                                                </tr>
+                                            ))}
+                                        </tbody>
+                                    </table>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                )}
+                    )}
 
-                {step === 'success' && (
-                    <div className="flex flex-col items-center justify-center py-12 animate-in zoom-in-95 duration-500 text-center">
-                        <div className="w-24 h-24 bg-emerald-50 rounded-[2rem] flex items-center justify-center mb-8 text-emerald-500 shadow-xl shadow-emerald-500/10 border-4 border-white animate-bounce">
-                            <CheckIconBig />
-                        </div>
-                        <h2 className="text-4xl font-black text-slate-800 tracking-tight mb-2">Sucesso!</h2>
-                        <p className="text-slate-400 font-bold text-sm uppercase tracking-widest mb-10">
-                            {importedCount} novos nomes adicionados à lista.
-                        </p>
+                    {step === 'success' && (
+                        <div className="flex flex-col items-center justify-center py-12 animate-in zoom-in-95 duration-500 text-center">
+                            <div className="w-24 h-24 bg-emerald-50 rounded-[2rem] flex items-center justify-center mb-8 text-emerald-500 shadow-xl shadow-emerald-500/10 border-4 border-white animate-bounce">
+                                <CheckIconBig />
+                            </div>
+                            <h2 className="text-4xl font-black text-slate-800 tracking-tight mb-2">Sucesso!</h2>
+                            <p className="text-slate-400 font-bold text-sm uppercase tracking-widest mb-10">
+                                {importedCount} novos nomes adicionados à lista.
+                            </p>
 
-                        <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md">
-                            <button
-                                onClick={() => {
-                                    setStep('choose')
-                                    setImportedCount(0)
-                                    setDuplicatesList([])
-                                }}
-                                className="flex-1 px-8 py-4 bg-white border border-slate-100 text-slate-500 text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-slate-50 transition-all shadow-sm"
-                            >
-                                Adicionar Mais
-                            </button>
-                            <button
-                                onClick={() => router.push('/dashboard')}
-                                className="flex-1 px-8 py-4 bg-brand text-white text-[10px] font-black uppercase tracking-widest rounded-2xl shadow-lg shadow-brand/20 hover:scale-105 transition-all"
-                            >
-                                Ver Lista Completa
-                            </button>
+                            <div className="flex flex-col sm:flex-row gap-4 w-full max-w-md">
+                                <button
+                                    onClick={() => {
+                                        setStep('choose')
+                                        setImportedCount(0)
+                                        setDuplicatesList([])
+                                    }}
+                                    className="flex-1 px-8 py-4 bg-white border border-slate-100 text-slate-500 text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-slate-50 transition-all shadow-sm"
+                                >
+                                    Adicionar Mais
+                                </button>
+                                <button
+                                    onClick={() => router.push('/dashboard')}
+                                    className="flex-1 px-8 py-4 bg-brand text-white text-[10px] font-black uppercase tracking-widest rounded-2xl shadow-lg shadow-brand/20 hover:scale-105 transition-all"
+                                >
+                                    Ver Lista Completa
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                )}
-            </main>
+                    )}
+                </main>
+            )}
         </SharedLayout>
     )
 }

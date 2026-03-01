@@ -57,8 +57,12 @@ type EventContextType = {
         declined: number
         totalPeople: number
     }
-    addGuest: (guest: Omit<Guest, 'id' | 'updatedAt' | 'status'>) => Promise<void>
-    addGuestsBatch: (guests: Omit<Guest, 'id' | 'updatedAt' | 'status'>[]) => Promise<{ imported: number; duplicates: string[] }>
+    addGuest: (guest: Omit<Guest, 'id' | 'updatedAt' | 'status'>) => Promise<boolean>
+    addGuestsBatch: (dataList: Omit<Guest, 'id' | 'updatedAt' | 'status'>[]) => Promise<{
+        imported: number,
+        duplicates: string[],
+        error?: string
+    }>
     removeGuest: (id: string) => Promise<void>
     updateGuestStatus: (id: string, status: GuestStatus) => Promise<void>
     updateGuest: (id: string, guest: Partial<Guest>) => Promise<void>
@@ -210,7 +214,10 @@ export function EventProvider({ children }: { children: ReactNode }) {
     }), [guests])
 
     async function addGuest(data: Omit<Guest, 'id' | 'updatedAt' | 'status'>) {
-        if (!eventId) return
+        if (!eventId) {
+            console.error('[addGuest] Falha: eventId não encontrado.');
+            return false
+        }
         const newId = Math.random().toString(36).substr(2, 9)
         const newGuest: Guest = {
             ...data,
@@ -236,13 +243,18 @@ export function EventProvider({ children }: { children: ReactNode }) {
 
             if (error) throw error
             setGuests(prev => [newGuest, ...prev])
+            return true
         } catch (error) {
             console.error('Erro ao adicionar convidado:', error)
+            return false
         }
     }
 
     async function addGuestsBatch(dataList: Omit<Guest, 'id' | 'updatedAt' | 'status'>[]) {
-        if (!eventId) return { imported: 0, duplicates: [] }
+        if (!eventId) {
+            console.error('[addGuestsBatch] Falha: eventId não encontrado para este usuário.');
+            return { imported: 0, duplicates: [], error: 'Nenhum evento encontrado para você. Fale com a administradora.' }
+        }
         const duplicates: string[] = []
         const toImport: any[] = []
         const newGuests: Guest[] = []
@@ -254,18 +266,22 @@ export function EventProvider({ children }: { children: ReactNode }) {
             } else {
                 const newId = Math.random().toString(36).substr(2, 9)
                 const now = new Date()
-                toImport.push({
+                const guestDataToInsert = {
                     id: newId,
                     event_id: eventId,
                     name: data.name,
-                    email: data.email,
-                    telefone: data.telefone,
-                    grupo: data.grupo,
+                    email: data.email || '',
+                    telefone: data.telefone || '',
+                    grupo: data.grupo || '',
                     status: 'pending',
                     category: data.category,
                     companions_list: data.companionsList || [],
                     updated_at: now.toISOString()
-                })
+                }
+
+                console.log('[addGuestsBatch] Preparando convidado:', guestDataToInsert);
+
+                toImport.push(guestDataToInsert)
                 newGuests.push({
                     ...data,
                     id: newId,
@@ -278,6 +294,7 @@ export function EventProvider({ children }: { children: ReactNode }) {
 
         if (toImport.length > 0) {
             try {
+                console.log(`[addGuestsBatch] Enviando ${toImport.length} convidados para o Supabase (EventId: ${eventId})`);
                 const { error } = await supabase.from('guests').insert(toImport)
                 if (error) throw error
                 setGuests(prev => [...newGuests, ...prev])
