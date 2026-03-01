@@ -69,6 +69,7 @@ type EventContextType = {
     updateGuestCompanions: (id: string, companions: Companion[]) => Promise<void>
     removeCompanion: (guestId: string, companionIndex: number) => Promise<void>
     updateEventSettings: (settings: Partial<EventSettings>) => Promise<void>
+    submitRSVP: (rsvpData: Omit<Guest, 'id' | 'updatedAt'>) => Promise<void>
 }
 
 const DEFAULT_EVENT_SETTINGS: EventSettings = {
@@ -380,6 +381,41 @@ export function EventProvider({ children }: { children: ReactNode }) {
         setEventSettings(updatedSettings)
     }
 
+    async function submitRSVP(rsvpData: Omit<Guest, 'id' | 'updatedAt'>) {
+        if (!eventId) throw new Error('Evento não identificado')
+
+        try {
+            const now = new Date()
+            const { error } = await supabase.from('guests').insert({
+                event_id: eventId,
+                name: rsvpData.name,
+                email: rsvpData.email,
+                telefone: rsvpData.telefone,
+                grupo: rsvpData.grupo,
+                status: 'confirmed',
+                category: rsvpData.category,
+                companions: rsvpData.companions,
+                companions_list: rsvpData.companionsList,
+                updated_at: now.toISOString(),
+                confirmed_at: now.toISOString()
+            })
+
+            if (error) throw error
+
+            // Opcional: Atualizar lista local se o admin estiver vendo
+            const newGuest: Guest = {
+                ...rsvpData,
+                id: Math.random().toString(36).substr(2, 9), // ID temporário até refresh
+                updatedAt: now,
+                confirmedAt: now
+            }
+            setGuests(prev => [newGuest, ...prev])
+        } catch (error) {
+            console.error('Erro ao submeter RSVP:', error)
+            throw error
+        }
+    }
+
     return (
         <EventContext.Provider value={{
             guests,
@@ -393,7 +429,8 @@ export function EventProvider({ children }: { children: ReactNode }) {
             updateGuest,
             updateGuestCompanions,
             removeCompanion,
-            updateEventSettings
+            updateEventSettings,
+            submitRSVP
         }}>
             {children}
         </EventContext.Provider>
