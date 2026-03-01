@@ -12,6 +12,7 @@ type User = {
 
 type AuthContextType = {
   user: User | null
+  loading: boolean
   login: (email: string, password: string) => Promise<void>
   register: (name: string, email: string, password: string) => Promise<void>
   logout: () => void
@@ -27,6 +28,7 @@ const ADMIN_CREDENTIALS = {
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
+  const [loading, setLoading] = useState(true)
 
   // Initialize state from localStorage once mounted
   useEffect(() => {
@@ -39,6 +41,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           console.error('Error parsing saved user:', e)
         }
       }
+      setLoading(false)
     }
   }, [])
 
@@ -112,7 +115,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, isAdmin: user?.role === 'admin' }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, isAdmin: user?.role === 'admin' }}>
       {children}
     </AuthContext.Provider>
   )

@@ -8,7 +8,7 @@ import Image from 'next/image'
 import { SharedLayout } from '@/app/components/shared-layout'
 
 export default function SettingsPage() {
-    const { user, logout } = useAuth()
+    const { user, loading: authLoading, logout } = useAuth()
     const { eventSettings, updateEventSettings } = useEvent()
     const router = useRouter()
 
@@ -30,6 +30,22 @@ export default function SettingsPage() {
 
     const [saved, setSaved] = useState(false)
     const [slugEdited, setSlugEdited] = useState(false) // Track if user manually edited slug
+
+    // Image upload states
+    const [imagePreview, setImagePreview] = useState<string>(eventSettings.coverImage)
+    const [uploadMethod, setUploadMethod] = useState<'url' | 'upload'>('upload')
+    const [showCropModal, setShowCropModal] = useState(false)
+    const [tempImage, setTempImage] = useState<string>('')
+    const [dragOffsetX, setDragOffsetX] = useState(0)
+    const [dragOffsetY, setDragOffsetY] = useState(0)
+    const [isDragging, setIsDragging] = useState(false)
+    const [dragStartX, setDragStartX] = useState(0)
+    const [dragStartY, setDragStartY] = useState(0)
+    const [cropScale, setCropScale] = useState(1)
+    const [cropRotation, setCropRotation] = useState(0)
+    const [touchDistance, setTouchDistance] = useState(0)
+    const [touchStartRotation, setTouchStartRotation] = useState(0)
+    const cropPreviewRef = useRef<HTMLDivElement>(null)
 
     // Function to generate slug from names
     const generateSlug = (text: string): string => {
@@ -54,22 +70,6 @@ export default function SettingsPage() {
         setSlug(value)
         setSlugEdited(true) // Mark as manually edited
     }
-
-    // Image upload states
-    const [imagePreview, setImagePreview] = useState<string>(eventSettings.coverImage)
-    const [uploadMethod, setUploadMethod] = useState<'url' | 'upload'>('upload')
-    const [showCropModal, setShowCropModal] = useState(false)
-    const [tempImage, setTempImage] = useState<string>('')
-    const [dragOffsetX, setDragOffsetX] = useState(0)
-    const [dragOffsetY, setDragOffsetY] = useState(0)
-    const [isDragging, setIsDragging] = useState(false)
-    const [dragStartX, setDragStartX] = useState(0)
-    const [dragStartY, setDragStartY] = useState(0)
-    const [cropScale, setCropScale] = useState(1)
-    const [cropRotation, setCropRotation] = useState(0)
-    const [touchDistance, setTouchDistance] = useState(0)
-    const [touchStartRotation, setTouchStartRotation] = useState(0)
-    const cropPreviewRef = useRef<HTMLDivElement>(null)
 
     // Handle drag on image in crop modal
     const handleImageMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -216,10 +216,18 @@ export default function SettingsPage() {
     }, [showCropModal])
 
     useEffect(() => {
-        if (!user) {
+        if (!authLoading && !user) {
             router.push('/login')
         }
-    }, [user, router])
+    }, [user, authLoading, router])
+
+    if (authLoading) {
+        return (
+            <div className="min-h-screen bg-background flex items-center justify-center">
+                <div className="w-12 h-12 border-4 border-brand/20 border-t-brand rounded-full animate-spin" />
+            </div>
+        )
+    }
 
     if (!user) {
         return null

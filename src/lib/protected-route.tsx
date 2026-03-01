@@ -10,12 +10,14 @@ interface ProtectedRouteProps {
 }
 
 export function ProtectedRoute({ children, requireAdmin = false }: ProtectedRouteProps) {
-  const { user, isAdmin } = useAuth()
+  const { user, loading, isAdmin } = useAuth()
   const router = useRouter()
   const [isAuthorized, setIsAuthorized] = useState(false)
   const [isChecking, setIsChecking] = useState(true)
 
   useEffect(() => {
+    if (loading) return
+
     // Se a rota requer admin
     if (requireAdmin) {
       if (!user) {
@@ -37,7 +39,7 @@ export function ProtectedRoute({ children, requireAdmin = false }: ProtectedRout
 
     setIsAuthorized(true)
     setIsChecking(false)
-  }, [user, isAdmin, router, requireAdmin])
+  }, [user, loading, isAdmin, router, requireAdmin])
 
   // Enquanto está checando, mostra um loading
   if (isChecking) {

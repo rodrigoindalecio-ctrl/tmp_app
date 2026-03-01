@@ -12,7 +12,7 @@ import { SharedLayout } from '@/app/components/shared-layout'
 import Link from 'next/link'
 
 export default function DashboardPage() {
-  const { user, logout } = useAuth()
+  const { user, loading, logout } = useAuth()
   const { guests, eventSettings, metrics, updateGuestStatus, removeGuest, removeCompanion, updateGuest } = useEvent()
   const router = useRouter()
 
@@ -26,10 +26,18 @@ export default function DashboardPage() {
   const [deleteAllConfirmDialog, setDeleteAllConfirmDialog] = useState({ isOpen: false, step: 1 })
 
   useEffect(() => {
-    if (!user) {
+    if (!loading && !user) {
       router.push('/login')
     }
-  }, [user, router])
+  }, [user, loading, router])
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-brand/20 border-t-brand rounded-full animate-spin" />
+      </div>
+    )
+  }
 
   if (!user) {
     return null

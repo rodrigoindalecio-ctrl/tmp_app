@@ -8,7 +8,7 @@ import { parseGuestsList, generateImportTemplate, ParseSheetResult } from '@/lib
 import { SharedLayout } from '@/app/components/shared-layout'
 
 export default function ImportPage() {
-    const { user, logout } = useAuth()
+    const { user, loading: authLoading, logout } = useAuth()
     const { addGuest, addGuestsBatch, loading: eventLoading } = useEvent()
     const router = useRouter()
     const fileInputRef = useRef<HTMLInputElement>(null)
@@ -45,10 +45,20 @@ export default function ImportPage() {
     const [duplicatesList, setDuplicatesList] = useState<string[]>([])
 
     useEffect(() => {
-        if (!user) {
+        if (!authLoading && !user) {
             router.push('/login')
         }
-    }, [user, router])
+    }, [user, authLoading, router])
+
+    if (authLoading || eventLoading) {
+        return (
+            <SharedLayout role="user" title="Importar Convidados">
+                <div className="min-h-[60vh] flex items-center justify-center">
+                    <div className="w-12 h-12 border-4 border-brand/20 border-t-brand rounded-full animate-spin" />
+                </div>
+            </SharedLayout>
+        )
+    }
 
     if (!user) {
         return null
