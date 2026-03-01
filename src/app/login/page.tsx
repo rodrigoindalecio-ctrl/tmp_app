@@ -17,12 +17,12 @@ export default function LoginPage() {
         {/* Logo Section */}
         <div className="text-center mb-12">
           <div className="flex flex-col items-center gap-4 mb-8">
-            <div className="relative w-16 h-16 mb-2">
+            <div className="relative w-24 h-24 mb-2 overflow-hidden rounded-2xl border border-brand/5 shadow-sm bg-white p-2">
               <Image
-                src="/logo_header.png"
+                src="/Logo-03.jpg"
                 alt="Logo Vanessa Bidinotti"
                 fill
-                className="object-contain"
+                className="object-contain p-1"
               />
             </div>
             <div>

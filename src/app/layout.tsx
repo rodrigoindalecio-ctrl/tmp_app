@@ -31,6 +31,10 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: 'App RSVP | Vanessa Bidinotti',
   description: 'Gestão exclusiva de eventos e convidados',
+  icons: {
+    icon: '/Logo-03.jpg',
+    apple: '/Logo-03.jpg',
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: 'default',
