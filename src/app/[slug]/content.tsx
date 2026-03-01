@@ -22,6 +22,7 @@ export default function EventContent({ slug }: EventContentProps) {
     // Confirmation state (for the group)
     const [isMainGuestConfirmed, setIsMainGuestConfirmed] = useState(true)
     const [groupConfirmations, setGroupConfirmations] = useState<{ [key: number]: boolean }>({})
+    const [guestEmail, setGuestEmail] = useState('')
 
     // Validate if this is the correct event
     const isCorrectEvent = eventSettings.slug === slug
@@ -52,6 +53,7 @@ export default function EventContent({ slug }: EventContentProps) {
     const handleSelectGuest = (guest: Guest) => {
         setSelectedGuest(guest)
         setIsMainGuestConfirmed(guest.status === 'confirmed')
+        setGuestEmail(guest.email || '')
 
         // Initialize companions confirmations
         const initialComps: { [key: number]: boolean } = {}
@@ -75,9 +77,40 @@ export default function EventContent({ slug }: EventContentProps) {
 
             await updateGuest(selectedGuest.id, {
                 status: isMainGuestConfirmed ? 'confirmed' : 'declined',
+                email: guestEmail,
                 companionsList: updatedCompanions,
                 confirmedAt: new Date()
             })
+
+            // Disparar o envio de email de confirmação
+            if (isMainGuestConfirmed || updatedCompanions.some(c => c.isConfirmed)) {
+                try {
+                    const confirmedComps = updatedCompanions.filter(c => c.isConfirmed)
+                    const confirmedNames = []
+                    if (isMainGuestConfirmed) confirmedNames.push(selectedGuest.name)
+                    confirmedComps.forEach(c => confirmedNames.push(c.name))
+
+                    const confirmedDetails = []
+                    if (isMainGuestConfirmed) confirmedDetails.push({ name: selectedGuest.name, category: selectedGuest.category })
+                    confirmedComps.forEach(c => confirmedDetails.push({ name: c.name, category: c.category }))
+
+                    await fetch('/api/send-confirmation-email', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            email: guestEmail,
+                            guestName: selectedGuest.name,
+                            eventSettings: eventSettings,
+                            confirmedCompanions: confirmedNames.length,
+                            confirmedNames: confirmedNames,
+                            confirmedDetails: confirmedDetails,
+                            giftListLinks: eventSettings.giftListLinks || []
+                        })
+                    })
+                } catch (emailError) {
+                    console.error('Erro ao disparar email:', emailError)
+                }
+            }
 
             setStep('success')
         } catch (error) {
@@ -263,6 +296,19 @@ export default function EventContent({ slug }: EventContentProps) {
                                 </span>
                             </div>
                         ))}
+                    </div>
+
+                    <div className="space-y-4 pt-4">
+                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Para receber confirmação</label>
+                        <input
+                            required
+                            type="email"
+                            value={guestEmail}
+                            onChange={(e) => setGuestEmail(e.target.value)}
+                            placeholder="Seu e-mail..."
+                            className="w-full px-6 py-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-brand/10 focus:border-brand transition-all outline-none shadow-sm"
+                        />
+                        <p className="text-[9px] text-slate-400 italic ml-1">* Enviaremos os detalhes do evento para este e-mail.</p>
                     </div>
 
                     <div className="pt-4">
