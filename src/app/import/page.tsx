@@ -18,8 +18,6 @@ export default function ImportPage() {
     const [method, setMethod] = useState<'excel' | 'manual' | null>(null)
     const [manualName, setManualName] = useState('')
     const [manualTelefone, setManualTelefone] = useState('')
-    const [manualEmail, setManualEmail] = useState('')
-    const [manualRestricoes, setManualRestricoes] = useState('')
     const [manualGrupo, setManualGrupo] = useState('')
     const [manualCategory, setManualCategory] = useState('adult_paying')
 
@@ -32,7 +30,7 @@ export default function ImportPage() {
         { name: '', category: 'adult_paying' }
     ])
 
-    const [pendingGuest, setPendingGuest] = useState<{ name: string, telefone: string, email: string, companionsList: any[], restricoes: string, grupo: string, category: string } | null>(null)
+    const [pendingGuest, setPendingGuest] = useState<{ name: string, telefone: string, companionsList: any[], grupo: string, category: string } | null>(null)
 
     // File upload states
     const [isDragging, setIsDragging] = useState(false)
@@ -84,9 +82,7 @@ export default function ImportPage() {
         setPendingGuest({
             name: manualName,
             telefone: manualTelefone,
-            email: manualEmail,
             companionsList,
-            restricoes: manualRestricoes,
             grupo: manualGrupo,
             category: manualCategory
         })
@@ -115,7 +111,6 @@ export default function ImportPage() {
         setStep('success')
         setManualName('')
         setManualTelefone('')
-        setManualEmail('')
         setManualCompanions([
             { name: '', category: 'adult_paying' },
             { name: '', category: 'adult_paying' },
@@ -123,7 +118,6 @@ export default function ImportPage() {
             { name: '', category: 'adult_paying' },
             { name: '', category: 'adult_paying' }
         ])
-        setManualRestricoes('')
         setManualGrupo('')
         setManualCategory('adult_paying')
         setPendingGuest(null)
@@ -258,13 +252,16 @@ export default function ImportPage() {
                                         setMethod('excel')
                                         setStep('input')
                                     }}
-                                    className="bg-white p-12 rounded-[2.5rem] border border-brand/5 hover:border-brand/20 hover:shadow-xl hover:shadow-brand/5 transition-all flex flex-col items-center text-center group"
+                                    className="bg-white p-12 rounded-[2.5rem] border border-brand/5 hover:border-brand/20 hover:shadow-2xl hover:shadow-brand/[0.03] transition-all flex flex-col items-center text-center group"
                                 >
-                                    <div className="w-20 h-20 bg-blue-50 rounded-[1.5rem] flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                                    <div className="w-20 h-20 bg-brand/5 rounded-[2.5rem] flex items-center justify-center mb-6 group-hover:scale-110 transition-transform border border-brand/10">
                                         <FileSpreadsheetIcon />
                                     </div>
                                     <h3 className="text-xl font-black text-slate-800 mb-2 tracking-tight">Planilha Excel</h3>
-                                    <p className="text-xs text-slate-400 font-bold uppercase tracking-widest leading-relaxed px-4">Importe múltiplos convidados de uma só vez usando nosso modelo.</p>
+                                    <p className="text-xs text-slate-400 font-bold uppercase tracking-widest leading-relaxed px-4">
+                                        Importe múltiplos convidados de uma só vez.<br />
+                                        <span className="text-brand/60 mt-2 block">Novidade: Liste acompanhantes por vírgula!</span>
+                                    </p>
                                 </button>
 
                                 <button
@@ -272,9 +269,9 @@ export default function ImportPage() {
                                         setMethod('manual')
                                         setStep('input')
                                     }}
-                                    className="bg-white p-12 rounded-[2.5rem] border border-brand/5 hover:border-brand/20 hover:shadow-xl hover:shadow-brand/5 transition-all flex flex-col items-center text-center group"
+                                    className="bg-white p-12 rounded-[2.5rem] border border-brand/5 hover:border-brand/20 hover:shadow-2xl hover:shadow-brand/[0.03] transition-all flex flex-col items-center text-center group"
                                 >
-                                    <div className="w-20 h-20 bg-brand/5 rounded-[1.5rem] flex items-center justify-center mb-6 group-hover:scale-110 transition-transform">
+                                    <div className="w-20 h-20 bg-brand/5 rounded-[2.5rem] flex items-center justify-center mb-6 group-hover:scale-110 transition-transform border border-brand/10">
                                         <UserPlusIcon />
                                     </div>
                                     <h3 className="text-xl font-black text-slate-800 mb-2 tracking-tight">Manualmente</h3>
@@ -355,7 +352,7 @@ export default function ImportPage() {
                                                 />
                                             </div>
                                             <div>
-                                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Telefone *</label>
+                                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Telefone / WhatsApp *</label>
                                                 <input
                                                     type="tel"
                                                     required
@@ -369,16 +366,6 @@ export default function ImportPage() {
 
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <div>
-                                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Email</label>
-                                                <input
-                                                    type="email"
-                                                    placeholder="contato@email.com"
-                                                    className="w-full px-5 py-3.5 bg-slate-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-slate-700"
-                                                    value={manualEmail}
-                                                    onChange={(e) => setManualEmail(e.target.value)}
-                                                />
-                                            </div>
-                                            <div>
                                                 <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Grupo</label>
                                                 <input
                                                     type="text"
@@ -387,6 +374,18 @@ export default function ImportPage() {
                                                     value={manualGrupo}
                                                     onChange={(e) => setManualGrupo(e.target.value)}
                                                 />
+                                            </div>
+                                            <div>
+                                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Tipo do Titular</label>
+                                                <select
+                                                    value={manualCategory}
+                                                    onChange={(e) => setManualCategory(e.target.value)}
+                                                    className="w-full px-5 py-3.5 bg-slate-50 border-none rounded-2xl text-xs font-black uppercase tracking-widest text-slate-500 shadow-inner outline-none"
+                                                >
+                                                    <option value="adult_paying">Adulto Pagante</option>
+                                                    <option value="child_paying">Criança Pagante</option>
+                                                    <option value="child_not_paying">Criança Não Pagante</option>
+                                                </select>
                                             </div>
                                         </div>
 
@@ -543,7 +542,7 @@ export default function ImportPage() {
 // Icons
 const ArrowLeftIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m12 19-7-7 7-7" /><path d="M19 12H5" /></svg>
 const ArrowRightIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" x2="19" y1="12" y2="12" /><polyline points="12 5 19 12 12 19" /></svg>
-const FileSpreadsheetIcon = () => <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-blue-500"><path d="M12 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10"></path><polyline points="12 2 12 10 20 10"></polyline></svg>
+const FileSpreadsheetIcon = () => <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-brand"><path d="M12 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10"></path><polyline points="12 2 12 10 20 10"></polyline></svg>
 const UserPlusIcon = () => <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-brand"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle></svg>
 const UploadCloudIcon = () => <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 14.899A7 7 0 1 1 15.71 8h1.79a4.5 4.5 0 0 1 2.5 8.242" /><path d="M12 12v9" /><path d="m16 16-4-4-4 4" /></svg>
 const DownloadIcon = () => <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="7 10 12 15 17 10" /><line x1="12" x2="12" y1="15" y2="3" /></svg>
