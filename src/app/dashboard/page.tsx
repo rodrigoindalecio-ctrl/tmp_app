@@ -118,7 +118,7 @@ export default function DashboardPage() {
 
   const handleCopyLink = () => {
     const slug = eventSettings.slug || user.name.toLowerCase().replace(/\s+/g, '-')
-    const url = `${window.location.origin}/evento/${slug}`
+    const url = `${window.location.origin}/confirmar/${slug}`
     navigator.clipboard.writeText(url)
     setCopied(true)
     setTimeout(() => setCopied(false), 2000)
@@ -408,7 +408,7 @@ export default function DashboardPage() {
           <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
             <div className="flex-1 bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-[10px] text-slate-400 font-black uppercase tracking-widest overflow-hidden text-ellipsis flex items-center shadow-inner">
               {typeof window !== 'undefined' ?
-                `${window.location.origin}/evento/${eventSettings.slug || user.name.toLowerCase().replace(/\s+/g, '-')}` : '...'
+                `${window.location.origin}/confirmar/${eventSettings.slug || user.name.toLowerCase().replace(/\s+/g, '-')}` : '...'
               }
             </div>
             <button
