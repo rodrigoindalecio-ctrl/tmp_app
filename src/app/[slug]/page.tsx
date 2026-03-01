@@ -1,3 +1,5 @@
+'use client'
+
 import { useAuth } from '@/lib/auth-context'
 import { useEvent, Guest, GuestStatus, GuestCategory } from '@/lib/event-context'
 import { useRouter, useParams } from 'next/navigation'
