@@ -29,10 +29,10 @@ export default function EventContent({ slug }: EventContentProps) {
 
     if (!isCorrectEvent) {
         return (
-            <div className="min-h-screen flex items-center justify-center p-4">
+            <div className="min-h-screen bg-background flex items-center justify-center p-4">
                 <div className="text-center">
-                    <h1 className="text-2xl font-serif mb-2 text-slate-800">Evento não encontrado</h1>
-                    <p className="text-slate-500">O link que você acessou pode estar incorreto.</p>
+                    <h1 className="text-2xl font-serif mb-2 text-text-primary">Evento não encontrado</h1>
+                    <p className="text-text-secondary">O link que você acessou pode estar incorreto.</p>
                 </div>
             </div>
         )
@@ -123,27 +123,27 @@ export default function EventContent({ slug }: EventContentProps) {
     if (step === 'success') {
         return (
             <div className="max-w-xl mx-auto py-20 px-6 text-center animate-in fade-in zoom-in duration-700">
-                <div className="w-20 h-20 bg-emerald-50 text-emerald-500 rounded-full flex items-center justify-center mx-auto mb-8">
+                <div className="w-20 h-20 bg-success-light text-success-dark rounded-full flex items-center justify-center mx-auto mb-8">
                     <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5" /></svg>
                 </div>
-                <h1 className="text-3xl font-serif mb-4 text-slate-800">Confirmado!</h1>
-                <p className="text-slate-500 mb-10 leading-relaxed text-sm">
+                <h1 className="text-3xl font-serif mb-4 text-text-primary">Confirmado!</h1>
+                <p className="text-text-secondary mb-10 leading-relaxed text-sm">
                     Sua resposta foi salva com sucesso. <br />
                     Mal podemos esperar para celebrar este momento com você!
                 </p>
-                <div className="p-6 bg-slate-50 rounded-3xl border border-slate-100 text-left mb-10">
-                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-4 text-center">Resumo</p>
+                <div className="p-6 bg-bg-light rounded-3xl border border-border-soft text-left mb-10">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-text-muted mb-4 text-center">Resumo</p>
                     <div className="space-y-2">
-                        <div className="flex justify-between items-center bg-white p-3 rounded-xl border border-slate-50">
-                            <span className="text-xs font-bold text-slate-700">{selectedGuest?.name}</span>
-                            <span className={`text-[10px] font-black uppercase ${isMainGuestConfirmed ? 'text-emerald-500' : 'text-slate-400'}`}>
+                        <div className="flex justify-between items-center bg-surface p-3 rounded-xl border border-border-soft">
+                            <span className="text-xs font-bold text-text-primary">{selectedGuest?.name}</span>
+                            <span className={`text-[10px] font-black uppercase ${isMainGuestConfirmed ? 'text-success-dark' : 'text-text-muted'}`}>
                                 {isMainGuestConfirmed ? 'Presença Confirmada' : 'Não Comparecerá'}
                             </span>
                         </div>
                         {selectedGuest?.companionsList.map((comp, idx) => (
-                            <div key={idx} className="flex justify-between items-center bg-white p-3 rounded-xl border border-slate-50 opacity-80">
-                                <span className="text-xs font-medium text-slate-600">{comp.name}</span>
-                                <span className={`text-[10px] font-black uppercase ${groupConfirmations[idx] ? 'text-emerald-500' : 'text-slate-300'}`}>
+                            <div key={idx} className="flex justify-between items-center bg-surface p-3 rounded-xl border border-border-soft opacity-80">
+                                <span className="text-xs font-medium text-text-secondary">{comp.name}</span>
+                                <span className={`text-[10px] font-black uppercase ${groupConfirmations[idx] ? 'text-success-dark' : 'text-text-muted'}`}>
                                     {groupConfirmations[idx] ? 'Confirmado' : 'Ausente'}
                                 </span>
                             </div>
@@ -168,15 +168,15 @@ export default function EventContent({ slug }: EventContentProps) {
             <div className="max-w-xl mx-auto py-12 px-6 animate-in slide-in-from-bottom duration-700">
                 <button
                     onClick={() => setStep('landing')}
-                    className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-brand mb-8 transition-colors group"
+                    className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-text-muted hover:text-brand mb-8 transition-colors group"
                 >
                     <svg className="group-hover:-translate-x-1 transition-transform" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
                     Voltar
                 </button>
 
                 <div className="mb-10">
-                    <h2 className="text-3xl font-serif text-slate-800 mb-2">Localizar Convite</h2>
-                    <p className="text-slate-500 text-sm">Digite seu nome conforme escrito no convite para encontrar sua reserva.</p>
+                    <h2 className="text-3xl font-serif text-text-primary mb-2">Localizar Convite</h2>
+                    <p className="text-text-secondary text-sm">Digite seu nome conforme escrito no convite para encontrar sua reserva.</p>
                 </div>
 
                 <form onSubmit={handleSearch} className="space-y-6">
@@ -188,7 +188,7 @@ export default function EventContent({ slug }: EventContentProps) {
                             value={searchTerm}
                             onChange={(e) => setSearchTerm(e.target.value)}
                             placeholder="Seu nome completo..."
-                            className="w-full px-6 py-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-brand/10 focus:border-brand transition-all outline-none pr-14 shadow-sm"
+                            className="w-full px-6 py-4 bg-surface border border-border-soft rounded-2xl text-sm font-bold focus:ring-4 focus:ring-brand/10 focus:border-brand transition-all outline-none pr-14 shadow-sm placeholder:text-text-muted text-text-primary"
                         />
                         <button
                             type="submit"
@@ -201,7 +201,7 @@ export default function EventContent({ slug }: EventContentProps) {
 
                 {step === 'results' && (
                     <div className="mt-12 space-y-4 animate-in fade-in duration-500">
-                        <p className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">
+                        <p className="text-[10px] font-black uppercase tracking-widest text-text-muted ml-1">
                             {searchResults.length === 0 ? 'Nenhum convite encontrado' : `${searchResults.length} Convite(s) Encontrado(s)`}
                         </p>
 
@@ -211,14 +211,14 @@ export default function EventContent({ slug }: EventContentProps) {
                                     <button
                                         key={guest.id}
                                         onClick={() => handleSelectGuest(guest)}
-                                        className="w-full text-left p-6 bg-white border border-slate-100 rounded-[2rem] hover:border-brand hover:shadow-xl hover:shadow-brand/5 transition-all group relative overflow-hidden"
+                                        className="w-full text-left p-6 bg-surface border border-border-soft rounded-[2rem] hover:border-brand hover:shadow-xl hover:shadow-brand/5 transition-all group relative overflow-hidden"
                                     >
                                         <div className="relative z-10 flex items-center justify-between">
                                             <div>
-                                                <p className="text-base font-serif text-slate-800 group-hover:text-brand transition-colors">{guest.name}</p>
-                                                {guest.grupo && <p className="text-[9px] font-black uppercase tracking-widest text-slate-300 mt-1">{guest.grupo}</p>}
+                                                <p className="text-base font-serif text-text-primary group-hover:text-brand transition-colors">{guest.name}</p>
+                                                {guest.grupo && <p className="text-[9px] font-black uppercase tracking-widest text-text-muted mt-1">{guest.grupo}</p>}
                                             </div>
-                                            <div className="w-8 h-8 rounded-full bg-slate-50 flex items-center justify-center text-slate-300 group-hover:bg-brand group-hover:text-white transition-all">
+                                            <div className="w-8 h-8 rounded-full bg-bg-light flex items-center justify-center text-text-muted group-hover:bg-brand group-hover:text-white transition-all">
                                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M9 18l6-6-6-6" /></svg>
                                             </div>
                                         </div>
@@ -226,8 +226,8 @@ export default function EventContent({ slug }: EventContentProps) {
                                 ))}
                             </div>
                         ) : (
-                            <div className="p-8 bg-slate-50 rounded-3xl border border-dashed border-slate-200 text-center">
-                                <p className="text-sm text-slate-400 mb-4 italic">Não encontrou seu nome? Verifique se digitou corretamente ou entre em contato com os noivos.</p>
+                            <div className="p-8 bg-bg-light rounded-3xl border border-dashed border-border-soft text-center">
+                                <p className="text-sm text-text-muted mb-4 italic">Não encontrou seu nome? Verifique se digitou corretamente ou entre em contato com os noivos.</p>
                                 <button
                                     onClick={() => setSearchTerm('')}
                                     className="text-[10px] font-black uppercase tracking-widest text-brand"
@@ -247,33 +247,33 @@ export default function EventContent({ slug }: EventContentProps) {
             <div className="max-w-xl mx-auto py-12 px-6 animate-in slide-in-from-right duration-700">
                 <button
                     onClick={() => setStep('results')}
-                    className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-brand mb-8 transition-colors"
+                    className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-text-muted hover:text-brand mb-8 transition-colors"
                 >
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M19 12H5M12 19l-7-7 7-7" /></svg>
                     Voltar
                 </button>
 
                 <div className="mb-10">
-                    <h2 className="text-3xl font-serif text-slate-800 mb-2">Quem irá comparecer?</h2>
-                    <p className="text-slate-500 text-sm">Selecione quem do seu grupo poderá prestigiar este momento.</p>
+                    <h2 className="text-3xl font-serif text-text-primary mb-2">Quem irá comparecer?</h2>
+                    <p className="text-text-secondary text-sm">Selecione quem do seu grupo poderá prestigiar este momento.</p>
                 </div>
 
                 <form onSubmit={handleConfirm} className="space-y-8">
                     <div className="space-y-4">
-                        <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 ml-1">Confirmar Presença</label>
+                        <label className="text-[10px] font-black uppercase tracking-widest text-text-muted ml-1">Confirmar Presença</label>
 
                         {/* Convidado Principal */}
                         <div
                             onClick={() => setIsMainGuestConfirmed(!isMainGuestConfirmed)}
-                            className={`p-6 rounded-3xl border-2 cursor-pointer transition-all flex items-center justify-between ${isMainGuestConfirmed ? 'bg-brand/5 border-brand' : 'bg-white border-slate-100 hover:border-slate-200'}`}
+                            className={`p-6 rounded-3xl border-2 cursor-pointer transition-all flex items-center justify-between ${isMainGuestConfirmed ? 'bg-brand-pale/50 border-brand' : 'bg-surface border-border-soft hover:border-brand-light/30'}`}
                         >
                             <div className="flex items-center gap-4">
-                                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${isMainGuestConfirmed ? 'bg-brand border-brand text-white' : 'border-slate-200'}`}>
+                                <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${isMainGuestConfirmed ? 'bg-brand border-brand text-white' : 'border-border-soft'}`}>
                                     {isMainGuestConfirmed && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5" /></svg>}
                                 </div>
-                                <span className={`text-sm font-bold ${isMainGuestConfirmed ? 'text-slate-800' : 'text-slate-400'}`}>{selectedGuest?.name}</span>
+                                <span className={`text-sm font-bold ${isMainGuestConfirmed ? 'text-text-primary' : 'text-text-muted'}`}>{selectedGuest?.name}</span>
                             </div>
-                            <span className={`text-[9px] font-black uppercase tracking-widest ${isMainGuestConfirmed ? 'text-brand' : 'text-slate-300'}`}>
+                            <span className={`text-[9px] font-black uppercase tracking-widest ${isMainGuestConfirmed ? 'text-brand' : 'text-text-muted'}`}>
                                 {isMainGuestConfirmed ? 'Eu Vou!' : 'Não Vou'}
                             </span>
                         </div>
@@ -283,15 +283,15 @@ export default function EventContent({ slug }: EventContentProps) {
                             <div
                                 key={idx}
                                 onClick={() => setGroupConfirmations({ ...groupConfirmations, [idx]: !groupConfirmations[idx] })}
-                                className={`p-6 rounded-3xl border-2 cursor-pointer transition-all flex items-center justify-between ${groupConfirmations[idx] ? 'bg-brand/5 border-brand' : 'bg-white border-slate-100 hover:border-slate-200'}`}
+                                className={`p-6 rounded-3xl border-2 cursor-pointer transition-all flex items-center justify-between ${groupConfirmations[idx] ? 'bg-brand-pale/50 border-brand' : 'bg-surface border-border-soft hover:border-brand-light/30'}`}
                             >
                                 <div className="flex items-center gap-4">
-                                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${groupConfirmations[idx] ? 'bg-brand border-brand text-white' : 'border-slate-200'}`}>
+                                    <div className={`w-6 h-6 rounded-full border-2 flex items-center justify-center transition-all ${groupConfirmations[idx] ? 'bg-brand border-brand text-white' : 'border-border-soft'}`}>
                                         {groupConfirmations[idx] && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><path d="M20 6L9 17l-5-5" /></svg>}
                                     </div>
-                                    <span className={`text-sm font-semibold ${groupConfirmations[idx] ? 'text-slate-800' : 'text-slate-400'}`}>{comp.name}</span>
+                                    <span className={`text-sm font-semibold ${groupConfirmations[idx] ? 'text-text-primary' : 'text-text-muted'}`}>{comp.name}</span>
                                 </div>
-                                <span className={`text-[9px] font-black uppercase tracking-widest ${groupConfirmations[idx] ? 'text-brand' : 'text-slate-300'}`}>
+                                <span className={`text-[9px] font-black uppercase tracking-widest ${groupConfirmations[idx] ? 'text-brand' : 'text-text-muted'}`}>
                                     {groupConfirmations[idx] ? 'Confirmado' : 'Ausente'}
                                 </span>
                             </div>
@@ -309,9 +309,9 @@ export default function EventContent({ slug }: EventContentProps) {
                             value={guestEmail}
                             onChange={(e) => setGuestEmail(e.target.value)}
                             placeholder="Seu melhor e-mail..."
-                            className="w-full px-6 py-4 bg-white border border-slate-200 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-brand/10 focus:border-brand transition-all outline-none shadow-sm"
+                            className="w-full px-6 py-4 bg-surface border border-border-soft rounded-2xl text-sm font-bold focus:ring-4 focus:ring-brand/10 focus:border-brand transition-all outline-none shadow-sm placeholder:text-text-muted text-text-primary"
                         />
-                        <p className="text-[10px] text-slate-500 font-medium ml-1">
+                        <p className="text-[10px] text-text-muted font-medium ml-1">
                             * Você receberá o resumo da confirmação, local e informações do evento neste e-mail.
                         </p>
                     </div>
@@ -319,7 +319,7 @@ export default function EventContent({ slug }: EventContentProps) {
                     <div className="pt-4">
                         <button
                             disabled={isSubmitting}
-                            className="w-full py-5 bg-brand text-white rounded-[2rem] font-black uppercase tracking-[0.2em] text-xs shadow-2xl shadow-brand/30 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-70"
+                            className="w-full py-5 bg-brand text-white rounded-[2rem] font-black uppercase tracking-[0.2em] text-xs shadow-2xl shadow-brand/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-2 disabled:opacity-70"
                         >
                             {isSubmitting ? (
                                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -334,7 +334,7 @@ export default function EventContent({ slug }: EventContentProps) {
     }
 
     return (
-        <div className="min-h-screen bg-white">
+        <div className="min-h-screen bg-background">
             {/* Header / Hero */}
             <div className="relative h-[65vh] md:h-[70vh] overflow-hidden">
                 <Image
@@ -370,21 +370,21 @@ export default function EventContent({ slug }: EventContentProps) {
             {/* Messages / Invitation */}
             <div className="max-w-4xl mx-auto py-24 px-6 text-center">
                 <div className="mb-20 animate-in fade-in duration-1000 delay-300">
-                    <div className="w-16 h-px bg-slate-200 mx-auto mb-12" />
-                    <p className="font-serif text-2xl md:text-3xl text-slate-700 leading-relaxed italic max-w-2xl mx-auto drop-shadow-sm">
+                    <div className="w-16 h-px bg-border-soft mx-auto mb-12" />
+                    <p className="font-serif text-2xl md:text-3xl text-text-primary leading-relaxed italic max-w-2xl mx-auto drop-shadow-sm">
                         "{eventSettings.customMessage || 'Nossa história ganha um novo capítulo e ficaremos muito felizes em ter você ao nosso lado para celebrar este momento único.'}"
                     </p>
-                    <div className="w-16 h-px bg-slate-200 mx-auto mt-12" />
+                    <div className="w-16 h-px bg-border-soft mx-auto mt-12" />
                 </div>
 
                 <div className="space-y-6 mb-24">
                     <button
                         onClick={() => setStep('search')}
-                        className="w-full max-w-md py-6 bg-brand text-white rounded-full font-black uppercase tracking-[0.25em] text-sm shadow-[0_20px_50px_rgba(154,52,65,0.3)] hover:scale-105 active:scale-95 transition-all duration-300"
+                        className="w-full max-w-md py-6 bg-brand text-white rounded-full font-black uppercase tracking-[0.25em] text-sm shadow-[0_20px_50px_rgba(123,45,61,0.2)] hover:scale-105 active:scale-95 transition-all duration-300"
                     >
                         Confirmar Presença
                     </button>
-                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">
+                    <p className="text-[10px] font-black uppercase tracking-widest text-text-muted">
                         {eventSettings.confirmationDeadline ? (
                             `Sua resposta é importante até ${formatDate(eventSettings.confirmationDeadline, { day: '2-digit', month: '2-digit' })}`
                         ) : 'Confirmação antecipada é muito apreciada'}
@@ -393,28 +393,28 @@ export default function EventContent({ slug }: EventContentProps) {
 
                 {/* Info Cards */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-10 text-left mb-24">
-                    <div className="p-10 bg-slate-50/50 rounded-[3rem] border border-slate-100 backdrop-blur-sm group hover:bg-white hover:shadow-2xl hover:shadow-slate-200/50 transition-all duration-500">
-                        <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-brand shadow-md mb-8 group-hover:bg-brand group-hover:text-white transition-all duration-500">
+                    <div className="p-10 bg-surface rounded-[3rem] border border-border-soft backdrop-blur-sm group hover:bg-surface hover:shadow-2xl hover:shadow-brand/5 transition-all duration-500">
+                        <div className="w-12 h-12 bg-bg-light rounded-2xl flex items-center justify-center text-brand shadow-sm mb-8 group-hover:bg-brand group-hover:text-white transition-all duration-500">
                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
                         </div>
-                        <h3 className="font-black text-xs uppercase tracking-[0.3em] text-slate-800 mb-4">Data e Horário</h3>
-                        <p className="text-base text-slate-500 leading-relaxed">
+                        <h3 className="font-black text-xs uppercase tracking-[0.3em] text-text-primary mb-4">Data e Horário</h3>
+                        <p className="text-base text-text-secondary leading-relaxed">
                             A cerimônia começará pontualmente às <strong>{eventSettings.eventTime || '21:00'}h</strong>. <br />
                             Aguardamos sua chegada com 30min de antecedência.
                         </p>
                     </div>
                     {eventSettings.wazeLocation && (
-                        <div className="p-10 bg-slate-50/50 rounded-[3rem] border border-slate-100 backdrop-blur-sm group hover:bg-white hover:shadow-2xl hover:shadow-slate-200/50 transition-all duration-500">
-                            <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-brand shadow-md mb-8 group-hover:bg-brand group-hover:text-white transition-all duration-500">
+                        <div className="p-10 bg-surface rounded-[3rem] border border-border-soft backdrop-blur-sm group hover:bg-surface hover:shadow-2xl hover:shadow-brand/5 transition-all duration-500">
+                            <div className="w-12 h-12 bg-bg-light rounded-2xl flex items-center justify-center text-brand shadow-sm mb-8 group-hover:bg-brand group-hover:text-white transition-all duration-500">
                                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="3 11 22 2 13 21 11 13 3 11" /></svg>
                             </div>
-                            <h3 className="font-black text-xs uppercase tracking-[0.3em] text-slate-800 mb-4">Como Chegar</h3>
-                            <p className="text-base text-slate-500 mb-6 line-clamp-2">{eventSettings.eventLocation}</p>
+                            <h3 className="font-black text-xs uppercase tracking-[0.3em] text-text-primary mb-4">Como Chegar</h3>
+                            <p className="text-base text-text-secondary mb-6 line-clamp-2">{eventSettings.eventLocation}</p>
                             <a
                                 href={eventSettings.wazeLocation}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-3 text-[11px] font-black uppercase tracking-[0.2em] text-brand hover:gap-5 transition-all"
+                                className="inline-flex items-center gap-3 text-[11px] font-black uppercase tracking-[0.2em] text-brand hover:gap-5 transition-all font-bold"
                             >
                                 Abrir GPS
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6M15 3h6v6M10 14L21 3" /></svg>
@@ -425,12 +425,12 @@ export default function EventContent({ slug }: EventContentProps) {
 
                 {/* Gifts section */}
                 {(eventSettings.giftList || (eventSettings.giftListLinks && eventSettings.giftListLinks.length > 0)) && (
-                    <div className="pt-10 border-t border-slate-100">
-                        <div className="w-16 h-16 bg-brand/5 rounded-3xl flex items-center justify-center text-brand mx-auto mb-8 shadow-inner">
+                    <div className="pt-10 border-t border-border-soft">
+                        <div className="w-16 h-16 bg-brand-pale rounded-3xl flex items-center justify-center text-brand mx-auto mb-8 shadow-inner">
                             <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 12V8H4v4M3 20h18L19 8H5L3 20zM12 22V8M8 12l4-4 4 4" /></svg>
                         </div>
-                        <h2 className="text-4xl font-serif text-slate-800 mb-8">Lista de Presentes</h2>
-                        <p className="text-slate-500 text-base mb-12 max-w-xl mx-auto leading-relaxed italic">
+                        <h2 className="text-4xl font-serif text-text-primary mb-8">Lista de Presentes</h2>
+                        <p className="text-text-secondary text-base mb-12 max-w-xl mx-auto leading-relaxed italic">
                             {eventSettings.giftList || 'Sua presença é o nosso maior presente, mas se desejar nos presentear de outra forma, aqui estão nossas sugestões:'}
                         </p>
 
@@ -441,7 +441,7 @@ export default function EventContent({ slug }: EventContentProps) {
                                     href={link.url}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="group px-10 py-5 bg-white border border-slate-100 rounded-[2rem] text-[11px] font-black uppercase tracking-[0.2em] text-slate-700 shadow-xl shadow-slate-200/50 hover:bg-brand hover:text-white hover:border-brand hover:translate-y-[-5px] transition-all duration-500"
+                                    className="group px-10 py-5 bg-surface border border-border-soft rounded-[2rem] text-[11px] font-black uppercase tracking-[0.2em] text-text-secondary shadow-lg shadow-brand/5 hover:bg-brand hover:text-white hover:border-brand hover:translate-y-[-5px] transition-all duration-500"
                                 >
                                     {link.name}
                                 </a>
@@ -452,10 +452,10 @@ export default function EventContent({ slug }: EventContentProps) {
             </div>
 
             {/* Footer */}
-            <footer className="py-20 px-6 text-center border-t border-slate-50">
+            <footer className="py-20 px-6 text-center border-t border-border-soft bg-bg-light/30">
                 <div className="max-w-4xl mx-auto space-y-6">
                     <p className="text-[10px] font-black uppercase tracking-[0.5em] text-brand/40 mb-4">Desenvolvido por</p>
-                    <p className="text-xs font-serif text-slate-400 opacity-60">Vanessa Bidinotti & Rodrigo</p>
+                    <p className="text-xs font-serif text-text-muted opacity-60">Vanessa Bidinotti & Rodrigo</p>
                     <div className="flex justify-center gap-4 mt-8 opacity-20">
                         <div className="w-2 h-2 rounded-full bg-brand" />
                         <div className="w-2 h-2 rounded-full bg-brand" />

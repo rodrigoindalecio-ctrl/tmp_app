@@ -277,14 +277,14 @@ export default function SettingsPage() {
         >
             <main className="max-w-[800px] mx-auto w-full animate-in fade-in duration-500 pb-20">
                 {/* SETTINGS CARD */}
-                <div className="bg-white rounded-[2.5rem] border border-brand/5 shadow-sm p-8 md:p-12">
+                <div className="bg-surface rounded-[2.5rem] border border-border-soft shadow-sm p-8 md:p-12">
                     <div className="flex items-center gap-3 mb-10">
-                        <div className="w-12 h-12 bg-brand/5 rounded-2xl flex items-center justify-center text-brand">
+                        <div className="w-12 h-12 bg-brand-pale/50 rounded-2xl flex items-center justify-center text-brand">
                             <HeartIconOutline className="w-6 h-6" />
                         </div>
                         <div>
-                            <h2 className="text-2xl font-black text-slate-800 tracking-tight">Evento</h2>
-                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest leading-none">Dados principais e identidade</p>
+                            <h2 className="text-2xl font-black text-text-primary tracking-tight">Evento</h2>
+                            <p className="text-[10px] font-black text-text-muted uppercase tracking-widest leading-none">Dados principais e identidade</p>
                         </div>
                     </div>
 
@@ -292,19 +292,19 @@ export default function SettingsPage() {
                         {/* Tipo de Evento */}
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                             <div>
-                                <label htmlFor="eventType" className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 ml-1">Tipo de Evento</label>
+                                <label htmlFor="eventType" className="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-3 ml-1">Tipo de Evento</label>
                                 <select
                                     id="eventType"
                                     value={eventType}
                                     onChange={(e) => setEventType(e.target.value as 'casamento' | 'debutante')}
-                                    className="w-full px-5 py-3.5 bg-slate-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-slate-700 appearance-none cursor-pointer"
+                                    className="w-full px-5 py-3.5 bg-bg-light border border-border-soft rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-text-primary appearance-none cursor-pointer"
                                 >
                                     <option value="casamento">💍 Casamento</option>
                                     <option value="debutante">💃 Debutante</option>
                                 </select>
                             </div>
                             <div>
-                                <label htmlFor="coupleNames" className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 ml-1">
+                                <label htmlFor="coupleNames" className="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-3 ml-1">
                                     {eventType === 'casamento' ? 'Nomes do Casal' : 'Nome da Debutante'}
                                 </label>
                                 <input
@@ -313,32 +313,32 @@ export default function SettingsPage() {
                                     value={coupleNames}
                                     onChange={(e) => handleNamesChange(e.target.value)}
                                     placeholder={eventType === 'casamento' ? 'Ex: Vanessa e Rodrigo' : 'Ex: Maria Clara'}
-                                    className="w-full px-5 py-3.5 bg-slate-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-slate-700"
+                                    className="w-full px-5 py-3.5 bg-bg-light border border-border-soft rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-text-primary placeholder:text-text-muted"
                                 />
                             </div>
                         </div>
 
                         {/* Slug (URL) */}
                         <div>
-                            <label htmlFor="slug" className="flex items-center gap-2 text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 ml-1">
+                            <label htmlFor="slug" className="flex items-center gap-2 text-[10px] font-black text-text-muted uppercase tracking-widest mb-3 ml-1">
                                 Slug (URL personalizada)
                                 <div className="group relative inline-block">
-                                    <InfoIcon className="w-4 h-4 text-slate-300 cursor-help hover:text-brand transition-colors" />
-                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 w-72 p-4 bg-slate-900 text-white text-[11px] leading-relaxed rounded-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 shadow-2xl pointer-events-none">
+                                    <InfoIcon className="w-4 h-4 text-text-muted/40 cursor-help hover:text-brand transition-colors" />
+                                    <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 w-72 p-4 bg-brand-dark text-white text-[11px] leading-relaxed rounded-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-300 z-50 shadow-2xl pointer-events-none border border-brand/20">
                                         <p className="font-black mb-2 text-brand uppercase tracking-widest">⚠️ Atenção</p>
                                         Este é o endereço do seu site (ex: rsvp.me/{slug}). Se você alterar após já ter enviado os convites, o link anterior parará de funcionar.
-                                        <div className="absolute top-full left-1/2 -translate-x-1/2 border-[6px] border-transparent border-t-slate-900" />
+                                        <div className="absolute top-full left-1/2 -translate-x-1/2 border-[6px] border-transparent border-t-brand-dark" />
                                     </div>
                                 </div>
                             </label>
                             <div className="relative group">
-                                <span className="absolute left-5 top-1/2 -translate-y-1/2 text-slate-400 font-bold text-sm">/</span>
+                                <span className="absolute left-5 top-1/2 -translate-y-1/2 text-text-muted font-bold text-sm">/</span>
                                 <input
                                     type="text"
                                     id="slug"
                                     value={slug}
                                     onChange={(e) => handleSlugChange(e.target.value)}
-                                    className="w-full pl-9 pr-14 py-3.5 bg-slate-50 border-none rounded-2xl text-sm font-mono font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-brand"
+                                    className="w-full pl-9 pr-14 py-3.5 bg-bg-light border border-border-soft rounded-2xl text-sm font-mono font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-brand"
                                 />
                                 {slugEdited && (
                                     <button
@@ -347,7 +347,7 @@ export default function SettingsPage() {
                                             setSlugEdited(false)
                                             setSlug(generateSlug(coupleNames))
                                         }}
-                                        className="absolute right-3 top-1/2 -translate-y-1/2 px-3 py-1 bg-white rounded-lg text-[9px] font-black uppercase tracking-widest text-slate-400 hover:text-brand shadow-sm transition-all"
+                                        className="absolute right-3 top-1/2 -translate-y-1/2 px-3 py-1 bg-surface border border-border-soft rounded-lg text-[9px] font-black uppercase tracking-widest text-text-muted hover:text-brand shadow-sm transition-all"
                                     >
                                         Auto
                                     </button>
@@ -358,33 +358,33 @@ export default function SettingsPage() {
                         {/* Data + Horário + Prazo */}
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                             <div>
-                                <label htmlFor="eventDate" className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 ml-1">Data do Evento</label>
+                                <label htmlFor="eventDate" className="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-3 ml-1">Data do Evento</label>
                                 <input
                                     type="date"
                                     id="eventDate"
                                     value={eventDate}
                                     onChange={(e) => setEventDate(e.target.value)}
-                                    className="w-full px-5 py-3.5 bg-slate-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-slate-700"
+                                    className="w-full px-5 py-3.5 bg-bg-light border border-border-soft rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-text-primary"
                                 />
                             </div>
                             <div>
-                                <label htmlFor="eventTime" className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 ml-1">Horário</label>
+                                <label htmlFor="eventTime" className="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-3 ml-1">Horário</label>
                                 <input
                                     type="time"
                                     id="eventTime"
                                     value={eventTime}
                                     onChange={(e) => setEventTime(e.target.value)}
-                                    className="w-full px-5 py-3.5 bg-slate-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-slate-700"
+                                    className="w-full px-5 py-3.5 bg-bg-light border border-border-soft rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-text-primary"
                                 />
                             </div>
                             <div>
-                                <label htmlFor="confirmationDeadline" className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 ml-1">Prazo RSVP</label>
+                                <label htmlFor="confirmationDeadline" className="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-3 ml-1">Prazo RSVP</label>
                                 <input
                                     type="date"
                                     id="confirmationDeadline"
                                     value={confirmationDeadline}
                                     onChange={(e) => setConfirmationDeadline(e.target.value)}
-                                    className="w-full px-5 py-3.5 bg-slate-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-slate-700"
+                                    className="w-full px-5 py-3.5 bg-bg-light border border-border-soft rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-text-primary"
                                 />
                             </div>
                         </div>
@@ -392,33 +392,33 @@ export default function SettingsPage() {
                         {/* Localização */}
                         <div className="space-y-6 pt-4">
                             <div className="flex items-center gap-3 mb-6">
-                                <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400">
+                                <div className="w-10 h-10 bg-bg-light border border-border-soft rounded-xl flex items-center justify-center text-text-muted">
                                     <PinIconRose />
                                 </div>
-                                <h3 className="text-lg font-black text-slate-800 tracking-tight">Localização</h3>
+                                <h3 className="text-lg font-black text-text-primary tracking-tight">Localização</h3>
                             </div>
 
                             <div>
-                                <label htmlFor="eventLocation" className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 ml-1">Endereço Completo</label>
+                                <label htmlFor="eventLocation" className="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-3 ml-1">Endereço Completo</label>
                                 <input
                                     type="text"
                                     id="eventLocation"
                                     value={eventLocation}
                                     onChange={(e) => setEventLocation(e.target.value)}
                                     placeholder="Ex: Villa de Regale, Rua das Palmeiras, 100"
-                                    className="w-full px-5 py-3.5 bg-slate-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-slate-700"
+                                    className="w-full px-5 py-3.5 bg-bg-light border border-border-soft rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-text-primary placeholder:text-text-muted"
                                 />
                             </div>
 
                             <div>
-                                <label htmlFor="wazeLocation" className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 ml-1">Link Waze/Maps (Opcional)</label>
+                                <label htmlFor="wazeLocation" className="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-3 ml-1">Link Waze/Maps (Opcional)</label>
                                 <input
                                     type="text"
                                     id="wazeLocation"
                                     value={wazeLocation}
                                     onChange={(e) => setWazeLocation(e.target.value)}
                                     placeholder="Cole aqui o link compartilhado do GPS"
-                                    className="w-full px-5 py-3.5 bg-slate-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-slate-700"
+                                    className="w-full px-5 py-3.5 bg-bg-light border border-border-soft rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-text-primary placeholder:text-text-muted"
                                 />
                             </div>
                         </div>
@@ -427,15 +427,15 @@ export default function SettingsPage() {
                         <div className="space-y-6 pt-4">
                             <div className="flex items-center justify-between mb-6">
                                 <div className="flex items-center gap-3">
-                                    <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400">
+                                    <div className="w-10 h-10 bg-bg-light border border-border-soft rounded-xl flex items-center justify-center text-text-muted">
                                         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M20 12V8H4v4M2 4h20v4H2zM12 4v16M7 12v8h10v-8" /></svg>
                                     </div>
-                                    <h3 className="text-lg font-black text-slate-800 tracking-tight">Presentes</h3>
+                                    <h3 className="text-lg font-black text-text-primary tracking-tight">Presentes</h3>
                                 </div>
                                 <button
                                     type="button"
                                     onClick={handleAddGiftLink}
-                                    className="px-4 py-2 bg-slate-50 hover:bg-slate-100 text-[10px] font-black uppercase tracking-widest text-slate-500 rounded-xl transition-all"
+                                    className="px-4 py-2 bg-bg-light hover:bg-brand-pale text-[10px] font-black uppercase tracking-widest text-text-muted rounded-xl transition-all border border-border-soft"
                                 >
                                     + Adicionar
                                 </button>
@@ -444,14 +444,14 @@ export default function SettingsPage() {
                             {giftListLinks.length > 0 && (
                                 <div className="space-y-4">
                                     {giftListLinks.map((link, index) => (
-                                        <div key={index} className="flex flex-col sm:flex-row gap-4 p-5 bg-slate-50 rounded-[2rem] border border-slate-100/50 group animate-in slide-in-from-left-4 duration-300">
+                                        <div key={index} className="flex flex-col sm:flex-row gap-4 p-5 bg-bg-light rounded-[2rem] border border-border-soft group animate-in slide-in-from-left-4 duration-300">
                                             <div className="flex-1">
                                                 <input
                                                     type="text"
                                                     placeholder="Nome da loja"
                                                     value={link.name}
                                                     onChange={(e) => handleUpdateGiftLink(index, 'name', e.target.value)}
-                                                    className="w-full px-4 py-2 bg-white border border-slate-100 rounded-xl text-xs font-bold focus:ring-2 focus:ring-brand/20 transition-all outline-none"
+                                                    className="w-full px-4 py-2 bg-surface border border-border-soft rounded-xl text-xs font-bold focus:ring-2 focus:ring-brand/20 transition-all outline-none text-text-primary"
                                                 />
                                             </div>
                                             <div className="flex-[2]">
@@ -460,13 +460,13 @@ export default function SettingsPage() {
                                                     placeholder="Link da lista"
                                                     value={link.url}
                                                     onChange={(e) => handleUpdateGiftLink(index, 'url', e.target.value)}
-                                                    className="w-full px-4 py-2 bg-white border border-slate-100 rounded-xl text-xs font-bold focus:ring-2 focus:ring-brand/20 transition-all outline-none"
+                                                    className="w-full px-4 py-2 bg-surface border border-border-soft rounded-xl text-xs font-bold focus:ring-2 focus:ring-brand/20 transition-all outline-none text-text-primary"
                                                 />
                                             </div>
                                             <button
                                                 type="button"
                                                 onClick={() => handleRemoveGiftLink(index)}
-                                                className="self-end sm:self-center p-2 text-slate-300 hover:text-rose-500 transition-colors"
+                                                className="self-end sm:self-center p-2 text-text-muted/40 hover:text-danger transition-colors"
                                             >
                                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M18 6 6 18M6 6l12 12" /></svg>
                                             </button>
@@ -476,8 +476,8 @@ export default function SettingsPage() {
                             )}
 
                             {giftListLinks.length === 0 && (
-                                <div className="text-center py-8 bg-slate-50/50 rounded-[2rem] border border-dashed border-slate-200">
-                                    <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Nenhuma lista adicionada</p>
+                                <div className="text-center py-8 bg-bg-light/50 rounded-[2rem] border border-dashed border-border-soft">
+                                    <p className="text-[10px] font-black text-text-muted uppercase tracking-widest">Nenhuma lista adicionada</p>
                                 </div>
                             )}
                         </div>
@@ -485,24 +485,24 @@ export default function SettingsPage() {
                         {/* Imagem de Capa */}
                         <div className="space-y-6 pt-4">
                             <div className="flex items-center gap-3 mb-6">
-                                <div className="w-10 h-10 bg-slate-50 rounded-xl flex items-center justify-center text-slate-400">
+                                <div className="w-10 h-10 bg-bg-light border border-border-soft rounded-xl flex items-center justify-center text-text-muted">
                                     <ImageIconRose />
                                 </div>
-                                <h3 className="text-lg font-black text-slate-800 tracking-tight">Banner de Capa</h3>
+                                <h3 className="text-lg font-black text-text-primary tracking-tight">Banner de Capa</h3>
                             </div>
 
-                            <div className="flex gap-2 p-1.5 bg-slate-100 rounded-2xl w-fit mb-8">
+                            <div className="flex gap-2 p-1.5 bg-bg-light rounded-2xl w-fit mb-8 border border-border-soft">
                                 <button
                                     type="button"
                                     onClick={() => setUploadMethod('upload')}
-                                    className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${uploadMethod === 'upload' ? 'bg-white text-brand shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                                    className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${uploadMethod === 'upload' ? 'bg-surface text-brand shadow-sm border border-border-soft' : 'text-text-muted hover:text-text-secondary'}`}
                                 >
                                     Arquivo
                                 </button>
                                 <button
                                     type="button"
                                     onClick={() => setUploadMethod('url')}
-                                    className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${uploadMethod === 'url' ? 'bg-white text-brand shadow-sm' : 'text-slate-400 hover:text-slate-600'}`}
+                                    className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${uploadMethod === 'url' ? 'bg-surface text-brand shadow-sm border border-border-soft' : 'text-text-muted hover:text-text-secondary'}`}
                                 >
                                     URL Link
                                 </button>
@@ -514,11 +514,11 @@ export default function SettingsPage() {
                                     value={coverImage}
                                     onChange={(e) => handleUrlChange(e.target.value)}
                                     placeholder="https://sua-imagem.com/foto.jpg"
-                                    className="w-full px-5 py-3.5 bg-slate-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-slate-700"
+                                    className="w-full px-5 py-3.5 bg-bg-light border border-border-soft rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-text-primary placeholder:text-text-muted"
                                 />
                             ) : (
                                 <div
-                                    className="relative border-4 border-dashed border-slate-100 rounded-[2.5rem] p-12 text-center hover:border-brand/30 hover:bg-slate-50 transition-all cursor-pointer group"
+                                    className="relative border-4 border-dashed border-border-soft rounded-[2.5rem] p-12 text-center hover:border-brand-light/30 hover:bg-bg-light transition-all cursor-pointer group"
                                     onClick={() => document.getElementById('coverImageFile')?.click()}
                                 >
                                     <input
@@ -529,12 +529,12 @@ export default function SettingsPage() {
                                         className="hidden"
                                     />
                                     <div className="flex flex-col items-center gap-4">
-                                        <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center text-slate-200 shadow-sm border border-slate-50 group-hover:scale-110 transition-transform">
+                                        <div className="w-16 h-16 bg-surface border border-border-soft rounded-2xl flex items-center justify-center text-text-muted/20 shadow-sm group-hover:scale-110 transition-transform">
                                             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" /><polyline points="17 8 12 3 7 8" /><line x1="12" x2="12" y1="3" y2="15" /></svg>
                                         </div>
                                         <div>
-                                            <p className="text-sm font-black text-slate-700">Escolha uma Foto</p>
-                                            <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">JPG ou PNG até 5MB</p>
+                                            <p className="text-sm font-black text-text-primary">Escolha uma Foto</p>
+                                            <p className="text-[10px] font-black text-text-muted uppercase tracking-widest mt-1">JPG ou PNG até 5MB</p>
                                         </div>
                                     </div>
                                 </div>
@@ -542,7 +542,7 @@ export default function SettingsPage() {
 
                             {imagePreview && imagePreview !== 'https://...' && (
                                 <div className="mt-8 space-y-6 animate-in fade-in zoom-in-95 duration-500">
-                                    <div className="relative rounded-[3rem] overflow-hidden border-8 border-white shadow-2xl shadow-slate-200 aspect-[16/9] bg-slate-100">
+                                    <div className="relative rounded-[3rem] overflow-hidden border-8 border-surface shadow-2xl shadow-brand-dark/[0.05] aspect-[16/9] bg-bg-light">
                                         <Image
                                             src={imagePreview}
                                             alt="Preview"
@@ -559,23 +559,23 @@ export default function SettingsPage() {
                                             <button
                                                 type="button"
                                                 onClick={() => { setTempImage(imagePreview); setShowCropModal(true); }}
-                                                className="w-10 h-10 bg-white/90 backdrop-blur text-brand rounded-2xl flex items-center justify-center hover:bg-brand hover:text-white transition-all shadow-lg"
+                                                className="w-10 h-10 bg-surface/90 backdrop-blur text-brand rounded-2xl flex items-center justify-center hover:bg-brand hover:text-white transition-all shadow-lg border border-border-soft"
                                             >
                                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
                                             </button>
                                             <button
                                                 type="button"
                                                 onClick={() => { setCoverImage('https://...'); setImagePreview(''); }}
-                                                className="w-10 h-10 bg-white/90 backdrop-blur text-rose-500 rounded-2xl flex items-center justify-center hover:bg-rose-500 hover:text-white transition-all shadow-lg"
+                                                className="w-10 h-10 bg-surface/90 backdrop-blur text-danger rounded-2xl flex items-center justify-center hover:bg-danger hover:text-white transition-all shadow-lg border border-border-soft"
                                             >
                                                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6 6 18M6 6l12 12" /></svg>
                                             </button>
                                         </div>
                                     </div>
 
-                                    <div className="bg-slate-50 p-8 rounded-[2.5rem] border border-slate-100 space-y-6">
+                                    <div className="bg-bg-light p-8 rounded-[2.5rem] border border-border-soft space-y-6">
                                         <div className="space-y-4">
-                                            <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-slate-400">
+                                            <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-text-muted">
                                                 <span>Ajuste Vertical</span>
                                                 <span className="text-brand">{coverImagePosition}%</span>
                                             </div>
@@ -585,11 +585,11 @@ export default function SettingsPage() {
                                                 max="100"
                                                 value={coverImagePosition}
                                                 onChange={(e) => setCoverImagePosition(parseInt(e.target.value))}
-                                                className="w-full h-1.5 bg-slate-200 rounded-full appearance-none cursor-pointer accent-brand"
+                                                className="w-full h-1.5 bg-border-soft rounded-full appearance-none cursor-pointer accent-brand"
                                             />
                                         </div>
                                         <div className="space-y-4">
-                                            <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-slate-400">
+                                            <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-text-muted">
                                                 <span>Nível de Zoom</span>
                                                 <span className="text-brand">{coverImageScale.toFixed(1)}x</span>
                                             </div>
@@ -600,7 +600,7 @@ export default function SettingsPage() {
                                                 step="0.1"
                                                 value={coverImageScale}
                                                 onChange={(e) => setCoverImageScale(parseFloat(e.target.value))}
-                                                className="w-full h-1.5 bg-slate-200 rounded-full appearance-none cursor-pointer accent-brand"
+                                                className="w-full h-1.5 bg-border-soft rounded-full appearance-none cursor-pointer accent-brand"
                                             />
                                         </div>
                                     </div>
@@ -610,14 +610,14 @@ export default function SettingsPage() {
 
                         {/* Mensagem Final */}
                         <div className="pt-4">
-                            <label htmlFor="customMessage" className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-3 ml-1">Mensagem para os Convidados</label>
+                            <label htmlFor="customMessage" className="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-3 ml-1">Mensagem para os Convidados</label>
                             <textarea
                                 id="customMessage"
                                 value={customMessage}
                                 onChange={(e) => setCustomMessage(e.target.value)}
                                 rows={4}
                                 placeholder="Uma mensagem carinhosa para quem vai acessar seu site..."
-                                className="w-full px-5 py-4 bg-slate-50 border-none rounded-[2rem] text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-slate-700 resize-none"
+                                className="w-full px-5 py-4 bg-bg-light border border-border-soft rounded-[2rem] text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-text-primary resize-none placeholder:text-text-muted"
                             />
                         </div>
 
@@ -625,7 +625,7 @@ export default function SettingsPage() {
                         <div className="pt-10">
                             <button
                                 type="submit"
-                                className={`w-full py-5 rounded-[2rem] font-black uppercase tracking-widest text-sm transition-all shadow-xl flex items-center justify-center gap-3 ${saved ? 'bg-emerald-500 text-white shadow-emerald-500/20' : 'bg-brand text-white shadow-brand/20 hover:scale-[1.02] active:scale-95'}`}
+                                className={`w-full py-5 rounded-[2rem] font-black uppercase tracking-widest text-sm transition-all shadow-xl flex items-center justify-center gap-3 ${saved ? 'bg-success text-success-dark shadow-success/20 border border-success/30' : 'bg-brand text-white shadow-brand-dark/20 hover:scale-[1.02] active:scale-95'}`}
                             >
                                 {saved ? (
                                     <>
@@ -646,11 +646,11 @@ export default function SettingsPage() {
 
             {/* Crop Modal */}
             {showCropModal && tempImage && (
-                <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-md flex items-center justify-center z-[100] p-4 animate-in fade-in duration-300">
-                    <div className="bg-white rounded-[3rem] shadow-2xl max-w-2xl w-full overflow-hidden border border-white/20 animate-in zoom-in-95 duration-500">
-                        <div className="p-8 border-b border-slate-50 flex items-center justify-between">
-                            <h3 className="text-xl font-black text-slate-800 tracking-tight">Ajustar Imagem</h3>
-                            <button onClick={() => setShowCropModal(false)} className="w-10 h-10 bg-slate-50 rounded-2xl flex items-center justify-center text-slate-400 hover:bg-slate-100 transition-all">
+                <div className="fixed inset-0 bg-brand-dark/40 backdrop-blur-md flex items-center justify-center z-[100] p-4 animate-in fade-in duration-300">
+                    <div className="bg-surface rounded-[3rem] shadow-2xl max-w-2xl w-full overflow-hidden border border-border-soft animate-in zoom-in-95 duration-500">
+                        <div className="p-8 border-b border-border-soft flex items-center justify-between">
+                            <h3 className="text-xl font-black text-text-primary tracking-tight">Ajustar Imagem</h3>
+                            <button onClick={() => setShowCropModal(false)} className="w-10 h-10 bg-bg-light rounded-2xl flex items-center justify-center text-text-muted hover:bg-brand-pale transition-all border border-border-soft">
                                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M18 6 6 18M6 6l12 12" /></svg>
                             </button>
                         </div>
@@ -658,7 +658,7 @@ export default function SettingsPage() {
                         <div className="p-8">
                             <div
                                 ref={cropPreviewRef}
-                                className="aspect-video relative rounded-[2rem] overflow-hidden bg-slate-100 cursor-grab active:cursor-grabbing group shadow-inner border border-slate-200"
+                                className="aspect-video relative rounded-[2rem] overflow-hidden bg-bg-light cursor-grab active:cursor-grabbing group shadow-inner border border-border-soft"
                                 tabIndex={0}
                                 onMouseDown={handleImageMouseDown}
                                 onMouseMove={handleImageMouseMove}
@@ -687,36 +687,36 @@ export default function SettingsPage() {
 
                             <div className="grid grid-cols-2 gap-6 mt-8">
                                 <div className="space-y-4">
-                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Zoom</label>
+                                    <label className="text-[10px] font-black text-text-muted uppercase tracking-widest">Zoom</label>
                                     <input
                                         type="range" min="0.5" max="3" step="0.1"
                                         value={cropScale}
                                         onChange={(e) => setCropScale(parseFloat(e.target.value))}
-                                        className="w-full h-1.5 bg-slate-100 rounded-full appearance-none cursor-pointer accent-brand"
+                                        className="w-full h-1.5 bg-border-soft rounded-full appearance-none cursor-pointer accent-brand"
                                     />
                                 </div>
                                 <div className="space-y-4">
-                                    <label className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Giro</label>
+                                    <label className="text-[10px] font-black text-text-muted uppercase tracking-widest">Giro</label>
                                     <input
                                         type="range" min="0" max="360"
                                         value={cropRotation}
                                         onChange={(e) => setCropRotation(parseInt(e.target.value))}
-                                        className="w-full h-1.5 bg-slate-100 rounded-full appearance-none cursor-pointer accent-brand"
+                                        className="w-full h-1.5 bg-border-soft rounded-full appearance-none cursor-pointer accent-brand"
                                     />
                                 </div>
                             </div>
                         </div>
 
-                        <div className="p-8 bg-slate-50 flex gap-4">
+                        <div className="p-8 bg-bg-light flex gap-4 border-t border-border-soft">
                             <button
                                 onClick={() => setShowCropModal(false)}
-                                className="flex-1 py-4 bg-white border border-slate-200 text-slate-400 text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-white transition-all"
+                                className="flex-1 py-4 bg-surface border border-border-soft text-text-muted text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-brand-pale transition-all"
                             >
                                 Cancelar
                             </button>
                             <button
                                 onClick={handleCropConfirm}
-                                className="flex-1 py-4 bg-brand text-white text-[10px] font-black uppercase tracking-widest rounded-2xl shadow-lg shadow-brand/20 hover:scale-105 transition-all"
+                                className="flex-1 py-4 bg-brand text-white text-[10px] font-black uppercase tracking-widest rounded-2xl shadow-lg shadow-brand-dark/20 hover:scale-105 transition-all"
                             >
                                 Confirmar
                             </button>

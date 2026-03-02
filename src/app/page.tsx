@@ -2,17 +2,17 @@ import Link from 'next/link'
 
 export default function Home() {
   return (
-    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-160px)] text-center px-6 relative overflow-hidden bg-gradient-to-b from-[#FDF8F6] to-white">
+    <div className="flex flex-col items-center justify-center min-h-[calc(100vh-160px)] text-center px-6 relative overflow-hidden bg-background">
       <div className="max-w-4xl space-y-12 animate-in fade-in slide-in-from-bottom-12 duration-1000">
         <div className="space-y-6">
-          <div className="inline-flex items-center justify-center gap-3 px-6 py-2 bg-white/50 backdrop-blur-md rounded-full border border-slate-100 shadow-sm transition-all hover:scale-105 group">
+          <div className="inline-flex items-center justify-center gap-3 px-6 py-2 bg-surface backdrop-blur-md rounded-full border border-border-soft shadow-sm transition-all hover:scale-105 group">
             <span className="w-1.5 h-1.5 rounded-full bg-brand animate-pulse" />
-            <p className="text-[10px] font-black tracking-[0.4em] text-slate-400 uppercase">
+            <p className="text-[10px] font-black tracking-[0.4em] text-text-muted uppercase">
               Sua Vida Organizada • RSVP
             </p>
           </div>
 
-          <h1 className="text-6xl md:text-8xl font-black text-[#2D1B1E] leading-[1.05] tracking-tighter">
+          <h1 className="text-6xl md:text-8xl font-black text-text-primary leading-[1.05] tracking-tighter">
             Celebre com <br />
             <span className="text-brand relative inline-block">
               sofisticação
@@ -20,7 +20,7 @@ export default function Home() {
             </span>
           </h1>
 
-          <p className="mx-auto max-w-2xl text-slate-400 text-lg md:text-xl leading-relaxed mt-10 font-bold uppercase tracking-widest opacity-80 decoration-brand/30">
+          <p className="mx-auto max-w-2xl text-text-secondary text-lg md:text-xl leading-relaxed mt-10 font-bold uppercase tracking-widest opacity-80 decoration-brand/30">
             O sistema de gestão de convidados <br className="hidden md:block" /> mais elegante e eficiente do mercado.
           </p>
         </div>
@@ -35,7 +35,7 @@ export default function Home() {
           </Link>
           <Link
             href="/register"
-            className="inline-flex items-center justify-center h-16 px-12 rounded-[2rem] border-2 border-slate-100 bg-white text-slate-600 text-[11px] font-black uppercase tracking-[0.2em] shadow-sm hover:bg-slate-50 hover:border-slate-200 hover:-translate-y-1.5 transition-all duration-300"
+            className="inline-flex items-center justify-center h-16 px-12 rounded-[2rem] border-2 border-border-soft bg-surface text-text-secondary text-[11px] font-black uppercase tracking-[0.2em] shadow-sm hover:bg-bg-light hover:border-brand-light/20 hover:-translate-y-1.5 transition-all duration-300"
           >
             Criar meu Evento
           </Link>
@@ -50,8 +50,8 @@ export default function Home() {
             { l: 'MÉTRICAS', v: 'REAL' }
           ].map((s, i) => (
             <div key={i} className="text-center">
-              <p className="text-xl font-black text-[#2D1B1E] tracking-tighter">{s.v}</p>
-              <p className="text-[8px] font-black text-slate-400 tracking-widest uppercase mt-1">{s.l}</p>
+              <p className="text-xl font-black text-text-primary tracking-tighter">{s.v}</p>
+              <p className="text-[8px] font-black text-text-muted tracking-widest uppercase mt-1">{s.l}</p>
             </div>
           ))}
         </div>
@@ -60,7 +60,7 @@ export default function Home() {
       {/* Decorative Elements - Premium Background */}
       <div className="fixed -z-10 top-0 left-0 w-full h-full overflow-hidden pointer-events-none">
         <div className="absolute top-[10%] right-[10%] w-[50%] h-[50%] bg-brand/10 rounded-full blur-[150px] animate-pulse" />
-        <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-[#FDF8F6] rounded-full blur-[120px]" />
+        <div className="absolute bottom-[-10%] left-[-10%] w-[40%] h-[40%] bg-bg-light/50 rounded-full blur-[120px]" />
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[60%] border-[1px] border-brand/5 rounded-[5rem] opacity-20 pointer-events-none" />
       </div>
     </div>

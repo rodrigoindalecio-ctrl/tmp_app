@@ -71,7 +71,7 @@ function AdminDashboardContent() {
         <>
           <button
             onClick={() => router.push('/admin/users')}
-            className="px-6 py-3 bg-white border border-slate-100 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-500 hover:text-brand hover:border-brand/20 transition-all shadow-sm flex items-center gap-2"
+            className="px-6 py-3 bg-white border border-border-soft rounded-2xl text-[10px] font-black uppercase tracking-widest text-text-secondary hover:text-brand hover:border-brand/20 transition-all shadow-sm flex items-center gap-2"
           >
             👥 Usuários
           </button>
@@ -85,23 +85,23 @@ function AdminDashboardContent() {
       }
     >
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
-        <div className="bg-white rounded-[2.5rem] border border-brand/5 p-8 shadow-sm">
-          <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Total de Eventos</p>
-          <p className="text-4xl font-serif font-black text-slate-800 tracking-tight">{events.length}</p>
+        <div className="bg-surface rounded-[2.5rem] border border-border-soft p-8 shadow-sm">
+          <p className="text-[9px] font-black text-text-muted uppercase tracking-widest mb-2">Total de Eventos</p>
+          <p className="text-4xl font-serif font-black text-text-primary tracking-tight">{events.length}</p>
         </div>
-        <div className="bg-white rounded-[2.5rem] border border-brand/5 p-8 shadow-sm">
-          <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-2">Total de Convidados</p>
+        <div className="bg-surface rounded-[2.5rem] border border-border-soft p-8 shadow-sm">
+          <p className="text-[9px] font-black text-text-muted uppercase tracking-widest mb-2">Total de Convidados</p>
           <p className="text-4xl font-serif font-black text-brand tracking-tight">
             {Object.values(guestCounts).reduce((acc, curr) => acc + curr.total, 0)}
           </p>
         </div>
-        <div className="bg-white rounded-[2.5rem] border border-brand/5 p-8 shadow-sm">
-          <p className="text-[9px] font-black text-emerald-500 uppercase tracking-widest mb-2">Confirmados</p>
-          <p className="text-4xl font-serif font-black text-emerald-600 tracking-tight">
+        <div className="bg-surface rounded-[2.5rem] border border-border-soft p-8 shadow-sm">
+          <p className="text-[9px] font-black text-success uppercase tracking-widest mb-2">Confirmados</p>
+          <p className="text-4xl font-serif font-black text-success-dark tracking-tight">
             {Object.values(guestCounts).reduce((acc, curr) => acc + curr.confirmed, 0)}
           </p>
         </div>
-        <div className="bg-white rounded-[2.5rem] border border-brand/5 p-8 shadow-sm flex items-center justify-center bg-brand/5">
+        <div className="bg-surface rounded-[2.5rem] border border-border-soft p-8 shadow-sm flex items-center justify-center bg-brand-pale/50">
           <div className="text-center">
             <p className="text-[9px] font-black text-brand uppercase tracking-widest mb-1">Taxa Média</p>
             <p className="text-3xl font-serif font-black text-brand">
@@ -113,15 +113,15 @@ function AdminDashboardContent() {
         </div>
       </div>
 
-      <div className="bg-white rounded-[3rem] border border-brand/5 overflow-hidden shadow-sm">
-        <div className="p-8 md:p-12 border-b border-slate-50 flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="bg-surface rounded-[3rem] border border-border-soft overflow-hidden shadow-sm">
+        <div className="p-8 md:p-12 border-b border-border-soft flex flex-col md:flex-row md:items-center justify-between gap-6">
           <div className="relative flex-1">
             <input
               type="text"
               placeholder="Buscar por casal ou código..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full px-8 py-5 bg-slate-50 border-none rounded-3xl text-sm font-bold shadow-inner outline-none focus:ring-4 focus:ring-brand/5 transition-all"
+              className="w-full px-8 py-5 bg-bg-light border-none rounded-3xl text-sm font-bold shadow-inner outline-none focus:ring-4 focus:ring-brand/5 transition-all placeholder:text-text-muted text-text-primary"
             />
           </div>
         </div>
@@ -129,7 +129,7 @@ function AdminDashboardContent() {
         <div className="p-8 md:p-12">
           {filteredEvents.length === 0 ? (
             <div className="py-20 text-center">
-              <p className="text-slate-400 font-serif italic text-lg">Nenhum evento encontrado...</p>
+              <p className="text-text-muted font-serif italic text-lg">Nenhum evento encontrado...</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
@@ -138,27 +138,27 @@ function AdminDashboardContent() {
                 const rate = count.total > 0 ? Math.round((count.confirmed / count.total) * 100) : 0
 
                 return (
-                  <div key={event.id} className="bg-white rounded-[2.5rem] p-8 border border-slate-100 hover:border-brand/20 transition-all group hover:shadow-2xl hover:shadow-brand/[0.03]">
+                  <div key={event.id} className="bg-surface rounded-[2.5rem] p-8 border border-border-soft hover:border-brand/20 transition-all group hover:shadow-2xl hover:shadow-brand/[0.03]">
                     <div className="flex justify-between items-start mb-8">
-                      <div className="w-16 h-16 bg-brand/5 rounded-2xl flex items-center justify-center text-3xl shadow-inner group-hover:scale-110 transition-transform">
+                      <div className="w-16 h-16 bg-brand-pale rounded-2xl flex items-center justify-center text-3xl shadow-inner group-hover:scale-110 transition-transform">
                         {event.eventSettings.eventType === 'casamento' ? '💒' : '👑'}
                       </div>
                       <div className="text-right">
                         <p className="text-[9px] font-black text-brand uppercase tracking-widest">{rate}% Confirmado</p>
-                        <p className="text-[8px] font-bold text-slate-400 uppercase mt-1">{count.total} convidados</p>
+                        <p className="text-[8px] font-bold text-text-muted uppercase mt-1">{count.total} convidados</p>
                       </div>
                     </div>
 
-                    <h3 className="text-xl font-serif font-black text-slate-800 mb-2 group-hover:text-brand transition-colors tracking-tight leading-tight">
+                    <h3 className="text-xl font-serif font-black text-text-primary mb-2 group-hover:text-brand transition-colors tracking-tight leading-tight">
                       {event.eventSettings.coupleNames}
                     </h3>
-                    <p className="text-xs font-bold text-slate-400 mb-8 uppercase tracking-widest italic">
+                    <p className="text-xs font-bold text-text-muted mb-8 uppercase tracking-widest italic">
                       {new Date(event.eventSettings.eventDate).toLocaleDateString('pt-BR', { day: '2-digit', month: 'long', year: 'numeric' })}
                     </p>
 
                     <button
                       onClick={() => router.push(`/admin/evento/${event.id}`)}
-                      className="w-full py-4.5 bg-brand text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-brand/20 hover:bg-brand/90 hover:-translate-y-1 transition-all"
+                      className="w-full py-4.5 bg-brand text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-brand/20 hover:bg-brand-dark hover:-translate-y-1 transition-all"
                     >
                       Gerenciar Evento
                     </button>

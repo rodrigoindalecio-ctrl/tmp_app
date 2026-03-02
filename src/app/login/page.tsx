@@ -32,9 +32,9 @@ export default function LoginPage() {
           </div>
         </div>
 
-        <div className="bg-white p-10 md:p-14 rounded-[3rem] shadow-2xl shadow-brand/5 border border-brand/5 space-y-8">
+        <div className="bg-surface p-10 md:p-14 rounded-[3rem] shadow-2xl shadow-brand/5 border border-border-soft space-y-8">
           <div className="text-center space-y-2">
-            <h2 className="text-2xl font-serif font-black text-slate-800 tracking-tight">
+            <h2 className="text-2xl font-serif font-black text-text-primary tracking-tight">
               Acesso ao Sistema
             </h2>
             <div className="h-px w-12 bg-brand/20 mx-auto mt-4" />
@@ -43,7 +43,7 @@ export default function LoginPage() {
           <form className="mt-10 space-y-6" onSubmit={(e) => { e.preventDefault(); login(email, password); }}>
             <div className="space-y-6">
               <div className="space-y-2">
-                <label htmlFor="email" className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 block">
+                <label htmlFor="email" className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1 block">
                   E-mail institucional
                 </label>
                 <input
@@ -54,13 +54,13 @@ export default function LoginPage() {
                   required
                   value={email}
                   onChange={e => setEmail(e.target.value)}
-                  className="w-full px-6 py-4 bg-background border border-slate-100 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-brand/5 focus:border-brand/20 outline-none transition-all placeholder:text-slate-300"
+                  className="w-full px-6 py-4 bg-bg-light border border-border-soft rounded-2xl text-sm font-bold focus:ring-4 focus:ring-brand/5 focus:border-brand-light transition-all outline-none placeholder:text-text-muted text-text-primary"
                   placeholder="nome@exemplo.com"
                 />
               </div>
 
               <div className="space-y-2">
-                <label htmlFor="password" className="text-[10px] font-black text-slate-400 uppercase tracking-widest ml-1 block">
+                <label htmlFor="password" className="text-[10px] font-black text-text-muted uppercase tracking-widest ml-1 block">
                   Senha de segurança
                 </label>
                 <input
@@ -71,7 +71,7 @@ export default function LoginPage() {
                   required
                   value={password}
                   onChange={e => setPassword(e.target.value)}
-                  className="w-full px-6 py-4 bg-background border border-slate-100 rounded-2xl text-sm font-bold focus:ring-4 focus:ring-brand/5 focus:border-brand/20 outline-none transition-all placeholder:text-slate-300"
+                  className="w-full px-6 py-4 bg-bg-light border border-border-soft rounded-2xl text-sm font-bold focus:ring-4 focus:ring-brand/5 focus:border-brand-light transition-all outline-none placeholder:text-text-muted text-text-primary"
                   placeholder="••••••••"
                 />
               </div>
@@ -80,15 +80,15 @@ export default function LoginPage() {
             <div className="pt-4">
               <button
                 type="submit"
-                className="w-full h-16 rounded-full bg-brand text-white text-xs font-black uppercase tracking-[0.2em] shadow-xl shadow-brand/20 hover:bg-brand/90 hover:scale-[1.02] active:scale-[0.98] transition-all duration-300"
+                className="w-full h-16 rounded-full bg-brand text-white text-xs font-black uppercase tracking-[0.2em] shadow-xl shadow-brand/20 hover:bg-brand-dark hover:scale-[1.02] active:scale-[0.98] transition-all duration-300"
               >
                 Acessar Painel
               </button>
             </div>
           </form>
 
-          <div className="pt-8 text-center border-t border-slate-50">
-            <p className="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+          <div className="pt-8 text-center border-t border-border-soft">
+            <p className="text-[10px] text-text-muted font-bold uppercase tracking-widest">
               RSVP • Gestão de Eventos
             </p>
           </div>

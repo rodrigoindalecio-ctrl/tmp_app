@@ -353,14 +353,14 @@ export default function DashboardPage() {
           </Link>
           <button
             onClick={handleExportCSV}
-            className="flex items-center gap-2 px-4 py-2.5 bg-brand text-white rounded-xl text-[9px] font-black uppercase tracking-widest shadow-lg shadow-brand/20 hover:bg-brand/90 transition-all"
+            className="flex items-center gap-2 px-4 py-2.5 bg-brand text-white rounded-xl text-[9px] font-black uppercase tracking-widest shadow-lg shadow-brand/20 hover:bg-brand-dark transition-all"
           >
             <DownloadIcon /> XLSX
           </button>
           <button
             onClick={handleDeleteAllGuests}
             disabled={metrics.total === 0}
-            className="flex items-center gap-2 px-4 py-2.5 border border-rose-100 text-rose-500 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-rose-50 transition-all disabled:opacity-50"
+            className="flex items-center gap-2 px-4 py-2.5 border border-danger/10 text-danger rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-danger-light transition-all disabled:opacity-50"
           >
             <TrashIcon /> Limpar Lista
           </button>
@@ -397,27 +397,27 @@ export default function DashboardPage() {
       )}
 
       {/* SHARE CARD */}
-      <div className="bg-white border border-brand/10 rounded-[2rem] p-6 mb-10 shadow-sm relative overflow-hidden group">
-        <div className="absolute -right-10 -top-10 w-40 h-40 bg-brand/5 rounded-full blur-3xl group-hover:bg-brand/10 transition-colors" />
+      <div className="bg-surface border border-border-soft rounded-[2rem] p-6 mb-10 shadow-sm relative overflow-hidden group">
+        <div className="absolute -right-10 -top-10 w-40 h-40 bg-brand-pale rounded-full blur-3xl group-hover:bg-brand-pale/80 transition-colors" />
         <div className="flex flex-col md:flex-row items-center gap-6">
-          <div className="w-16 h-16 bg-brand/5 rounded-2xl flex items-center justify-center text-brand flex-shrink-0 animate-pulse">
+          <div className="w-16 h-16 bg-brand-pale rounded-2xl flex items-center justify-center text-brand flex-shrink-0 animate-pulse">
             <ShareIcon />
           </div>
           <div className="flex-1 min-w-0 text-center md:text-left">
-            <h3 className="text-slate-800 font-black text-xl mb-1 tracking-tight">Convite Digital</h3>
-            <p className="text-slate-400 text-xs font-bold leading-relaxed max-w-2xl px-4 md:px-0">
+            <h3 className="text-text-primary font-black text-xl mb-1 tracking-tight">Convite Digital</h3>
+            <p className="text-text-muted text-xs font-bold leading-relaxed max-w-2xl px-4 md:px-0">
               O seu link personalizado está pronto. Envie para os convidados confirmarem presença.
             </p>
           </div>
           <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-            <div className="flex-1 bg-slate-50 border border-slate-100 rounded-xl px-4 py-3 text-[10px] text-slate-400 font-black uppercase tracking-widest overflow-hidden text-ellipsis flex items-center shadow-inner">
+            <div className="flex-1 bg-bg-light border border-border-soft rounded-xl px-4 py-3 text-[10px] text-text-muted font-black uppercase tracking-widest overflow-hidden text-ellipsis flex items-center shadow-inner">
               {typeof window !== 'undefined' ?
                 `${window.location.origin}/${eventSettings.slug || user.name.toLowerCase().replace(/\s+/g, '-')}` : '...'
               }
             </div>
             <button
               onClick={handleCopyLink}
-              className={`px-8 py-3 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all flex items-center justify-center gap-2 ${copied ? 'bg-emerald-500 text-white' : 'bg-brand text-white shadow-lg shadow-brand/20 hover:scale-105 active:scale-95'}`}
+              className={`px-8 py-3 rounded-xl font-black uppercase tracking-widest text-[10px] transition-all flex items-center justify-center gap-2 ${copied ? 'bg-success text-white' : 'bg-brand text-white shadow-lg shadow-brand/20 hover:scale-105 active:scale-95'}`}
             >
               {copied ? <><CheckIcon /> Copiado!</> : <><CopyIcon /> Copiar Link</>}
             </button>
@@ -460,16 +460,16 @@ export default function DashboardPage() {
       </div>
 
       {/* SEARCH AND FILTER */}
-      <div className="bg-white rounded-[2rem] border border-brand/5 shadow-sm overflow-hidden mb-10">
-        <div className="p-4 md:p-6 border-b border-brand/5 flex flex-col md:flex-row gap-4 items-center">
+      <div className="bg-surface rounded-[2rem] border border-border-soft shadow-sm overflow-hidden mb-10">
+        <div className="p-4 md:p-6 border-b border-border-soft flex flex-col md:flex-row gap-4 items-center">
           <div className="relative flex-1 w-full">
-            <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-300" />
+            <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-text-muted" />
             <input
               type="text"
               placeholder="Pesquisar convidado..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-6 py-4 bg-slate-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-slate-700"
+              className="w-full pl-12 pr-6 py-4 bg-bg-light border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-text-primary"
             />
           </div>
         </div>
@@ -477,7 +477,7 @@ export default function DashboardPage() {
         {/* GUEST LIST - Unified Card Grid */}
         <div className="p-4 md:p-8">
           {filteredPeople.length === 0 ? (
-            <div className="py-20 flex flex-col items-center justify-center text-slate-300">
+            <div className="py-20 flex flex-col items-center justify-center text-text-muted">
               <UsersIcon className="w-16 h-16 mb-4 opacity-20" />
               <p className="text-[10px] font-black uppercase tracking-widest">Nenhum convidado encontrado</p>
             </div>
@@ -486,18 +486,18 @@ export default function DashboardPage() {
               {filteredPeople.map((person) => (
                 <div
                   key={person.uniqueId}
-                  className="bg-white rounded-[2rem] border border-brand/5 shadow-sm p-6 hover:-translate-y-1 hover:shadow-xl hover:shadow-brand/5 transition-all duration-300 group flex flex-col justify-between"
+                  className="bg-surface rounded-[2rem] border border-border-soft shadow-sm p-6 hover:-translate-y-1 hover:shadow-xl hover:shadow-brand/5 transition-all duration-300 group flex flex-col justify-between"
                 >
                   <div className="flex items-start justify-between mb-4">
                     <div className="flex items-center gap-3">
-                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm shadow-inner ${person.status === 'confirmed' ? 'bg-emerald-50 text-emerald-600' : person.status === 'declined' ? 'bg-rose-50 text-rose-500' : 'bg-slate-50 text-slate-400'}`}>
+                      <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm shadow-inner transform group-hover:scale-110 transition-transform ${person.status === 'confirmed' ? 'bg-success-light text-success-dark' : person.status === 'declined' ? 'bg-danger-light text-danger-dark' : 'bg-bg-light text-text-muted'}`}>
                         {person.name.charAt(0).toUpperCase()}
                       </div>
                       <div className="min-w-0">
-                        <h4 className="text-sm font-black text-slate-800 tracking-tight truncate max-w-[120px]" title={person.name}>
+                        <h4 className="text-sm font-black text-text-primary tracking-tight truncate max-w-[120px]" title={person.name}>
                           {person.name}
                         </h4>
-                        <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest truncate">
+                        <p className="text-[9px] font-bold text-text-muted uppercase tracking-widest truncate">
                           {person.groupName}
                         </p>
                       </div>
@@ -505,13 +505,13 @@ export default function DashboardPage() {
                     <StatusBadge status={person.status} mobile />
                   </div>
 
-                  <div className="flex items-center justify-between pt-4 border-t border-slate-50">
-                    <span className={`px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-widest ${person.type === 'Principal' ? 'bg-brand/10 text-brand' : 'bg-slate-100 text-slate-400'}`}>
+                  <div className="flex items-center justify-between pt-4 border-t border-border-soft">
+                    <span className={`px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-widest ${person.type === 'Principal' ? 'bg-brand-pale text-brand' : 'bg-bg-light text-text-muted'}`}>
                       {person.type}
                     </span>
                     <button
                       onClick={() => handleEditClick(guests.find(g => g.id === person.guestId)!)}
-                      className="w-9 h-9 bg-slate-50 text-slate-300 rounded-xl flex items-center justify-center hover:bg-brand hover:text-white hover:scale-110 transition-all shadow-inner group-hover:text-slate-500"
+                      className="w-9 h-9 bg-bg-light text-text-muted rounded-xl flex items-center justify-center hover:bg-brand hover:text-white hover:scale-110 transition-all shadow-inner group-hover:text-text-primary"
                     >
                       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" /><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z" /></svg>
                     </button>
@@ -569,10 +569,10 @@ function NavItem({ href, active, label, icon }: { href: string; active?: boolean
       href={href}
       className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${active
         ? 'bg-brand/10 text-brand shadow-sm'
-        : 'text-slate-400 hover:bg-slate-50 hover:text-slate-600'
+        : 'text-text-muted hover:bg-bg-light hover:text-text-primary'
         }`}
     >
-      <span className={active ? 'text-brand' : 'text-slate-400'}>{icon}</span>
+      <span className={active ? 'text-brand' : 'text-text-muted'}>{icon}</span>
       {label}
     </Link>
   )
@@ -596,10 +596,10 @@ function KPICard({
   onClick?: () => void
 }) {
   const bgColors: { [key: string]: string } = {
-    success: 'bg-green-50 text-green-600',
-    warning: 'bg-amber-50 text-amber-600',
-    danger: 'bg-red-50 text-red-600',
-    default: 'bg-gray-50 text-gray-500'
+    success: 'bg-success-light text-success-dark',
+    warning: 'bg-warning-light text-warning',
+    danger: 'bg-danger-light text-danger-dark',
+    default: 'bg-bg-light text-text-muted'
   }
   const colorClass = status ? bgColors[status] : bgColors.default
 
@@ -612,15 +612,15 @@ function KPICard({
         }`}
     >
       <div className="flex justify-between items-start">
-        <span className="text-[10px] text-slate-400 font-black uppercase tracking-widest">{label}</span>
+        <span className="text-[10px] text-text-muted font-black uppercase tracking-widest">{label}</span>
         <div className={`p-2 rounded-xl text-brand`}>
           {icon}
         </div>
       </div>
       <div>
-        <span className="text-3xl font-black text-slate-800 tracking-tight">{value}</span>
+        <span className="text-3xl font-black text-text-primary tracking-tight">{value}</span>
         {subValue && (
-          <span className={`text-[10px] font-black uppercase tracking-widest ml-2 ${status === 'success' ? 'text-emerald-500' : status === 'warning' ? 'text-amber-500' : 'text-slate-400'}`}>
+          <span className={`text-[10px] font-black uppercase tracking-widest ml-2 ${status === 'success' ? 'text-success' : status === 'warning' ? 'text-warning' : 'text-text-muted'}`}>
             {subValue}
           </span>
         )}
@@ -631,9 +631,9 @@ function KPICard({
 
 function StatusBadge({ status, mobile }: { status: GuestStatus; mobile?: boolean }) {
   const config = {
-    confirmed: { label: 'Confirmado', icon: '✓', class: 'bg-emerald-50 text-emerald-600 border-emerald-100' },
-    pending: { label: 'Pendente', icon: '⏳', class: 'bg-amber-50 text-amber-600 border-amber-100' },
-    declined: { label: 'Recusado', icon: '✗', class: 'bg-rose-50 text-rose-100 border-rose-100' }
+    confirmed: { label: 'Confirmado', icon: '✓', class: 'bg-success-light text-success-dark border-success/20' },
+    pending: { label: 'Pendente', icon: '⏳', class: 'bg-warning-light text-warning border-warning/20' },
+    declined: { label: 'Recusado', icon: '✗', class: 'bg-danger-light text-danger-dark border-danger/20' }
   }
 
   const { label, icon, class: className } = config[status]

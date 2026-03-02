@@ -130,10 +130,10 @@ export function SharedLayout({
 
                     {/* Center: Title */}
                     <div className="flex-[2] flex flex-col items-center justify-center text-center px-2 min-w-0">
-                        <h1 className="text-xs md:text-base font-serif font-black text-slate-800 tracking-tight truncate leading-tight w-full">
+                        <h1 className="text-xs md:text-base font-serif font-black text-text-primary tracking-tight truncate leading-tight w-full">
                             {title || 'Painel'}
                         </h1>
-                        {subtitle && <p className="text-[7px] md:text-[8px] font-bold text-slate-400 uppercase tracking-widest mt-0.5 truncate w-full">{subtitle}</p>}
+                        {subtitle && <p className="text-[7px] md:text-[8px] font-bold text-text-muted uppercase tracking-widest mt-0.5 truncate w-full">{subtitle}</p>}
                     </div>
 
                     {/* Right: User Avatar (clica para abrir dropdown) */}
@@ -154,22 +154,22 @@ export function SharedLayout({
                 <>
                     {/* Backdrop */}
                     <div
-                        className="fixed inset-0 bg-slate-900/10 backdrop-blur-[2px] z-[60]"
+                        className="fixed inset-0 bg-brand-dark/10 backdrop-blur-[2px] z-[60]"
                         onClick={() => setIsMenuOpen(false)}
                     />
 
                     {/* Dropdown panel */}
-                    <div className="fixed top-24 right-6 w-64 bg-white rounded-3xl shadow-2xl z-[70] border border-brand/10 animate-in fade-in zoom-in-95 duration-200 overflow-hidden">
+                    <div className="fixed top-24 right-6 w-64 bg-surface rounded-3xl shadow-2xl z-[70] border border-border-soft animate-in fade-in zoom-in-95 duration-200 overflow-hidden">
 
                         {/* User info */}
-                        <div className="p-6 border-b border-slate-50 bg-slate-50/30">
+                        <div className="p-6 border-b border-border-soft bg-bg-light/30">
                             <div className="flex items-center gap-3">
                                 <div className="w-10 h-10 rounded-xl bg-brand text-white flex items-center justify-center font-black text-sm uppercase shadow-inner">
                                     {user.name.charAt(0)}
                                 </div>
                                 <div className="min-w-0">
-                                    <p className="text-xs font-black text-slate-800 truncate">{user.name}</p>
-                                    <p className="text-[9px] font-bold text-slate-400 uppercase truncate">{user.email}</p>
+                                    <p className="text-xs font-black text-text-primary truncate">{user.name}</p>
+                                    <p className="text-[9px] font-bold text-text-muted uppercase truncate">{user.email}</p>
                                 </div>
                             </div>
                         </div>
@@ -181,19 +181,19 @@ export function SharedLayout({
                                     <button
                                         key={link.href}
                                         onClick={() => { router.push(link.href); setIsMenuOpen(false) }}
-                                        className="w-full text-left px-4 py-3 flex items-center gap-3 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-50 hover:text-brand transition-all"
+                                        className="w-full text-left px-4 py-3 flex items-center gap-3 rounded-2xl text-[10px] font-black uppercase tracking-widest text-text-secondary hover:bg-bg-light hover:text-brand transition-all"
                                     >
                                         <span className="flex-shrink-0">{link.icon}</span>
                                         {link.label}
                                     </button>
                                 ))}
-                                <div className="my-1 border-t border-slate-50" />
+                                <div className="my-1 border-t border-border-soft" />
                             </div>
 
                             {/* Sair — aparece sempre */}
                             <button
                                 onClick={logout}
-                                className="w-full text-left px-4 py-3 flex items-center gap-3 rounded-2xl text-[10px] font-black uppercase tracking-widest text-rose-500 hover:bg-rose-50 transition-all"
+                                className="w-full text-left px-4 py-3 flex items-center gap-3 rounded-2xl text-[10px] font-black uppercase tracking-widest text-danger hover:bg-danger-light transition-all"
                             >
                                 <IconLogOut />
                                 Sair
@@ -215,18 +215,13 @@ export function SharedLayout({
                     </div>
                 )}
 
-                <div className="p-6 md:p-12 flex-1 relative">
+                <div className="p-6 md:p-12 pb-24 md:pb-12 flex-1 relative">
                     <div className="max-w-[1400px] mx-auto animate-in fade-in slide-in-from-bottom-4 duration-500">
                         {children}
                     </div>
                 </div>
 
-                {/* Footer */}
-                <footer className="py-12 border-t border-brand/5 text-center mt-12 bg-white/30 mb-20 md:mb-0">
-                    <p className="text-[9px] font-black text-slate-300 uppercase tracking-[0.5em]">
-                        Vanessa Bidinotti • RSVP Manager
-                    </p>
-                </footer>
+                {/* O rodapé foi removido para uma interface mais limpa no painel de gestão */}
             </main>
 
             {/* ── MOBILE BOTTOM NAVIGATION ──────────────────────────── */}
@@ -239,10 +234,10 @@ export function SharedLayout({
                             onClick={() => router.push(link.href)}
                             className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${isActive ? 'scale-110' : 'opacity-40 grayscale'}`}
                         >
-                            <div className={`w-12 h-12 flex items-center justify-center rounded-2xl transition-all ${isActive ? 'bg-brand text-white shadow-lg shadow-brand/20' : 'bg-slate-50 text-slate-400'}`}>
+                            <div className={`w-12 h-12 flex items-center justify-center rounded-2xl transition-all ${isActive ? 'bg-brand text-white shadow-lg shadow-brand-dark/20' : 'bg-bg-light text-text-muted'}`}>
                                 {link.icon}
                             </div>
-                            <span className={`text-[8px] font-black uppercase tracking-widest ${isActive ? 'text-brand' : 'text-slate-400'}`}>
+                            <span className={`text-[8px] font-black uppercase tracking-widest ${isActive ? 'text-brand' : 'text-text-muted'}`}>
                                 {link.label}
                             </span>
                         </button>

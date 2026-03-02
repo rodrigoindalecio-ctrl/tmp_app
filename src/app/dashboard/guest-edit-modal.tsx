@@ -94,7 +94,7 @@ export function GuestEditModal({ guest, isOpen, onClose, onSave, onDelete }: Gue
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault()
-        
+
         if (!formData.name.trim()) {
             alert('Por favor, preencha o nome')
             return
@@ -106,7 +106,7 @@ export function GuestEditModal({ guest, isOpen, onClose, onSave, onDelete }: Gue
         }
 
         setIsSaving(true)
-        
+
         // Simular delay de salvamento
         setTimeout(() => {
             const updatedGuest: Guest = {
@@ -120,14 +120,14 @@ export function GuestEditModal({ guest, isOpen, onClose, onSave, onDelete }: Gue
     }
 
     return (
-        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-            <div className="bg-white rounded-2xl shadow-lg max-w-md w-full animate-in fade-in zoom-in-95 duration-300">
+        <div className="fixed inset-0 bg-brand-dark/40 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+            <div className="bg-surface rounded-3xl shadow-2xl max-w-md w-full animate-in fade-in zoom-in-95 duration-300 border border-border-soft overflow-hidden">
                 {/* Header */}
-                <div className="flex items-center justify-between p-6 border-b border-borderSoft">
-                    <h2 className="text-lg font-serif font-bold text-textPrimary">Editar Convidado</h2>
+                <div className="flex items-center justify-between p-6 border-b border-border-soft">
+                    <h2 className="text-xl font-serif font-black text-text-primary tracking-tight">Editar Convidado</h2>
                     <button
                         onClick={onClose}
-                        className="text-textSecondary hover:text-textPrimary transition-colors"
+                        className="text-text-muted hover:text-text-primary transition-colors p-2 hover:bg-bg-light rounded-xl"
                         disabled={isSaving}
                     >
                         <XIcon />
@@ -135,10 +135,10 @@ export function GuestEditModal({ guest, isOpen, onClose, onSave, onDelete }: Gue
                 </div>
 
                 {/* Form */}
-                <form onSubmit={handleSubmit} className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+                <form onSubmit={handleSubmit} className="p-8 space-y-6 max-h-[75vh] overflow-y-auto custom-scrollbar">
                     {/* Nome Principal */}
                     <div>
-                        <label htmlFor="name" className="block text-sm font-medium text-textPrimary mb-2">
+                        <label htmlFor="name" className="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-2 ml-1">
                             Nome Principal
                         </label>
                         <input
@@ -146,16 +146,15 @@ export function GuestEditModal({ guest, isOpen, onClose, onSave, onDelete }: Gue
                             type="text"
                             value={formData.name}
                             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                            className="w-full rounded-lg border border-borderSoft px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all"
+                            className="w-full px-5 py-3.5 bg-bg-light border border-border-soft rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-text-primary"
                             placeholder="Ex: Roberto Silva"
                             disabled={isSaving}
                         />
-                        <p className="text-xs text-textSecondary mt-1">Tag: <span className="font-medium text-primary">Principal</span></p>
                     </div>
 
                     {/* Grupo */}
                     <div>
-                        <label htmlFor="group" className="block text-sm font-medium text-textPrimary mb-2">
+                        <label htmlFor="group" className="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-2 ml-1">
                             Grupo/Família
                         </label>
                         <input
@@ -163,159 +162,164 @@ export function GuestEditModal({ guest, isOpen, onClose, onSave, onDelete }: Gue
                             type="text"
                             value={formData.grupo || ''}
                             onChange={(e) => setFormData({ ...formData, grupo: e.target.value })}
-                            className="w-full rounded-lg border border-borderSoft px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all"
+                            className="w-full px-5 py-3.5 bg-bg-light border border-border-soft rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-text-primary"
                             placeholder="Ex: Família Silva"
                             disabled={isSaving}
                         />
                     </div>
 
-                    {/* Email */}
-                    <div>
-                        <label htmlFor="email" className="block text-sm font-medium text-textPrimary mb-2">
-                            Email
-                        </label>
-                        <input
-                            id="email"
-                            type="email"
-                            value={formData.email || ''}
-                            onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                            className="w-full rounded-lg border border-borderSoft px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all"
-                            placeholder="seu@email.com"
-                            disabled={isSaving}
-                        />
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {/* Status */}
+                        <div>
+                            <label htmlFor="status" className="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-2 ml-1">
+                                Status
+                            </label>
+                            <select
+                                id="status"
+                                value={formData.status}
+                                onChange={(e) => setFormData({ ...formData, status: e.target.value as 'confirmed' | 'pending' | 'declined' })}
+                                className="w-full px-5 py-3.5 bg-bg-light border border-border-soft rounded-2xl text-xs font-black uppercase tracking-widest text-text-secondary shadow-inner outline-none"
+                                disabled={isSaving}
+                            >
+                                <option value="pending">⏳ Pendente</option>
+                                <option value="confirmed">✓ Confirmado</option>
+                                <option value="declined">✗ Recusado</option>
+                            </select>
+                        </div>
+
+                        {/* Categoria */}
+                        <div>
+                            <label htmlFor="category" className="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-2 ml-1">
+                                Categoria
+                            </label>
+                            <select
+                                id="category"
+                                value={formData.category}
+                                onChange={(e) => setFormData({ ...formData, category: e.target.value as GuestCategory })}
+                                className="w-full px-5 py-3.5 bg-bg-light border border-border-soft rounded-2xl text-xs font-black uppercase tracking-widest text-text-secondary shadow-inner outline-none"
+                                disabled={isSaving}
+                            >
+                                <option value="adult_paying">Adulto</option>
+                                <option value="child_paying">Criança Pag.</option>
+                                <option value="child_not_paying">Criança N.P.</option>
+                            </select>
+                        </div>
                     </div>
 
-                    {/* Telefone */}
-                    <div>
-                        <label htmlFor="telefone" className="block text-sm font-medium text-textPrimary mb-2">
-                            Telefone
-                        </label>
-                        <input
-                            id="telefone"
-                            type="tel"
-                            value={formData.telefone || ''}
-                            onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
-                            className="w-full rounded-lg border border-borderSoft px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all"
-                            placeholder="Ex: (11) 99999-9999"
-                            disabled={isSaving}
-                        />
-                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                        {/* Telefone */}
+                        <div>
+                            <label htmlFor="telefone" className="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-2 ml-1">
+                                Telefone
+                            </label>
+                            <input
+                                id="telefone"
+                                type="tel"
+                                value={formData.telefone || ''}
+                                onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
+                                className="w-full px-5 py-3.5 bg-bg-light border border-border-soft rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-text-primary"
+                                placeholder="(00) 00000-0000"
+                                disabled={isSaving}
+                            />
+                        </div>
 
-                    {/* Status */}
-                    <div>
-                        <label htmlFor="status" className="block text-sm font-medium text-textPrimary mb-2">
-                            Status
-                        </label>
-                        <select
-                            id="status"
-                            value={formData.status}
-                            onChange={(e) => setFormData({ ...formData, status: e.target.value as 'confirmed' | 'pending' | 'declined' })}
-                            className="w-full rounded-lg border border-borderSoft px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all"
-                            disabled={isSaving}
-                        >
-                            <option value="pending">Pendente</option>
-                            <option value="confirmed">Confirmado</option>
-                            <option value="declined">Recusado</option>
-                        </select>
-                    </div>
-
-                    {/* Categoria */}
-                    <div>
-                        <label htmlFor="category" className="block text-sm font-medium text-textPrimary mb-2">
-                            Categoria
-                        </label>
-                        <select
-                            id="category"
-                            value={formData.category}
-                            onChange={(e) => setFormData({ ...formData, category: e.target.value as GuestCategory })}
-                            className="w-full rounded-lg border border-borderSoft px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all"
-                            disabled={isSaving}
-                        >
-                            <option value="adult_paying">Adulto Pagante</option>
-                            <option value="child_paying">Criança Pagante</option>
-                            <option value="child_not_paying">Criança Não Pagante</option>
-                        </select>
+                        {/* Email */}
+                        <div>
+                            <label htmlFor="email" className="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-2 ml-1">
+                                E-mail (Opcional)
+                            </label>
+                            <input
+                                id="email"
+                                type="email"
+                                value={formData.email || ''}
+                                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                className="w-full px-5 py-3.5 bg-bg-light border border-border-soft rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-text-primary"
+                                placeholder="exemplo@email.com"
+                                disabled={isSaving}
+                            />
+                        </div>
                     </div>
 
                     {/* Acompanhantes - 5 Slots Fixos */}
-                    <div className="bg-blue-50/50 border border-blue-100 rounded-lg p-4 space-y-4">
-                        <h3 className="font-medium text-textPrimary text-sm">Acompanhantes (Máximo 5)</h3>
+                    <div className="bg-bg-light/50 border border-border-soft rounded-[2rem] p-6 space-y-6">
+                        <h3 className="text-xs font-black text-text-muted uppercase tracking-widest ml-1 mb-2">Acompanhantes (Até 5)</h3>
                         {companionsList.slice(0, 5).map((companion, index) => (
-                            <div key={index} className="space-y-2">
-                                <div className="grid grid-cols-3 gap-2 items-start">
+                            <div key={index} className="space-y-3 bg-surface p-4 rounded-2xl border border-border-soft shadow-sm">
+                                <div className="grid grid-cols-3 gap-3 items-end">
                                     <div className="col-span-2">
-                                        <label className="block text-xs font-medium text-textSecondary mb-1">
-                                            Acompanhante {index + 1}
+                                        <label className="block text-[9px] font-black text-text-muted uppercase tracking-widest mb-2 ml-1">
+                                            Nome {index + 1}
                                         </label>
                                         <input
                                             type="text"
                                             value={companion.name}
                                             onChange={(e) => handleCompanionNameChange(index, e.target.value)}
-                                            className="w-full rounded-lg border border-borderSoft px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all"
-                                            placeholder="Nome"
+                                            className="w-full px-4 py-2.5 bg-bg-light border border-border-soft rounded-xl text-xs font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-text-primary"
+                                            placeholder="Nome do acompanhante"
                                             disabled={isSaving}
                                         />
                                     </div>
-                                    <div>
-                                        <label className="block text-xs font-medium text-textSecondary mb-1">
-                                            Categoria
-                                        </label>
-                                        <select
-                                            value={companion.category || 'adult_paying'}
-                                            onChange={(e) => handleCompanionCategoryChange(index, e.target.value as GuestCategory)}
-                                            className="w-full rounded-lg border border-borderSoft px-3 py-2 text-sm focus:border-primary focus:ring-1 focus:ring-primary focus:outline-none transition-all"
-                                            disabled={isSaving}
-                                        >
-                                            <option value="adult_paying">Adulto</option>
-                                            <option value="child_paying">Criança Pag.</option>
-                                            <option value="child_not_paying">Criança N.P.</option>
-                                        </select>
-                                    </div>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                    <input
-                                        type="checkbox"
-                                        id={`companion-confirmed-${index}`}
-                                        checked={companion.isConfirmed}
-                                        onChange={(e) => handleCompanionConfirmedChange(index, e.target.checked)}
-                                        className="w-4 h-4 rounded border-borderSoft cursor-pointer"
+                                    <select
+                                        value={companion.category || 'adult_paying'}
+                                        onChange={(e) => handleCompanionCategoryChange(index, e.target.value as GuestCategory)}
+                                        className="w-full px-3 py-2.5 bg-bg-light border border-border-soft rounded-xl text-[10px] font-black uppercase tracking-widest text-text-secondary outline-none"
                                         disabled={isSaving}
-                                    />
-                                    <label htmlFor={`companion-confirmed-${index}`} className="text-xs font-medium text-textSecondary cursor-pointer">
-                                        Confirmado
-                                    </label>
+                                    >
+                                        <option value="adult_paying">Adulto</option>
+                                        <option value="child_paying">Criança Pag.</option>
+                                        <option value="child_not_paying">Não Pagante</option>
+                                    </select>
                                 </div>
-                                {companion.name && <div className="text-xs text-textSecondary">Status: {companion.isConfirmed ? '✓ Confirmado' : '⊘ Pendente'}</div>}
+                                <div className="flex items-center justify-between px-1">
+                                    <div className="flex items-center gap-2">
+                                        <input
+                                            type="checkbox"
+                                            id={`companion-confirmed-${index}`}
+                                            checked={companion.isConfirmed}
+                                            onChange={(e) => handleCompanionConfirmedChange(index, e.target.checked)}
+                                            className="w-4 h-4 rounded-md border-border-soft text-brand focus:ring-brand/20 cursor-pointer"
+                                            disabled={isSaving}
+                                        />
+                                        <label htmlFor={`companion-confirmed-${index}`} className="text-[10px] font-black text-text-muted uppercase tracking-widest cursor-pointer">
+                                            Confirmado
+                                        </label>
+                                    </div>
+                                    {companion.name && (
+                                        <span className={`text-[9px] font-black uppercase tracking-widest ${companion.isConfirmed ? 'text-success' : 'text-warning'}`}>
+                                            {companion.isConfirmed ? '✓ Confirmado' : '⏳ Pendente'}
+                                        </span>
+                                    )}
+                                </div>
                             </div>
                         ))}
                     </div>
 
                     {/* Buttons */}
-                    <div className="flex flex-col gap-3 pt-4">
-                        <div className="flex gap-3">
+                    <div className="flex flex-col gap-4 pt-4">
+                        <div className="flex flex-col sm:flex-row gap-3">
                             <button
                                 type="button"
                                 onClick={onClose}
-                                className="flex-1 py-2 px-4 rounded-lg border border-borderSoft text-textPrimary font-medium hover:bg-gray-50 transition-colors disabled:opacity-50"
+                                className="flex-1 py-4 px-6 rounded-2xl border border-border-soft text-text-muted font-black uppercase tracking-widest text-[10px] hover:bg-bg-light transition-all disabled:opacity-50"
                                 disabled={isSaving}
                             >
                                 Cancelar
                             </button>
                             <button
                                 type="submit"
-                                className="flex-1 py-2 px-4 rounded-lg bg-primary text-white font-medium hover:bg-primary/90 transition-colors disabled:opacity-50"
+                                className="flex-1 py-4 px-6 rounded-2xl bg-brand text-white font-black uppercase tracking-widest text-[10px] shadow-lg shadow-brand/20 hover:scale-[1.02] active:scale-95 transition-all disabled:opacity-50"
                                 disabled={isSaving}
                             >
-                                {isSaving ? 'Salvando...' : 'Salvar'}
+                                {isSaving ? 'Salvando...' : 'Salvar Alterações'}
                             </button>
                         </div>
 
                         <button
                             type="button"
                             onClick={handleDeleteClick}
-                            className="w-full py-2 px-4 rounded-lg border border-red-300 text-red-600 font-medium hover:bg-red-50 transition-colors"
+                            className="w-full py-4 px-6 rounded-2xl border border-danger/30 text-danger font-black uppercase tracking-widest text-[10px] hover:bg-danger-light transition-all"
                         >
-                            Excluir Convidado
+                            Excluir Registro
                         </button>
                     </div>
                 </form>
@@ -323,11 +327,11 @@ export function GuestEditModal({ guest, isOpen, onClose, onSave, onDelete }: Gue
 
             {/* Delete Confirmation Modal */}
             {showDeleteConfirm && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-[60] p-4">
-                    <div className="bg-white rounded-2xl shadow-lg max-w-sm w-full animate-in fade-in zoom-in-95 duration-300">
-                        <div className="p-6">
-                            <div className="flex items-center justify-center w-12 h-12 mx-auto mb-4 rounded-full bg-red-100">
-                                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-red-600">
+                <div className="fixed inset-0 bg-brand-dark/60 backdrop-blur-md flex items-center justify-center z-[60] p-4">
+                    <div className="bg-surface rounded-[2.5rem] shadow-2xl border border-border-soft max-w-sm w-full animate-in fade-in zoom-in-95 duration-300 overflow-hidden">
+                        <div className="p-10 text-center">
+                            <div className="flex items-center justify-center w-16 h-16 mx-auto mb-6 rounded-2xl bg-danger-light text-danger shadow-inner">
+                                <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
                                     <polyline points="3 6 5 6 21 6" />
                                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
                                     <line x1="10" y1="11" x2="10" y2="17" />
@@ -335,26 +339,26 @@ export function GuestEditModal({ guest, isOpen, onClose, onSave, onDelete }: Gue
                                 </svg>
                             </div>
 
-                            <h3 className="text-lg font-bold text-textPrimary text-center mb-2">
+                            <h3 className="text-xl font-serif font-black text-text-primary tracking-tight mb-2">
                                 Excluir Convidado?
                             </h3>
 
-                            <p className="text-textSecondary text-center text-sm mb-6">
-                                Tem certeza que deseja excluir <strong>{formData?.name}</strong>? Esta ação não pode ser desfeita.
+                            <p className="text-text-muted text-sm font-bold leading-relaxed mb-8 px-2">
+                                Tem certeza que deseja excluir <span className="text-text-primary">"{formData?.name}"</span>? Esta ação não pode ser desfeita.
                             </p>
 
                             <div className="flex gap-3">
                                 <button
                                     onClick={() => setShowDeleteConfirm(false)}
-                                    className="flex-1 py-2 px-4 rounded-lg border border-borderSoft text-textPrimary font-medium hover:bg-gray-50 transition-colors"
+                                    className="flex-1 py-4 bg-bg-light rounded-xl text-[10px] font-black uppercase tracking-widest text-text-muted hover:bg-border-soft transition-all"
                                 >
-                                    Cancelar
+                                    Voltar
                                 </button>
                                 <button
                                     onClick={confirmDelete}
-                                    className="flex-1 py-2 px-4 rounded-lg bg-red-600 text-white font-medium hover:bg-red-700 transition-colors"
+                                    className="flex-1 py-4 bg-danger text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-danger/20 hover:bg-danger-dark transition-all"
                                 >
-                                    Excluir
+                                    Confirmar
                                 </button>
                             </div>
                         </div>

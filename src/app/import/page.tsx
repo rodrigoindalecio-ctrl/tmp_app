@@ -52,7 +52,7 @@ export default function ImportPage() {
         return (
             <SharedLayout role="user" title="Importar Convidados">
                 <div className="min-h-[60vh] flex items-center justify-center">
-                    <div className="w-12 h-12 border-4 border-brand/20 border-t-brand rounded-full animate-spin" />
+                    <div className="w-12 h-12 border-4 border-brand-pale border-t-brand rounded-full animate-spin" />
                 </div>
             </SharedLayout>
         )
@@ -221,8 +221,8 @@ export default function ImportPage() {
         >
             {eventLoading ? (
                 <div className="flex flex-col items-center justify-center min-h-[400px]">
-                    <div className="w-12 h-12 border-4 border-brand/20 border-t-brand rounded-full animate-spin mb-4" />
-                    <p className="text-[10px] font-black uppercase tracking-widest text-slate-400">Carregando dados do evento...</p>
+                    <div className="w-12 h-12 border-4 border-brand-pale border-t-brand rounded-full animate-spin mb-4" />
+                    <p className="text-[10px] font-black uppercase tracking-widest text-text-muted">Carregando dados do evento...</p>
                 </div>
             ) : (
                 <main className="max-w-[1200px] mx-auto w-full animate-in fade-in duration-500">
@@ -232,7 +232,7 @@ export default function ImportPage() {
                                 if (step === 'review' || step === 'input') setStep('choose')
                                 else router.back()
                             }}
-                            className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-brand transition-all"
+                            className="flex items-center gap-2 text-[10px] font-black uppercase tracking-widest text-text-muted hover:text-brand transition-all"
                         >
                             <ArrowLeftIcon />
                             Voltar
@@ -242,8 +242,8 @@ export default function ImportPage() {
                     {step === 'choose' && (
                         <div className="max-w-4xl mx-auto py-4 animate-in fade-in duration-500">
                             <div className="text-center mb-12">
-                                <h2 className="text-3xl font-black text-slate-800 tracking-tight mb-2">Lista de Presença</h2>
-                                <p className="text-slate-400 font-bold text-sm uppercase tracking-widest">Escolha como quer adicionar seus convidados:</p>
+                                <h2 className="text-3xl font-black text-text-primary tracking-tight mb-2">Lista de Presença</h2>
+                                <p className="text-text-muted font-bold text-sm uppercase tracking-widest">Escolha como quer adicionar seus convidados:</p>
                             </div>
 
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -252,15 +252,15 @@ export default function ImportPage() {
                                         setMethod('excel')
                                         setStep('input')
                                     }}
-                                    className="bg-white p-12 rounded-[2.5rem] border border-brand/5 hover:border-brand/20 hover:shadow-2xl hover:shadow-brand/[0.03] transition-all flex flex-col items-center text-center group"
+                                    className="bg-surface p-12 rounded-[2.5rem] border border-border-soft hover:border-brand-light/30 hover:shadow-2xl hover:shadow-brand/[0.03] transition-all flex flex-col items-center text-center group"
                                 >
-                                    <div className="w-20 h-20 bg-brand/5 rounded-[2.5rem] flex items-center justify-center mb-6 group-hover:scale-110 transition-transform border border-brand/10">
+                                    <div className="w-20 h-20 bg-brand-pale rounded-[2.5rem] flex items-center justify-center mb-6 group-hover:scale-110 transition-transform border border-brand/10">
                                         <FileSpreadsheetIcon />
                                     </div>
-                                    <h3 className="text-xl font-black text-slate-800 mb-2 tracking-tight">Planilha Excel</h3>
-                                    <p className="text-xs text-slate-400 font-bold uppercase tracking-widest leading-relaxed px-4">
+                                    <h3 className="text-xl font-black text-text-primary mb-2 tracking-tight">Planilha Excel</h3>
+                                    <p className="text-xs text-text-muted font-bold uppercase tracking-widest leading-relaxed px-4">
                                         Importe múltiplos convidados de uma só vez.<br />
-                                        <span className="text-brand/60 mt-2 block">Novidade: Liste acompanhantes por vírgula!</span>
+                                        <span className="text-brand/60 mt-2 block font-black">Novidade: Liste acompanhantes por vírgula!</span>
                                     </p>
                                 </button>
 
@@ -269,13 +269,13 @@ export default function ImportPage() {
                                         setMethod('manual')
                                         setStep('input')
                                     }}
-                                    className="bg-white p-12 rounded-[2.5rem] border border-brand/5 hover:border-brand/20 hover:shadow-2xl hover:shadow-brand/[0.03] transition-all flex flex-col items-center text-center group"
+                                    className="bg-surface p-12 rounded-[2.5rem] border border-border-soft hover:border-brand-light/30 hover:shadow-2xl hover:shadow-brand/[0.03] transition-all flex flex-col items-center text-center group"
                                 >
-                                    <div className="w-20 h-20 bg-brand/5 rounded-[2.5rem] flex items-center justify-center mb-6 group-hover:scale-110 transition-transform border border-brand/10">
+                                    <div className="w-20 h-20 bg-brand-pale rounded-[2.5rem] flex items-center justify-center mb-6 group-hover:scale-110 transition-transform border border-brand/10">
                                         <UserPlusIcon />
                                     </div>
-                                    <h3 className="text-xl font-black text-slate-800 mb-2 tracking-tight">Manualmente</h3>
-                                    <p className="text-xs text-slate-400 font-bold uppercase tracking-widest leading-relaxed px-4">Adicione convidados um a um com seus respectivos acompanhantes.</p>
+                                    <h3 className="text-xl font-black text-text-primary mb-2 tracking-tight">Manualmente</h3>
+                                    <p className="text-xs text-text-muted font-bold uppercase tracking-widest leading-relaxed px-4">Adicione convidados um a um com seus respectivos acompanhantes.</p>
                                 </button>
                             </div>
                         </div>
@@ -284,22 +284,22 @@ export default function ImportPage() {
                     {step === 'input' && (
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 animate-in slide-in-from-bottom-4 duration-500">
                             {method === 'excel' && (
-                                <div className="bg-white p-8 rounded-[2.5rem] border border-brand/5 shadow-sm flex flex-col lg:col-span-1">
+                                <div className="bg-surface p-8 rounded-[2.5rem] border border-border-soft shadow-sm flex flex-col lg:col-span-1">
                                     <div className="mb-8">
-                                        <h2 className="text-xl font-black text-slate-800 tracking-tight mb-1">Importar Excel</h2>
-                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Siga o modelo para evitar erros</p>
+                                        <h2 className="text-xl font-black text-text-primary tracking-tight mb-1">Importar Excel</h2>
+                                        <p className="text-[10px] font-black text-text-muted uppercase tracking-widest">Siga o modelo para evitar erros</p>
                                     </div>
 
                                     <button
                                         onClick={handleDownloadModel}
-                                        className="w-full flex items-center justify-center gap-2 py-4 bg-slate-50 border border-slate-100 rounded-2xl text-[10px] font-black uppercase tracking-widest text-slate-600 hover:bg-slate-100 transition-all mb-8 shadow-inner"
+                                        className="w-full flex items-center justify-center gap-2 py-4 bg-bg-light border border-border-soft rounded-2xl text-[10px] font-black uppercase tracking-widest text-text-secondary hover:bg-brand-pale transition-all mb-8 shadow-inner"
                                     >
                                         <DownloadIcon />
                                         Baixar modelo (.xlsx)
                                     </button>
 
                                     <div
-                                        className={`flex-1 min-h-[300px] border-2 border-dashed rounded-[2rem] flex flex-col items-center justify-center p-8 transition-all cursor-pointer ${isDragging ? 'border-brand bg-brand/5 scale-[0.98]' : 'border-slate-100 hover:border-brand/30 hover:bg-slate-50/50'}`}
+                                        className={`flex-1 min-h-[300px] border-2 border-dashed rounded-[2rem] flex flex-col items-center justify-center p-8 transition-all cursor-pointer ${isDragging ? 'border-brand bg-brand-pale scale-[0.98]' : 'border-border-soft hover:border-brand-light/30 hover:bg-bg-light'}`}
                                         onDragOver={handleDragOver}
                                         onDragLeave={handleDragLeave}
                                         onDrop={handleDrop}
@@ -315,16 +315,16 @@ export default function ImportPage() {
 
                                         {importStatus === 'processing' ? (
                                             <div className="text-center">
-                                                <div className="w-12 h-12 border-4 border-brand/20 border-t-brand rounded-full animate-spin mx-auto mb-4" />
+                                                <div className="w-12 h-12 border-4 border-brand-pale border-t-brand rounded-full animate-spin mx-auto mb-4" />
                                                 <p className="text-[10px] font-black uppercase tracking-widest text-brand">Validando arquivo...</p>
                                             </div>
                                         ) : (
                                             <div className="text-center">
-                                                <div className="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mx-auto mb-4 text-slate-300 shadow-sm border border-slate-50">
+                                                <div className="w-16 h-16 bg-bg-light rounded-2xl flex items-center justify-center mx-auto mb-4 text-text-muted shadow-sm border border-border-soft">
                                                     <UploadCloudIcon />
                                                 </div>
-                                                <p className="text-sm font-black text-slate-800 mb-1">Upload de Arquivo</p>
-                                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Arraste ou clique para selecionar</p>
+                                                <p className="text-sm font-black text-text-primary mb-1">Upload de Arquivo</p>
+                                                <p className="text-[10px] font-black text-text-muted uppercase tracking-widest">Arraste ou clique para selecionar</p>
                                             </div>
                                         )}
                                     </div>
@@ -332,32 +332,32 @@ export default function ImportPage() {
                             )}
 
                             {method === 'manual' && (
-                                <div className="bg-white p-8 rounded-[2.5rem] border border-brand/5 shadow-sm lg:col-span-1">
+                                <div className="bg-surface p-8 rounded-[2.5rem] border border-border-soft shadow-sm lg:col-span-1">
                                     <div className="mb-8">
-                                        <h2 className="text-xl font-black text-slate-800 tracking-tight mb-1">Adicionar Manual</h2>
-                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Preencha as informações obrigatórias</p>
+                                        <h2 className="text-xl font-black text-text-primary tracking-tight mb-1">Adicionar Manual</h2>
+                                        <p className="text-[10px] font-black text-text-muted uppercase tracking-widest">Preencha as informações obrigatórias</p>
                                     </div>
 
                                     <form onSubmit={handleManualAdd} className="space-y-6">
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <div>
-                                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Nome Principal *</label>
+                                                <label className="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-2 ml-1">Nome Principal *</label>
                                                 <input
                                                     type="text"
                                                     required
                                                     placeholder="Nome do convidado"
-                                                    className="w-full px-5 py-3.5 bg-slate-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-slate-700"
+                                                    className="w-full px-5 py-3.5 bg-bg-light border border-border-soft rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-text-primary"
                                                     value={manualName}
                                                     onChange={(e) => setManualName(e.target.value)}
                                                 />
                                             </div>
                                             <div>
-                                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Telefone / WhatsApp *</label>
+                                                <label className="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-2 ml-1">Telefone / WhatsApp *</label>
                                                 <input
                                                     type="tel"
                                                     required
                                                     placeholder="(00) 00000-0000"
-                                                    className="w-full px-5 py-3.5 bg-slate-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-slate-700"
+                                                    className="w-full px-5 py-3.5 bg-bg-light border border-border-soft rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-text-primary"
                                                     value={manualTelefone}
                                                     onChange={(e) => setManualTelefone(e.target.value)}
                                                 />
@@ -366,21 +366,21 @@ export default function ImportPage() {
 
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <div>
-                                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Grupo</label>
+                                                <label className="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-2 ml-1">Grupo</label>
                                                 <input
                                                     type="text"
                                                     placeholder="ex: Família Noiva"
-                                                    className="w-full px-5 py-3.5 bg-slate-50 border-none rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-slate-700"
+                                                    className="w-full px-5 py-3.5 bg-bg-light border border-border-soft rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-text-primary"
                                                     value={manualGrupo}
                                                     onChange={(e) => setManualGrupo(e.target.value)}
                                                 />
                                             </div>
                                             <div>
-                                                <label className="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-2 ml-1">Tipo do Titular</label>
+                                                <label className="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-2 ml-1">Tipo do Titular</label>
                                                 <select
                                                     value={manualCategory}
                                                     onChange={(e) => setManualCategory(e.target.value)}
-                                                    className="w-full px-5 py-3.5 bg-slate-50 border-none rounded-2xl text-xs font-black uppercase tracking-widest text-slate-500 shadow-inner outline-none"
+                                                    className="w-full px-5 py-3.5 bg-bg-light border border-border-soft rounded-2xl text-xs font-black uppercase tracking-widest text-text-secondary shadow-inner outline-none"
                                                 >
                                                     <option value="adult_paying">Adulto Pagante</option>
                                                     <option value="child_paying">Criança Pagante</option>
@@ -390,15 +390,15 @@ export default function ImportPage() {
                                         </div>
 
                                         <div>
-                                            <label className="block text-xs font-medium text-textSecondary mb-3">Acompanhantes (até 5)</label>
-                                            <div className="space-y-3 bg-slate-50/50 p-6 rounded-2xl border border-slate-100">
+                                            <label className="block text-xs font-black text-text-muted uppercase tracking-widest mb-3 ml-1">Acompanhantes (até 5)</label>
+                                            <div className="space-y-3 bg-bg-light/50 p-6 rounded-2xl border border-border-soft">
                                                 {manualCompanions.map((companion, idx) => (
                                                     <div key={idx} className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                                                         <div className="sm:col-span-2">
                                                             <input
                                                                 type="text"
                                                                 placeholder={`Nome do Acompanhante ${idx + 1}`}
-                                                                className="w-full px-4 py-2.5 bg-white border border-slate-100 rounded-xl text-xs font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-sm outline-none text-slate-700"
+                                                                className="w-full px-4 py-2.5 bg-surface border border-border-soft rounded-xl text-xs font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-sm outline-none text-text-primary"
                                                                 value={companion.name}
                                                                 onChange={(e) => {
                                                                     const newCompanions = [...manualCompanions]
@@ -414,7 +414,7 @@ export default function ImportPage() {
                                                                 newCompanions[idx].category = e.target.value
                                                                 setManualCompanions(newCompanions)
                                                             }}
-                                                            className="px-4 py-2.5 bg-white border border-slate-100 rounded-xl text-[10px] font-black uppercase tracking-widest text-slate-500 outline-none"
+                                                            className="px-4 py-2.5 bg-surface border border-border-soft rounded-xl text-[10px] font-black uppercase tracking-widest text-text-muted outline-none"
                                                         >
                                                             <option value="adult_paying">Adulto</option>
                                                             <option value="child_paying">Criança Pag.</option>
@@ -441,16 +441,16 @@ export default function ImportPage() {
 
                     {step === 'review' && (
                         <div className="max-w-4xl mx-auto animate-in slide-in-from-right-8 duration-500">
-                            <div className="bg-white p-8 rounded-[2.5rem] border border-brand/5 shadow-sm mb-6">
+                            <div className="bg-surface p-8 rounded-[2.5rem] border border-border-soft shadow-sm mb-6">
                                 <div className="flex flex-col sm:flex-row items-center justify-between gap-6 mb-8">
                                     <div>
-                                        <h2 className="text-2xl font-black text-slate-800 tracking-tight mb-1">Revisar Importação</h2>
-                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Confirme os dados antes de salvar</p>
+                                        <h2 className="text-2xl font-black text-text-primary tracking-tight mb-1">Revisar Importação</h2>
+                                        <p className="text-[10px] font-black text-text-muted uppercase tracking-widest">Confirme os dados antes de salvar</p>
                                     </div>
                                     <div className="flex gap-3 w-full sm:w-auto">
                                         <button
                                             onClick={() => setStep('input')}
-                                            className="flex-1 sm:flex-none px-6 py-3 bg-slate-50 text-[10px] font-black uppercase tracking-widest text-slate-400 rounded-xl hover:bg-slate-100 transition-all border border-slate-100"
+                                            className="flex-1 sm:flex-none px-6 py-3 bg-bg-light text-[10px] font-black uppercase tracking-widest text-text-muted rounded-xl hover:bg-brand-pale transition-all border border-border-soft"
                                         >
                                             Corrigir
                                         </button>
@@ -463,35 +463,35 @@ export default function ImportPage() {
                                     </div>
                                 </div>
 
-                                <div className="border border-slate-100 rounded-[2rem] overflow-hidden shadow-inner bg-slate-50/30">
+                                <div className="border border-border-soft rounded-[2rem] overflow-hidden shadow-inner bg-bg-light/30">
                                     <table className="w-full text-left text-sm">
-                                        <thead className="bg-slate-50 border-b border-slate-100 text-[9px] font-black text-slate-400 uppercase tracking-widest">
+                                        <thead className="bg-bg-light/50 border-b border-border-soft text-[9px] font-black text-text-muted uppercase tracking-widest">
                                             <tr>
                                                 <th className="px-8 py-4">Nome</th>
                                                 <th className="px-8 py-4">Status</th>
                                                 <th className="px-8 py-4 text-right">Membros</th>
                                             </tr>
                                         </thead>
-                                        <tbody className="divide-y divide-slate-100">
+                                        <tbody className="divide-y divide-border-soft">
                                             {pendingGuest ? (
                                                 <tr>
                                                     <td className="px-8 py-5">
-                                                        <p className="font-black text-slate-800 tracking-tight">{pendingGuest.name}</p>
-                                                        <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">{pendingGuest.telefone}</p>
+                                                        <p className="font-black text-text-primary tracking-tight">{pendingGuest.name}</p>
+                                                        <p className="text-[10px] text-text-muted font-bold uppercase mt-1">{pendingGuest.telefone}</p>
                                                     </td>
                                                     <td className="px-8 py-5">
-                                                        <span className="bg-amber-100 text-amber-700 px-2 py-1 rounded text-[9px] font-black uppercase tracking-widest">Pendente</span>
+                                                        <span className="bg-warning-light text-warning px-2 py-1 rounded text-[9px] font-black uppercase tracking-widest border border-warning/10">Pendente</span>
                                                     </td>
                                                     <td className="px-8 py-5 text-right font-black text-brand">{1 + pendingGuest.companionsList.length}</td>
                                                 </tr>
                                             ) : parseResult?.convidados.map((guest, idx) => (
                                                 <tr key={idx}>
                                                     <td className="px-8 py-4">
-                                                        <p className="font-black text-slate-800 tracking-tight">{guest.name}</p>
-                                                        <p className="text-[10px] text-slate-400 font-bold uppercase mt-1">{guest.telefone}</p>
+                                                        <p className="font-black text-text-primary tracking-tight">{guest.name}</p>
+                                                        <p className="text-[10px] text-text-muted font-bold uppercase mt-1">{guest.telefone}</p>
                                                     </td>
                                                     <td className="px-8 py-4">
-                                                        <span className="bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-[9px] font-black uppercase tracking-widest">Válido</span>
+                                                        <span className="bg-success-light text-success-dark px-2 py-1 rounded text-[9px] font-black uppercase tracking-widest border border-success/10">Válido</span>
                                                     </td>
                                                     <td className="px-8 py-4 text-right font-black text-brand">{1 + (guest.companionsList?.length || 0)}</td>
                                                 </tr>
@@ -505,11 +505,11 @@ export default function ImportPage() {
 
                     {step === 'success' && (
                         <div className="flex flex-col items-center justify-center py-12 animate-in zoom-in-95 duration-500 text-center">
-                            <div className="w-24 h-24 bg-emerald-50 rounded-[2rem] flex items-center justify-center mb-8 text-emerald-500 shadow-xl shadow-emerald-500/10 border-4 border-white animate-bounce">
+                            <div className="w-24 h-24 bg-success-light rounded-[2rem] flex items-center justify-center mb-8 text-success-dark shadow-xl shadow-success/10 border-4 border-surface animate-bounce">
                                 <CheckIconBig />
                             </div>
-                            <h2 className="text-4xl font-black text-slate-800 tracking-tight mb-2">Sucesso!</h2>
-                            <p className="text-slate-400 font-bold text-sm uppercase tracking-widest mb-10">
+                            <h2 className="text-4xl font-black text-text-primary tracking-tight mb-2">Sucesso!</h2>
+                            <p className="text-text-muted font-bold text-sm uppercase tracking-widest mb-10">
                                 {importedCount} novos nomes adicionados à lista.
                             </p>
 
@@ -520,7 +520,7 @@ export default function ImportPage() {
                                         setImportedCount(0)
                                         setDuplicatesList([])
                                     }}
-                                    className="flex-1 px-8 py-4 bg-white border border-slate-100 text-slate-500 text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-slate-50 transition-all shadow-sm"
+                                    className="flex-1 px-8 py-4 bg-surface border border-border-soft text-text-muted text-[10px] font-black uppercase tracking-widest rounded-2xl hover:bg-bg-light transition-all shadow-sm"
                                 >
                                     Adicionar Mais
                                 </button>
