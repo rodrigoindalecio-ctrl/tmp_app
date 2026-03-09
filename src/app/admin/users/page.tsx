@@ -11,7 +11,11 @@ function UsersManagementContent() {
   const [showInviteModal, setShowInviteModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [isSending, setIsSending] = useState(false)
-  const [newUser, setNewUser] = useState({ name: '', email: '', type: 'noivos' as 'noivos' | 'admin', password: '' })
+  const generatePassword = () => {
+    return Math.random().toString(36).slice(-8)
+  }
+
+  const [newUser, setNewUser] = useState({ name: '', email: '', type: 'noivos' as 'noivos' | 'admin', password: generatePassword() })
   const [editingUser, setEditingUser] = useState<any>(null)
 
   // Função para gerar iniciais inteligentes (ex: Isabella e Felipe -> I&F)
@@ -88,7 +92,7 @@ function UsersManagementContent() {
       const data = await response.json()
       if (!response.ok) throw new Error(data.details || 'Falha no envio do e-mail')
 
-      setNewUser({ name: '', email: '', type: 'noivos', password: '' })
+      setNewUser({ name: '', email: '', type: 'noivos', password: generatePassword() })
       setShowInviteModal(false)
       alert('Usuário convidado e e-mail automático enviado! ✨')
     } catch (error: any) {
@@ -360,7 +364,15 @@ function UsersManagementContent() {
                   </div>
                 </div>
                 <div>
-                  <label className="block text-[10px] font-black text-text-muted uppercase tracking-[0.2em] mb-2.5 ml-1">Senha Inicial de Acesso</label>
+                  <div className="flex items-center justify-between mb-2.5 ml-1">
+                    <label className="block text-[10px] font-black text-text-muted uppercase tracking-[0.2em]">Senha Inicial de Acesso</label>
+                    <button 
+                      onClick={() => setNewUser({ ...newUser, password: generatePassword() })}
+                      className="text-[9px] text-brand hover:underline font-bold"
+                    >
+                        Gerar Outra
+                    </button>
+                  </div>
                   <input
                     type="text"
                     value={newUser.password}

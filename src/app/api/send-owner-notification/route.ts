@@ -29,6 +29,8 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Email do proprietário não informado' }, { status: 400 })
         }
 
+        const reqBaseUrl = request.headers.get('origin') || process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+
         const isConfirmed = status === 'confirmed' || confirmedNames.length > 0
 
         const emailHTML = `
@@ -69,7 +71,7 @@ export async function POST(request: NextRequest) {
 
             <p>Para ver a lista completa e gerenciar seus convidados, acesse seu painel:</p>
             <div style="text-align: center; margin: 30px 0;">
-                <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'https://rsvp-manager.vercel.app'}/dashboard" style="background: #8B2D4F; color: white; padding: 12px 25px; text-decoration: none; border-radius: 8px; font-weight: bold;">Ver Painel de Controle</a>
+                <a href="${reqBaseUrl}/dashboard" style="background: #8B2D4F; color: white; padding: 12px 25px; text-decoration: none; border-radius: 8px; font-weight: bold;">Ver Painel de Controle</a>
             </div>
         </div>
         <div class="footer">
@@ -82,8 +84,11 @@ export async function POST(request: NextRequest) {
         `
 
         const transporter = createTransporter()
+        
+        const senderName = process.env.SMTP_FROM_NAME?.replace(/['"]/g, '') || "Vanessa Bidinotti"
+        
         await transporter.sendMail({
-            from: `"${process.env.SMTP_FROM_NAME}" <${process.env.SMTP_FROM_EMAIL}>`,
+            from: `"${senderName}" <${process.env.SMTP_FROM_EMAIL}>`,
             to: ownerEmail,
             subject: `🔔 Novo RSVP: ${guestName} ${isConfirmed ? 'confirmou' : 'recusou'} presença`,
             html: emailHTML

@@ -29,6 +29,8 @@ export async function POST(request: NextRequest) {
             return NextResponse.json({ error: 'Email do proprietário não informado' }, { status: 400 })
         }
 
+        const reqBaseUrl = request.headers.get('origin') || process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+
         const emailHTML = `
 <!DOCTYPE html>
 <html>
@@ -61,7 +63,7 @@ export async function POST(request: NextRequest) {
             <p>O valor será processado e estará disponível no seu painel de acordo com o prazo do meio de pagamento (PIX é liberado em 48h).</p>
             
             <div style="text-align: center; margin: 30px 0;">
-                <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'https://rsvp-manager.vercel.app'}/dashboard" style="background: #7b2d3d; color: white; padding: 12px 25px; text-decoration: none; border-radius: 8px; font-weight: bold;">Acessar meu Extrato</a>
+                <a href="${reqBaseUrl}/dashboard" style="background: #7b2d3d; color: white; padding: 12px 25px; text-decoration: none; border-radius: 8px; font-weight: bold;">Acessar meu Extrato</a>
             </div>
         </div>
         <div class="footer">
@@ -74,8 +76,11 @@ export async function POST(request: NextRequest) {
         `
 
         const transporter = createTransporter()
+        
+        const senderName = process.env.SMTP_FROM_NAME?.replace(/['"]/g, '') || "Vanessa Bidinotti"
+        
         await transporter.sendMail({
-            from: `"${process.env.SMTP_FROM_NAME}" <${process.env.SMTP_FROM_EMAIL}>`,
+            from: `"${senderName}" <${process.env.SMTP_FROM_EMAIL}>`,
             to: ownerEmail,
             subject: `🎁 Novo Presente: ${guestName} te presenteou com ${giftName}`,
             html: emailHTML

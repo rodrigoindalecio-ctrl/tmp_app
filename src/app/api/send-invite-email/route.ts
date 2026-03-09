@@ -25,6 +25,8 @@ export async function POST(request: NextRequest) {
         const body = await request.json()
         const { name, email, type, onboardingSteps, password } = body
 
+        const reqBaseUrl = request.headers.get('origin') || process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'
+
         // Template profissional de e-mail de convite
         const emailHTML = `
 <!DOCTYPE html>
@@ -81,7 +83,7 @@ export async function POST(request: NextRequest) {
                 </div>
             </div>
 
-            <a href="${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/" class="cta-button">
+            <a href="${reqBaseUrl}/" class="cta-button">
                 Começar agora!
             </a>
         </div>
@@ -96,10 +98,12 @@ export async function POST(request: NextRequest) {
         `
 
         const transporter = createTransporter()
+        
+        const senderName = process.env.SMTP_FROM_NAME?.replace(/['"]/g, '') || "Vanessa Bidinotti"
 
         // Enviar o e-mail
         await transporter.sendMail({
-            from: `"${process.env.SMTP_FROM_NAME}" <${process.env.SMTP_FROM_EMAIL}>`,
+            from: `"${senderName}" <${process.env.SMTP_FROM_EMAIL}>`,
             to: email,
             subject: `🎁 Convite Especial: Seu Painel RSVP está pronto!`,
             html: emailHTML,

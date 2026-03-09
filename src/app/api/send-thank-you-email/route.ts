@@ -132,8 +132,10 @@ export async function POST(request: NextRequest) {
 
         const transporter = createTransporter()
 
+        const senderName = process.env.SMTP_FROM_NAME?.replace(/['"]/g, '') || "Vanessa Bidinotti"
+
         const result = await transporter.sendMail({
-            from: `"${process.env.SMTP_FROM_NAME}" <${process.env.SMTP_FROM_EMAIL}>`,
+            from: `"${senderName}" <${process.env.SMTP_FROM_EMAIL}>`,
             to: guestEmail,
             subject: `Obrigado pelo presente! - ${coupleNames}`,
             html: emailHTML,
