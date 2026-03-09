@@ -25,19 +25,13 @@ export default function Home() {
           </p>
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-6 justify-center pt-8">
+        <div className="flex justify-center pt-8">
           <Link
             href="/login"
             className="group relative inline-flex items-center justify-center h-16 px-12 rounded-[2rem] bg-brand text-white text-[11px] font-black uppercase tracking-[0.3em] shadow-[0_20px_40px_rgba(112,36,49,0.2)] transition-all hover:-translate-y-1.5 hover:shadow-brand/30 active:translate-y-0"
           >
             Entrar no Painel
             <span className="ml-3 group-hover:translate-x-1.5 transition-transform duration-300">→</span>
-          </Link>
-          <Link
-            href="/register"
-            className="inline-flex items-center justify-center h-16 px-12 rounded-[2rem] border-2 border-border-soft bg-surface text-text-secondary text-[11px] font-black uppercase tracking-[0.2em] shadow-sm hover:bg-bg-light hover:border-brand-light/20 hover:-translate-y-1.5 transition-all duration-300"
-          >
-            Criar meu Evento
           </Link>
         </div>
 
