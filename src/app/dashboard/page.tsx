@@ -610,31 +610,36 @@ export default function DashboardPage() {
                       key={person.uniqueId}
                       className="bg-surface rounded-[2rem] border border-border-soft shadow-sm p-6 hover:-translate-y-1 hover:shadow-xl hover:shadow-brand/5 transition-all duration-300 group flex flex-col justify-between"
                     >
-                      <div className="flex items-start justify-between mb-4">
-                        <div className="flex items-center gap-3">
-                          <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-black text-sm shadow-inner transform group-hover:scale-110 transition-transform ${person.status === 'confirmed' ? 'bg-success-light text-success-dark' : person.status === 'declined' ? 'bg-danger-light text-danger-dark' : 'bg-bg-light text-text-muted'}`}>
+                      <div className="grid grid-cols-[1fr_auto] gap-2 items-start mb-4">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className={`w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center font-black text-sm shadow-inner transform group-hover:scale-110 transition-transform ${person.status === 'confirmed' ? 'bg-success-light text-success-dark' : person.status === 'declined' ? 'bg-danger-light text-danger-dark' : 'bg-bg-light text-text-muted'}`}>
                             {person.name.charAt(0).toUpperCase()}
                           </div>
                           <div className="min-w-0">
-                            <h4 className="text-sm font-black text-text-primary tracking-tight truncate max-w-[140px] sm:max-w-[180px]" title={person.name}>
+                            <h4 className="text-sm font-black text-text-primary tracking-tight truncate" title={person.name}>
                               {person.name}
                             </h4>
                             <p className="text-[9px] font-bold text-text-muted uppercase tracking-widest truncate">
-                              {person.groupName} • {person.category === 'adult_paying' ? 'Adulto' :
-                                person.category === 'child_paying' ? 'Criança Pagante' :
-                                  'Criança Isenta'}
+                              {person.groupName}
                             </p>
                           </div>
                         </div>
-                        <div className="flex-shrink-0 ml-2">
+                        <div className="flex-shrink-0 pt-0.5">
                           <StatusBadge status={person.status} />
                         </div>
                       </div>
 
                       <div className="flex items-center justify-between pt-4 border-t border-border-soft">
-                        <span className={`px-2 py-0.5 rounded-lg text-[8px] font-black uppercase tracking-widest ${person.type === 'Principal' ? 'bg-brand-pale text-brand' : 'bg-bg-light text-text-muted'}`}>
-                          {person.type}
-                        </span>
+                        <div className="flex flex-col">
+                          <span className={`px-2 py-0.5 w-fit rounded-lg text-[8px] font-black uppercase tracking-widest ${person.type === 'Principal' ? 'bg-brand-pale text-brand' : 'bg-bg-light text-text-muted'}`}>
+                            {person.type}
+                          </span>
+                          <span className="text-[8px] font-bold text-text-muted uppercase tracking-tighter mt-1">
+                            {person.category === 'adult_paying' ? 'Adulto' :
+                              person.category === 'child_paying' ? 'Criança Pag.' :
+                                'Criança Isenta'}
+                          </span>
+                        </div>
                         <button
                           onClick={() => handleEditClick(guests.find(g => g.id === person.guestId)!)}
                           className="w-9 h-9 bg-bg-light text-text-muted rounded-xl flex items-center justify-center hover:bg-brand hover:text-white hover:scale-110 transition-all shadow-inner group-hover:text-text-primary"
@@ -779,7 +784,7 @@ function KPICard({
   )
 }
 
-function StatusBadge({ status, mobile }: { status: GuestStatus; mobile?: boolean }) {
+function StatusBadge({ status }: { status: GuestStatus }) {
   const config = {
     confirmed: { label: 'Presença', icon: '✓', class: 'bg-success-light text-success-dark border-success/20' },
     pending: { label: 'Pendente', icon: '⏳', class: 'bg-warning-light text-warning border-warning/20' },
@@ -789,8 +794,8 @@ function StatusBadge({ status, mobile }: { status: GuestStatus; mobile?: boolean
   const { label, icon, class: className } = config[status]
 
   return (
-    <span className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full border shadow-sm font-black uppercase tracking-widest whitespace-nowrap ${className} ${mobile ? 'text-[8px] px-2 py-0.5' : 'text-[10px] md:text-[11px]'}`}>
-      <span className="opacity-70 scale-110">{icon}</span> {label}
+    <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg border shadow-sm font-black uppercase tracking-widest whitespace-nowrap ${className} text-[8px] md:text-[9px]`}>
+      <span className="opacity-70">{icon}</span> {label}
     </span>
   )
 }
