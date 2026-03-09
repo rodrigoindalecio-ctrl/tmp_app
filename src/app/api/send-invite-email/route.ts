@@ -103,7 +103,10 @@ export async function POST(request: NextRequest) {
 
         // Enviar o e-mail
         await transporter.sendMail({
-            from: `"${senderName}" <${process.env.SMTP_FROM_EMAIL}>`,
+            from: {
+                name: senderName,
+                address: process.env.SMTP_FROM_EMAIL as string
+            },
             to: email,
             subject: `🎁 Convite Especial: Seu Painel RSVP está pronto!`,
             html: emailHTML,

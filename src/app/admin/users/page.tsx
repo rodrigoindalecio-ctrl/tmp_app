@@ -4,6 +4,7 @@ import { ProtectedRoute } from '@/lib/protected-route'
 import { useAdmin } from '@/lib/admin-context'
 import { useState } from 'react'
 import { SharedLayout } from '@/app/components/shared-layout'
+import { toast } from 'sonner'
 
 function UsersManagementContent() {
   const { users, addUser, updateUser, removeUser, addEvent, createDefaultEventForUser } = useAdmin()
@@ -11,6 +12,9 @@ function UsersManagementContent() {
   const [showInviteModal, setShowInviteModal] = useState(false)
   const [showEditModal, setShowEditModal] = useState(false)
   const [isSending, setIsSending] = useState(false)
+  const [confirmDialog, setConfirmDialog] = useState<{ open: boolean; userId: string | null }>({
+    open: false, userId: null
+  })
   const generatePassword = () => {
     return Math.random().toString(36).slice(-8)
   }
@@ -37,7 +41,7 @@ function UsersManagementContent() {
 
   const handleInviteUser = async () => {
     if (!newUser.name || !newUser.email || !newUser.password) {
-      alert('Preencha todos os campos, incluindo a senha inicial.')
+      toast.error('Preencha nome e e-mail antes de enviar.')
       return
     }
 
@@ -94,10 +98,16 @@ function UsersManagementContent() {
 
       setNewUser({ name: '', email: '', type: 'noivos', password: generatePassword() })
       setShowInviteModal(false)
-      alert('Usuário convidado e e-mail automático enviado! ✨')
+      toast.success('Convite enviado com sucesso! 🎉', {
+        description: `Um e-mail foi enviado para ${newUser.email} com os dados de acesso.`,
+        duration: 5000,
+      })
     } catch (error: any) {
       console.error('Erro ao convidar usuário:', error)
-      alert(`Erro: ${error.message}\n\nO usuário foi cadastrado, mas o e-mail falhou.`)
+      toast.error('Erro ao enviar convite', {
+        description: error.message || 'O usuário foi cadastrado, mas o e-mail falhou.',
+        duration: 6000,
+      })
     } finally {
       setIsSending(false)
     }
@@ -114,25 +124,30 @@ function UsersManagementContent() {
       })
       setShowEditModal(false)
       setEditingUser(null)
-      alert('Usuário atualizado com sucesso!')
+      toast.success('Usuário atualizado com sucesso! ✅')
     } catch (error) {
-      alert('Erro ao atualizar usuário')
+      toast.error('Erro ao atualizar usuário')
     } finally {
       setIsSending(false)
     }
   }
 
   const handleDeleteUser = async (id: string) => {
-    if (!confirm('Tem certeza que deseja remover o acesso deste usuário? Esta ação não pode ser desfeita.')) return
+    setConfirmDialog({ open: true, userId: id })
+  }
 
+  const confirmDelete = async () => {
+    const id = confirmDialog.userId
+    if (!id) return
+    setConfirmDialog({ open: false, userId: null })
     setIsSending(true)
     try {
       await removeUser(id)
       setShowEditModal(false)
       setEditingUser(null)
-      alert('Usuário removido do sistema.')
+      toast.success('Acesso removido com sucesso.')
     } catch (error) {
-      alert('Erro ao remover usuário')
+      toast.error('Erro ao remover usuário')
     } finally {
       setIsSending(false)
     }
@@ -406,6 +421,37 @@ function UsersManagementContent() {
                   </div>
                 ))}
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* CONFIRM DELETE MODAL */}
+      {confirmDialog.open && (
+        <div className="fixed inset-0 bg-brand-dark/50 backdrop-blur-sm flex items-center justify-center z-[60] p-4 animate-in fade-in duration-200">
+          <div className="bg-surface rounded-[2.5rem] shadow-2xl border border-border-soft max-w-sm w-full p-10 animate-in zoom-in-95 duration-200 flex flex-col items-center text-center">
+            <div className="w-16 h-16 rounded-2xl bg-danger-light/30 flex items-center justify-center mb-6">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="text-danger">
+                <polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4a1 1 0 0 1 1-1h4a1 1 0 0 1 1 1v2"/>
+              </svg>
+            </div>
+            <h4 className="text-xl font-serif font-black text-text-primary mb-3 italic">Remover Acesso?</h4>
+            <p className="text-sm text-text-muted font-medium leading-relaxed mb-8">
+              Esta ação é permanente e não pode ser desfeita. O usuário perderá totalmente o acesso à plataforma.
+            </p>
+            <div className="flex gap-3 w-full">
+              <button
+                onClick={() => setConfirmDialog({ open: false, userId: null })}
+                className="flex-1 px-4 py-3.5 bg-bg-light rounded-2xl text-[10px] font-black uppercase tracking-widest text-text-muted hover:text-text-secondary transition-all"
+              >
+                Cancelar
+              </button>
+              <button
+                onClick={confirmDelete}
+                className="flex-1 px-4 py-3.5 bg-danger text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-danger/30 hover:bg-danger/90 transition-all"
+              >
+                Sim, Remover
+              </button>
             </div>
           </div>
         </div>

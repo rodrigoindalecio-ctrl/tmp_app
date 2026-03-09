@@ -80,7 +80,10 @@ export async function POST(request: NextRequest) {
         const senderName = process.env.SMTP_FROM_NAME?.replace(/['"]/g, '') || "Vanessa Bidinotti"
         
         await transporter.sendMail({
-            from: `"${senderName}" <${process.env.SMTP_FROM_EMAIL}>`,
+            from: {
+                name: senderName,
+                address: process.env.SMTP_FROM_EMAIL as string
+            },
             to: ownerEmail,
             subject: `🎁 Novo Presente: ${guestName} te presenteou com ${giftName}`,
             html: emailHTML
