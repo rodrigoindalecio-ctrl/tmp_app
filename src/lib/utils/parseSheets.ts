@@ -83,7 +83,7 @@ export async function parseGuestsList(file: File): Promise<ParseSheetResult> {
   try {
     const arrayBuffer = await file.arrayBuffer()
     const workbook = XLSX.read(arrayBuffer, { type: 'array' })
-    
+
     // Busca a aba de dados (geralmente a segunda se a primeira for Instruções)
     let sheetName = workbook.SheetNames.find(n => n.toLowerCase().includes('lista') || n.toLowerCase().includes('convidados'))
     if (!sheetName) sheetName = workbook.SheetNames[0]
@@ -167,7 +167,7 @@ function processRows(rows: RawGuestRow[]): ParseSheetResult {
       normalizedRow['nomecompleto'] ||
       normalizedRow['nomeconvidado'] ||
       ''
-    
+
     // Detectar duplicatas usando apenas nome
     const nameKey = nomePrincipal.toLowerCase().trim()
     if (processedNames.has(nameKey)) {
@@ -251,7 +251,7 @@ export function detectDuplicatesWithExisting(
   const duplicates: Array<{ novo: ParsedGuest; existente: Guest; motivo: string }> = []
 
   newGuests.forEach(newGuest => {
-    const found = existingGuests.find(existing => 
+    const found = existingGuests.find(existing =>
       existing.name.toLowerCase().trim() === newGuest.name.toLowerCase().trim()
     )
 
@@ -284,16 +284,16 @@ export async function generateImportTemplate(): Promise<Uint8Array> {
   const introRow = helpSheet.addRow(['INSTRUÇÕES DE PREENCHIMENTO'])
   introRow.font = { bold: true, size: 14, color: { argb: burgundyHex } }
   helpSheet.addRow([])
-  
+
   const headerHelp = helpSheet.addRow(['Coluna', 'Como Preencher'])
   headerHelp.font = { bold: true }
   headerHelp.eachCell(c => c.fill = { type: 'pattern', pattern: 'solid', fgColor: { argb: 'FFF5F5F5' } })
 
   const tips = [
-    ['NOME_COMPLETO_DO_TITULAR', 'Nome COMPLETO do convidado principal. NÃO use apelidos.'],
-    ['NOME_COMPLETO_DOS_ACOMPANHANTES', 'Nomes COMPLETOS de acompanhantes ADULTOS (ex: João Silva, Maria Souza).'],
-    ['CRIANCAS_PAGANTES', 'Nomes COMPLETOS de crianças PAGANTES.'],
-    ['CRIANCAS_ISENTAS', 'Nomes COMPLETOS de crianças ISENTAS (não pagantes).'],
+    ['NOME_COMPLETO_DO_TITULAR', 'Nome COMPLETO do convidado principal. NÃO use apelidos. (APENAS 1 NOME)'],
+    ['NOME_COMPLETO_DOS_ACOMPANHANTES', 'Nomes COMPLETOS de acompanhantes ADULTOS separados por vírgula.(ex: João Silva, Maria Silva).'],
+    ['CRIANCAS_PAGANTES', 'Nomes COMPLETOS de crianças PAGANTES separados por vírgula.(ex: Enzo Silva, Maria Silva).'],
+    ['CRIANCAS_ISENTAS', 'Nomes COMPLETOS de crianças ISENTAS (não pagantes) separados por vírgula.(ex: Enzo Silva, Maria Silva).'],
     ['GRUPO_FAMILIA', 'Ex: Família Noiva, Amigos Trabalho.'],
   ]
 
@@ -306,6 +306,9 @@ export async function generateImportTemplate(): Promise<Uint8Array> {
   helpSheet.addRow([])
   const note = helpSheet.addRow(['⚠️ IMPORTANTE: Use sempre o NOME COMPLETO. Apelidos causam erros e duplicidades.'])
   note.font = { bold: true, italic: true, color: { argb: burgundyHex } }
+
+  const tipText = helpSheet.addRow(['💡 DICA: Se você tiver mais de um acompanhante no mesmo convite, basta colocar os nomes completos separados por vírgulas.'])
+  tipText.font = { italic: true, color: { argb: 'FF666666' } }
 
   // Aba Lista
   const worksheet = workbook.addWorksheet('Lista de Convidados')
