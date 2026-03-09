@@ -206,23 +206,7 @@ export function GuestEditModal({ guest, isOpen, onClose, onSave, onDelete }: Gue
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                        {/* Telefone */}
-                        <div>
-                            <label htmlFor="telefone" className="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-2 ml-1">
-                                Telefone
-                            </label>
-                            <input
-                                id="telefone"
-                                type="tel"
-                                value={formData.telefone || ''}
-                                onChange={(e) => setFormData({ ...formData, telefone: e.target.value })}
-                                className="w-full px-5 py-3.5 bg-bg-light border border-border-soft rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-text-primary"
-                                placeholder="(00) 00000-0000"
-                                disabled={isSaving}
-                            />
-                        </div>
-
+                    <div>
                         {/* Email */}
                         <div>
                             <label htmlFor="email" className="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-2 ml-1">

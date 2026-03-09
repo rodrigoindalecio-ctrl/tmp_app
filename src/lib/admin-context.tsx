@@ -311,7 +311,8 @@ export function AdminProvider({ children }: { children: ReactNode }) {
           coverImage: 'https://images.unsplash.com/photo-1511795409834-ef04bbd61622?q=80&w=2069&auto=format&fit=crop',
           coverImagePosition: 50,
           coverImageScale: 1.0,
-          customMessage: 'Ficamos muito felizes em receber a sua confirmação de presença.'
+          customMessage: 'Ficamos muito felizes em receber a sua confirmação de presença.',
+          isGiftListEnabled: false
         },
         guests: [],
         createdAt: new Date(),

@@ -17,7 +17,6 @@ export default function ImportPage() {
     const [step, setStep] = useState<'choose' | 'input' | 'review' | 'success' | 'error'>('choose')
     const [method, setMethod] = useState<'excel' | 'manual' | null>(null)
     const [manualName, setManualName] = useState('')
-    const [manualTelefone, setManualTelefone] = useState('')
     const [manualGrupo, setManualGrupo] = useState('')
     const [manualCategory, setManualCategory] = useState('adult_paying')
 
@@ -30,7 +29,7 @@ export default function ImportPage() {
         { name: '', category: 'adult_paying' }
     ])
 
-    const [pendingGuest, setPendingGuest] = useState<{ name: string, telefone: string, companionsList: any[], grupo: string, category: string } | null>(null)
+    const [pendingGuest, setPendingGuest] = useState<{ name: string, companionsList: any[], grupo: string, category: string, email?: string, telefone?: string } | null>(null)
 
     // File upload states
     const [isDragging, setIsDragging] = useState(false)
@@ -65,8 +64,8 @@ export default function ImportPage() {
     // --- MANUAL ADD HANDLER ---
     const handleManualAdd = (e: React.FormEvent) => {
         e.preventDefault()
-        if (!manualName.trim() || !manualTelefone.trim()) {
-            alert('Nome e Telefone são obrigatórios')
+        if (!manualName.trim()) {
+            alert('O nome do convidado é obrigatório')
             return
         }
 
@@ -81,7 +80,6 @@ export default function ImportPage() {
 
         setPendingGuest({
             name: manualName,
-            telefone: manualTelefone,
             companionsList,
             grupo: manualGrupo,
             category: manualCategory
@@ -94,8 +92,8 @@ export default function ImportPage() {
 
         const success = await addGuest({
             name: pendingGuest.name,
-            email: pendingGuest.email || undefined,
-            telefone: pendingGuest.telefone,
+            email: pendingGuest.email,
+            telefone: pendingGuest.telefone || '',
             grupo: pendingGuest.grupo || undefined,
             companions: pendingGuest.companionsList.length,
             companionsList: pendingGuest.companionsList as any,
@@ -110,7 +108,6 @@ export default function ImportPage() {
         setImportedCount(1 + pendingGuest.companionsList.length) // 1 titular + N acompanhantes
         setStep('success')
         setManualName('')
-        setManualTelefone('')
         setManualCompanions([
             { name: '', category: 'adult_paying' },
             { name: '', category: 'adult_paying' },
@@ -193,7 +190,7 @@ export default function ImportPage() {
                 if (result.erros.length > 0 || result.duplicatas.length > 0) {
                     setStep('error')
                     setImportStatus('error')
-                    const dups = result.duplicatas.map(d => `${d.nomePrincipal} (${d.telefone})`)
+                    const dups = result.duplicatas.map(d => `${d.nomePrincipal}`)
                     setDuplicatesList(dups)
                     return
                 }
@@ -341,40 +338,29 @@ export default function ImportPage() {
                                     <form onSubmit={handleManualAdd} className="space-y-6">
                                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <div>
-                                                <label className="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-2 ml-1">Nome Principal *</label>
+                                                <label className="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-2 ml-1">Nome Completo do Titular *</label>
                                                 <input
                                                     type="text"
                                                     required
-                                                    placeholder="Nome do convidado"
+                                                    placeholder="Digite o nome completo"
                                                     className="w-full px-5 py-3.5 bg-bg-light border border-border-soft rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-text-primary"
                                                     value={manualName}
                                                     onChange={(e) => setManualName(e.target.value)}
                                                 />
                                             </div>
                                             <div>
-                                                <label className="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-2 ml-1">Telefone / WhatsApp *</label>
-                                                <input
-                                                    type="tel"
-                                                    required
-                                                    placeholder="(00) 00000-0000"
-                                                    className="w-full px-5 py-3.5 bg-bg-light border border-border-soft rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-text-primary"
-                                                    value={manualTelefone}
-                                                    onChange={(e) => setManualTelefone(e.target.value)}
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                            <div>
-                                                <label className="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-2 ml-1">Grupo</label>
+                                                <label className="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-2 ml-1">Grupo (ex: Família Noiva)</label>
                                                 <input
                                                     type="text"
-                                                    placeholder="ex: Família Noiva"
+                                                    placeholder="Digite o grupo"
                                                     className="w-full px-5 py-3.5 bg-bg-light border border-border-soft rounded-2xl text-sm font-bold focus:ring-2 focus:ring-brand/20 transition-all shadow-inner outline-none text-text-primary"
                                                     value={manualGrupo}
                                                     onChange={(e) => setManualGrupo(e.target.value)}
                                                 />
                                             </div>
+                                        </div>
+
+                                        <div className="grid grid-cols-1 gap-4">
                                             <div>
                                                 <label className="block text-[10px] font-black text-text-muted uppercase tracking-widest mb-2 ml-1">Tipo do Titular</label>
                                                 <select
@@ -477,7 +463,6 @@ export default function ImportPage() {
                                                 <tr>
                                                     <td className="px-8 py-5">
                                                         <p className="font-black text-text-primary tracking-tight">{pendingGuest.name}</p>
-                                                        <p className="text-[10px] text-text-muted font-bold uppercase mt-1">{pendingGuest.telefone}</p>
                                                     </td>
                                                     <td className="px-8 py-5">
                                                         <span className="bg-warning-light text-warning px-2 py-1 rounded text-[9px] font-black uppercase tracking-widest border border-warning/10">Pendente</span>
@@ -488,7 +473,6 @@ export default function ImportPage() {
                                                 <tr key={idx}>
                                                     <td className="px-8 py-4">
                                                         <p className="font-black text-text-primary tracking-tight">{guest.name}</p>
-                                                        <p className="text-[10px] text-text-muted font-bold uppercase mt-1">{guest.telefone}</p>
                                                     </td>
                                                     <td className="px-8 py-4">
                                                         <span className="bg-success-light text-success-dark px-2 py-1 rounded text-[9px] font-black uppercase tracking-widest border border-success/10">Válido</span>

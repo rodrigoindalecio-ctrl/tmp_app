@@ -159,7 +159,6 @@ export default function DashboardPage() {
         'NOME COMPLETO',
         'CATEGORIA',
         'GRUPO / FAMÍLIA',
-        'TELEFONE',
         'STATUS',
         'ACOMPANHANTES',
         'DATA CONFIRMAÇÃO'
@@ -201,14 +200,13 @@ export default function DashboardPage() {
           guest.name.toUpperCase(),
           categoryLabel(guest.category),
           guest.grupo || '-',
-          guest.telefone || '-',
           guest.status === 'confirmed' ? 'CONFIRMADO' : (guest.status === 'declined' ? 'RECUSADO' : 'PENDENTE'),
           guest.companionsList?.map(c => `${c.name} (${categoryLabel(c.category || 'adult_paying')})`).join(', ') || 'Nenhum',
           guest.confirmedAt ? formatDate(guest.confirmedAt.toISOString(), { day: '2-digit', month: '2-digit', year: 'numeric' }) : '-'
         ])
 
         // Estilo condicional para Status
-        const statusCell = row.getCell(5)
+        const statusCell = row.getCell(4)
         if (guest.status === 'confirmed') {
           statusCell.font = { color: { argb: 'FF107C10' }, bold: true }
         } else if (guest.status === 'declined') {
@@ -467,14 +465,14 @@ export default function DashboardPage() {
                 className="px-4 py-2 bg-brand/5 text-brand border border-brand/20 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-sm flex items-center gap-2 hover:bg-brand/10 whitespace-nowrap"
               >
                 <UploadIcon className="w-3.5 h-3.5" />
-                Importar
+                Adicionar Convidados
               </button>
               <button
                 onClick={handleExportCSV}
                 className="px-4 py-2 bg-success-light text-success-dark border border-success/20 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all shadow-sm flex items-center gap-2 hover:bg-success/20 whitespace-nowrap"
               >
                 <DownloadIcon />
-                Exportar
+                Baixar Lista
               </button>
               <button
                 onClick={handleDeleteAllGuests}
