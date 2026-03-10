@@ -37,7 +37,7 @@ export default function DashboardPage() {
   
   const tourSteps: TourStep[] = [
     {
-      targetId: 'tour-dashboard',
+      targetId: 'tour-welcome-intro', // ID inexistente → fallback elegante para centro
       title: 'Bem-vindo ao seu Painel! 🏠',
       content: 'Este é o coração do seu evento. Aqui você tem uma visão geral de tudo o que está acontecendo.',
       position: 'center'
