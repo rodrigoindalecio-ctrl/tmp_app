@@ -59,6 +59,7 @@ export type EventSettings = {
     brandColor?: string
     brandFont?: string
     isGiftListEnabled?: boolean
+    hasCompletedOnboarding?: boolean
 }
 
 type EventContextType = {
@@ -128,7 +129,8 @@ const DEFAULT_EVENT_SETTINGS: EventSettings = {
     },
     brandColor: '#7b2d3d',
     brandFont: 'lora',
-    isGiftListEnabled: true
+    isGiftListEnabled: true,
+    hasCompletedOnboarding: false
 }
 
 const EventContext = createContext<EventContextType | undefined>(undefined)

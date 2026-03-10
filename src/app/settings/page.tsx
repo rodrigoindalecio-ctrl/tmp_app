@@ -3,7 +3,8 @@
 import { useAuth } from '@/lib/auth-context'
 import { useEvent, EventSettings } from '@/lib/event-context'
 import { useRouter } from 'next/navigation'
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, Suspense } from 'react'
+import { useSearchParams } from 'next/navigation'
 import Image from 'next/image'
 import { SharedLayout } from '@/app/components/shared-layout'
 
@@ -11,7 +12,19 @@ export default function SettingsPage() {
     const { user, loading: authLoading, logout } = useAuth()
     const { eventSettings, updateEventSettings } = useEvent()
     const router = useRouter()
+    
+    // Wrap with Suspense because useSearchParams is used
+    return (
+        <Suspense fallback={<div className="min-h-screen bg-background flex items-center justify-center"><div className="w-12 h-12 border-4 border-brand/20 border-t-brand rounded-full animate-spin" /></div>}>
+            <SettingsContent user={user} authLoading={authLoading} eventSettings={eventSettings} updateEventSettings={updateEventSettings} router={router} />
+        </Suspense>
+    )
+}
 
+function SettingsContent({ user, authLoading, eventSettings, updateEventSettings, router }: any) {
+    const searchParams = useSearchParams()
+    const isOnboarding = searchParams.get('onboarding') === 'true'
+    
     // Form states - Initialize from context
     const [eventType, setEventType] = useState<'casamento' | 'debutante'>(eventSettings.eventType)
     const [coupleNames, setCoupleNames] = useState(eventSettings.coupleNames)
@@ -285,7 +298,7 @@ export default function SettingsPage() {
 
     // Timeline Handlers
     const handleAddTimelineEvent = () => setTimelineEvents([...timelineEvents, { emoji: '✨', title: '', description: '' }])
-    const handleRemoveTimelineEvent = (index: number) => setTimelineEvents(timelineEvents.filter((_, i) => i !== index))
+    const handleRemoveTimelineEvent = (index: number) => setTimelineEvents(timelineEvents.filter((_: any, i: number) => i !== index))
     const handleUpdateTimelineEvent = (index: number, field: string, value: string) => {
         const updated = [...timelineEvents]
         updated[index] = { ...updated[index], [field]: value }
@@ -330,9 +343,25 @@ export default function SettingsPage() {
             subtitle="Personalize as informações do seu evento"
         >
             <main className="max-w-[800px] mx-auto w-full animate-in fade-in duration-500 pb-20">
-                {/* SETTINGS CARD */}
-                <div className="bg-surface rounded-[2.5rem] border border-border-soft shadow-sm p-8 md:p-12">
-                    <div className="flex items-center gap-3 mb-10">
+                    {/* ONBOARDING BANNER */}
+                    {isOnboarding && (
+                        <div className="bg-brand-pale border border-brand/20 rounded-[2rem] p-6 mb-10 shadow-sm animate-in slide-in-from-top-4 duration-500">
+                            <div className="flex gap-4">
+                                <div className="w-12 h-12 bg-white rounded-2xl flex items-center justify-center text-brand flex-shrink-0 shadow-sm">
+                                    <StarIcon className="w-6 h-6" />
+                                </div>
+                                <div>
+                                    <h3 className="text-lg font-black text-brand tracking-tight mb-1">Quase lá! ✨</h3>
+                                    <p className="text-xs font-bold text-text-primary leading-relaxed">
+                                        Para começar com o pé direito, preencha os dados básicos do seu evento abaixo e, por segurança, <button onClick={() => setActiveTab('seguranca')} className="text-brand underline">altere sua senha</button>.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    {/* SETTINGS CARD */}
+                    <div className="bg-surface rounded-[2.5rem] border border-border-soft shadow-sm p-8 md:p-12">
+                        <div className="flex items-center gap-3 mb-10">
                         <div className="w-12 h-12 bg-brand-pale/50 rounded-2xl flex items-center justify-center text-brand">
                             <HeartIconOutline className="w-6 h-6" />
                         </div>
@@ -1056,7 +1085,7 @@ export default function SettingsPage() {
                                 </div>
 
                                 <div className="space-y-4">
-                                    {timelineEvents.map((event, index) => (
+                                    {timelineEvents.map((event: any, index: number) => (
                                         <div key={index} className="p-6 bg-bg-light/30 border border-border-soft rounded-3xl animate-in slide-in-from-right-4 duration-300 relative group">
                                             <button
                                                 type="button"
@@ -1316,3 +1345,5 @@ const InfoIcon = ({ className = "w-4 h-4" }: { className?: string }) => <svg cla
 const HeartIconOutline = ({ className = "w-5 h-5" }: { className?: string }) => <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" /></svg>
 const PinIconRose = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0Z" /><circle cx="12" cy="10" r="3" /></svg>
 const ImageIconRose = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><rect width="18" height="18" x="3" y="3" rx="2" ry="2" /><circle cx="9" cy="9" r="2" /><path d="m21 15-3.086-3.086a2 2 0 0 0-2.828 0L6 21" /></svg>
+const StarIcon = ({ className = "w-5 h-5" }: { className?: string }) => <svg className={className} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
+

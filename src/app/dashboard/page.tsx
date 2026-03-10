@@ -12,6 +12,7 @@ import { SharedLayout } from '@/app/components/shared-layout'
 import Link from 'next/link'
 import GiftManagementTab from '@/app/components/GiftManagementTab'
 import MuralMessagesTab from '@/app/components/MuralMessagesTab'
+import { OnboardingTour, TourStep } from '@/app/components/onboarding-tour'
 
 export default function DashboardPage() {
   const { user, loading, logout } = useAuth()
@@ -30,6 +31,65 @@ export default function DashboardPage() {
   const [isEditModalOpen, setIsEditModalOpen] = useState(false)
   const [deleteConfirmDialog, setDeleteConfirmDialog] = useState<{ isOpen: boolean; person?: any }>({ isOpen: false })
   const [deleteAllConfirmDialog, setDeleteAllConfirmDialog] = useState({ isOpen: false, step: 1 })
+
+  // Onboarding Tour state
+  const [isTourOpen, setIsTourOpen] = useState(false)
+  
+  const tourSteps: TourStep[] = [
+    {
+      targetId: 'tour-dashboard',
+      title: 'Bem-vindo ao seu Painel! 🏠',
+      content: 'Este é o coração do seu evento. Aqui você tem uma visão geral de tudo o que está acontecendo.',
+      position: 'center'
+    },
+    {
+      targetId: 'tour-invite',
+      title: 'Seu Convite Digital 💌',
+      content: 'Aqui está o seu link personalizado. Copie e envie para seus convidados. É por este link que eles acessarão o site e farão o RSVP.',
+      position: 'bottom'
+    },
+    {
+      targetId: 'tour-stats',
+      title: 'Acompanhe os Números 📊',
+      content: 'Clique aqui para ver estatísticas detalhadas do buffet, como total de adultos e crianças confirmadas.',
+      position: 'bottom'
+    },
+    {
+      targetId: 'tour-rsvp',
+      title: 'Gestão de Convidados 👥',
+      content: 'Aqui você gerencia sua lista. Pode importar nomes do Excel, exportar a lista atualizada para o buffet ou limpar tudo se precisar recomeçar.',
+      position: 'top'
+    },
+    {
+      targetId: 'tour-avatar',
+      title: 'Configurações e Perfil ⚙️',
+      content: 'Aqui no seu perfil você acessa as configurações para definir o prazo final de confirmação e personalizar a URL do seu site.',
+      position: 'left'
+    }
+  ]
+
+  const { updateEventSettings } = useEvent()
+
+  useEffect(() => {
+    // Só inicia o tour se as configurações já foram carregadas e o onboarding não foi feito
+    if (!loading && user && eventSettings && eventSettings.hasCompletedOnboarding !== true && !isTourOpen) {
+       // Pequeno delay para garantir que o DOM renderizou
+       const timer = setTimeout(() => setIsTourOpen(true), 1500)
+       return () => clearTimeout(timer)
+    }
+  }, [loading, user, eventSettings, isTourOpen])
+
+  const handleTourComplete = async () => {
+    setIsTourOpen(false)
+    await updateEventSettings({ hasCompletedOnboarding: true })
+    // Após o término do tour, redireciona para configurações
+    router.push('/settings?onboarding=true')
+  }
+
+  const handleTourSkip = async () => {
+    setIsTourOpen(false)
+    await updateEventSettings({ hasCompletedOnboarding: true })
+  }
 
   useEffect(() => {
     if (!loading && !user) {
@@ -303,6 +363,13 @@ export default function DashboardPage() {
       title={eventSettings.coupleNames}
       subtitle={`${eventSettings.eventType === 'casamento' ? '💒' : '👑'} ${eventSettings.eventType === 'casamento' ? 'Casamento' : 'Debutante'}`}
     >
+      <div id="tour-dashboard">
+      <OnboardingTour 
+        isOpen={isTourOpen} 
+        steps={tourSteps} 
+        onComplete={handleTourComplete} 
+        onSkip={handleTourSkip} 
+      />
       {/* HERO SECTION - Cover Image */}
       {eventSettings.coverImage && (
         <div className="relative h-64 md:h-80 rounded-[2.5rem] overflow-hidden mb-10 shadow-xl border-4 border-white animate-in fade-in duration-1000">
@@ -343,7 +410,7 @@ export default function DashboardPage() {
       )}
 
       {/* SHARE CARD */}
-      <div className="bg-surface border border-border-soft rounded-[2rem] p-6 mb-10 shadow-sm relative overflow-hidden group">
+      <div id="tour-invite" className="bg-surface border border-border-soft rounded-[2rem] p-6 mb-10 shadow-sm relative overflow-hidden group">
         <div className="absolute -right-10 -top-10 w-40 h-40 bg-brand-pale rounded-full blur-3xl opacity-50 group-hover:bg-brand-pale/80 transition-all" />
         <div className="flex flex-col md:flex-row items-center gap-6">
           <div className="w-16 h-16 bg-brand-pale rounded-2xl flex items-center justify-center text-brand flex-shrink-0 animate-pulse">
@@ -372,49 +439,58 @@ export default function DashboardPage() {
       </div>
 
       {/* TABS MENU */}
-      <div className="flex justify-center mb-8 gap-4">
+      <div className="flex flex-wrap items-center justify-between mb-8 gap-4">
+        <div className="flex gap-4">
+          <button
+            onClick={() => setActiveTab('guests')}
+            className={`flex items-center gap-2 px-6 py-3 rounded-full text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'guests' ? 'bg-brand text-white shadow-xl' : 'bg-surface border border-border-soft text-text-muted hover:border-brand/30 hover:text-brand'}`}
+          >
+            <UsersIconMini /> Lista de Convidados
+          </button>
+          <button
+            onClick={() => {
+              if (eventSettings.isGiftListEnabled === false) return;
+              setActiveTab('gifts');
+            }}
+            className={`flex items-center gap-2 px-6 py-3 rounded-full text-xs font-black uppercase tracking-widest transition-all ${eventSettings.isGiftListEnabled === false
+              ? 'bg-bg-light border border-dashed border-border-soft text-text-muted opacity-50 cursor-not-allowed'
+              : activeTab === 'gifts'
+                ? 'bg-brand text-white shadow-xl'
+                : 'bg-surface border border-border-soft text-text-muted hover:border-brand/30 hover:text-brand'
+              }`}
+            title={eventSettings.isGiftListEnabled === false ? "Este módulo está desativado nas configurações" : ""}
+          >
+            <HeartIcon /> Lista de Presentes {eventSettings.isGiftListEnabled === false && '🔒'}
+          </button>
+          <button
+            onClick={() => {
+              if (eventSettings.isGiftListEnabled === false) return;
+              setActiveTab('messages');
+            }}
+            className={`flex items-center gap-2 px-6 py-3 rounded-full text-xs font-black uppercase tracking-widest transition-all ${eventSettings.isGiftListEnabled === false
+              ? 'bg-bg-light border border-dashed border-border-soft text-text-muted opacity-50 cursor-not-allowed'
+              : activeTab === 'messages'
+                ? 'bg-brand text-white shadow-xl'
+                : 'bg-surface border border-border-soft text-text-muted hover:border-brand/30 hover:text-brand'
+              }`}
+            title={eventSettings.isGiftListEnabled === false ? "Este módulo está desativado nas configurações" : ""}
+          >
+            <MessageSquareIcon /> Mural de Recados {eventSettings.isGiftListEnabled === false && '🔒'}
+          </button>
+        </div>
+
         <button
-          onClick={() => setActiveTab('guests')}
-          className={`flex items-center gap-2 px-6 py-3 rounded-full text-xs font-black uppercase tracking-widest transition-all ${activeTab === 'guests' ? 'bg-brand text-white shadow-xl' : 'bg-surface border border-border-soft text-text-muted hover:border-brand/30 hover:text-brand'}`}
+          onClick={() => setIsTourOpen(true)}
+          className="flex items-center gap-2 px-6 py-3 rounded-full text-xs font-black uppercase tracking-widest transition-all bg-bg-light border border-border-soft text-text-muted hover:bg-brand-pale hover:text-brand hover:border-brand/20 shadow-sm"
         >
-          <UsersIconMini /> Lista de Convidados
-        </button>
-        <button
-          onClick={() => {
-            if (eventSettings.isGiftListEnabled === false) return;
-            setActiveTab('gifts');
-          }}
-          className={`flex items-center gap-2 px-6 py-3 rounded-full text-xs font-black uppercase tracking-widest transition-all ${eventSettings.isGiftListEnabled === false
-            ? 'bg-bg-light border border-dashed border-border-soft text-text-muted opacity-50 cursor-not-allowed'
-            : activeTab === 'gifts'
-              ? 'bg-brand text-white shadow-xl'
-              : 'bg-surface border border-border-soft text-text-muted hover:border-brand/30 hover:text-brand'
-            }`}
-          title={eventSettings.isGiftListEnabled === false ? "Este módulo está desativado nas configurações" : ""}
-        >
-          <HeartIcon /> Lista de Presentes {eventSettings.isGiftListEnabled === false && '🔒'}
-        </button>
-        <button
-          onClick={() => {
-            if (eventSettings.isGiftListEnabled === false) return;
-            setActiveTab('messages');
-          }}
-          className={`flex items-center gap-2 px-6 py-3 rounded-full text-xs font-black uppercase tracking-widest transition-all ${eventSettings.isGiftListEnabled === false
-            ? 'bg-bg-light border border-dashed border-border-soft text-text-muted opacity-50 cursor-not-allowed'
-            : activeTab === 'messages'
-              ? 'bg-brand text-white shadow-xl'
-              : 'bg-surface border border-border-soft text-text-muted hover:border-brand/30 hover:text-brand'
-            }`}
-          title={eventSettings.isGiftListEnabled === false ? "Este módulo está desativado nas configurações" : ""}
-        >
-          <MessageSquareIcon /> Mural de Recados {eventSettings.isGiftListEnabled === false && '🔒'}
+          <HelpCircleIcon className="w-4 h-4" /> Ver Tutorial
         </button>
       </div>
 
       {activeTab === 'guests' ? (
         <>
           {/* FILTER ROW EXCLUSIVE STYLE (SYNCED WITH ADMIN) */}
-          <div className="flex flex-wrap items-center justify-center gap-3 mb-12">
+          <div id="tour-rsvp" className="flex flex-wrap items-center justify-center gap-3 mb-12">
             <div className="relative">
               <button
                 onClick={() => setShowCategoryMenu(!showCategoryMenu)}
@@ -457,7 +533,10 @@ export default function DashboardPage() {
             <FilterPill label="Pendentes" count={metrics.pending} active={filter === 'pending'} onClick={() => setFilter('pending')} />
             <FilterPill label="Presentes" count={metrics.confirmed} active={filter === 'confirmed'} onClick={() => setFilter('confirmed')} />
             <FilterPill label="Todos" count={metrics.total} active={filter === 'all'} onClick={() => setFilter('all')} />
-            <FilterPill label="Estatísticas" active={showStats} onClick={() => setShowStats(true)} />
+            <div id="tour-stats">
+              <FilterPill label="Estatísticas" active={showStats} onClick={() => setShowStats(true)} />
+            </div>
+            
 
             <div className="flex flex-wrap items-center justify-center gap-2">
               <button
@@ -610,12 +689,12 @@ export default function DashboardPage() {
                       key={person.uniqueId}
                       className="bg-surface rounded-[2rem] border border-border-soft shadow-sm p-6 hover:-translate-y-1 hover:shadow-xl hover:shadow-brand/5 transition-all duration-300 group flex flex-col justify-between"
                     >
-                      <div className="grid grid-cols-[1fr_auto] gap-2 items-start mb-4">
-                        <div className="flex items-center gap-3 min-w-0">
+                      <div className="flex justify-between items-start gap-2 mb-4">
+                        <div className="flex items-center gap-3 min-w-0 flex-1">
                           <div className={`w-10 h-10 rounded-xl flex-shrink-0 flex items-center justify-center font-black text-sm shadow-inner transform group-hover:scale-110 transition-transform ${person.status === 'confirmed' ? 'bg-success-light text-success-dark' : person.status === 'declined' ? 'bg-danger-light text-danger-dark' : 'bg-bg-light text-text-muted'}`}>
                             {person.name.charAt(0).toUpperCase()}
                           </div>
-                          <div className="min-w-0">
+                          <div className="min-w-0 flex-1">
                             <h4 className="text-sm font-black text-text-primary tracking-tight truncate" title={person.name}>
                               {person.name}
                             </h4>
@@ -692,10 +771,11 @@ export default function DashboardPage() {
           />
         </>
       ) : activeTab === 'gifts' ? (
-        eventId && <GiftManagementTab eventId={eventId} />
+        eventId && <GiftManagementTab eventId={eventId as string} />
       ) : (
-        eventId && <MuralMessagesTab eventId={eventId} />
+        eventId && <MuralMessagesTab eventId={eventId as string} />
       )}
+      </div>
     </SharedLayout>
   )
 }
@@ -830,3 +910,4 @@ const XIcon = () => <svg width="20" height="20" viewBox="0 0 24 24" fill="none" 
 const StarIcon = ({ className = "" }: { className?: string }) => <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" /></svg>
 const HeartIcon = ({ className = "" }: { className?: string }) => <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z" /></svg>
 const MessageSquareIcon = ({ className = "" }: { className?: string }) => <svg className={`w-5 h-5 ${className}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg>
+const HelpCircleIcon = ({ className = "" }: { className?: string }) => <svg className={className} width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10" /><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" /><line x1="12" y1="17" x2="12.01" y2="17" /></svg>

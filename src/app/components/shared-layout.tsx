@@ -3,6 +3,7 @@
 import { useAuth } from '@/lib/auth-context'
 import { useEvent } from '@/lib/event-context'
 import { useRouter, usePathname } from 'next/navigation'
+import Link from 'next/link'
 import React, { useState, useContext } from 'react'
 
 // ── SVG Outline Icons ──────────────────────────────────────────
@@ -135,7 +136,13 @@ export function SharedLayout({
     ]
 
     const links = role === 'admin' ? adminLinks : userLinks
-    const isEventPage = pathname.includes('/admin/evento/') || pathname.includes('/admin/users') || pathname.includes('/admin/novo-evento')
+    const isEventPage = pathname?.includes('/admin/evento/') || pathname?.includes('/admin/users') || pathname?.includes('/admin/novo-evento')
+    const isSettingsPage = pathname?.startsWith('/settings')
+    const homeHref = role === 'admin' ? '/admin/dashboard' : '/dashboard'
+    const isAtHome = pathname === homeHref
+    
+    // Mostramos botão voltar se não estivermos na home e formos admin em subpágina OU user em config
+    const showBackButton = (role === 'admin' && isEventPage) || (role === 'user' && isSettingsPage)
 
     return (
         <div className="min-h-screen bg-background flex flex-col font-sans text-textPrimary overflow-x-hidden max-w-[100vw]">
@@ -146,21 +153,24 @@ export function SharedLayout({
 
                     {/* Left: Back button or Logo */}
                     <div className="flex items-center gap-4 flex-1">
-                        {isEventPage ? (
-                            <button
-                                onClick={() => router.push('/admin/dashboard')}
+                        <Link 
+                            href={homeHref}
+                            className="flex items-center gap-2 flex-shrink-0 group hover:opacity-80 transition-all"
+                        >
+                            <div className="w-10 h-10 rounded-lg overflow-hidden flex items-center justify-center border border-brand/10 group-hover:border-brand/30 transition-all">
+                                <img src="/Logo-03.jpg" alt="Logo" className="w-full h-full object-cover" />
+                            </div>
+                            <span className="font-serif font-black text-[10px] text-brand uppercase tracking-tighter hidden sm:block">RSVP Manager</span>
+                        </Link>
+
+                        {showBackButton && (
+                            <Link
+                                href={homeHref}
                                 className="flex items-center gap-2 px-3 py-1.5 bg-brand/5 text-brand rounded-full text-[9px] font-black uppercase tracking-widest hover:bg-brand/10 transition-all border border-brand/10 shadow-sm group whitespace-nowrap"
                             >
                                 <span className="group-hover:-translate-x-1 transition-transform">←</span>
-                                <span>Painel</span>
-                            </button>
-                        ) : (
-                            <div className="flex items-center gap-2 flex-shrink-0">
-                                <div className="w-10 h-10 rounded-lg overflow-hidden flex items-center justify-center border border-brand/10">
-                                    <img src="/Logo-03.jpg" alt="Logo" className="w-full h-full object-cover" />
-                                </div>
-                                <span className="font-serif font-black text-[10px] text-brand uppercase tracking-tighter hidden sm:block">RSVP Manager</span>
-                            </div>
+                                <span>Voltar</span>
+                            </Link>
                         )}
                     </div>
 
@@ -175,6 +185,7 @@ export function SharedLayout({
                     {/* Right: User Avatar (clica para abrir dropdown) */}
                     <div className="flex items-center gap-4 flex-1 justify-end">
                         <button
+                            id="tour-avatar"
                             onClick={() => setIsMenuOpen(!isMenuOpen)}
                             className={`w-10 h-10 rounded-full bg-brand text-white flex items-center justify-center font-black uppercase shadow-md hover:shadow-lg hover:scale-105 active:scale-95 transition-all border-2 border-white ${initials.length > 2 ? 'text-[10px]' : 'text-sm'}`}
                             title={user.name}
@@ -216,6 +227,7 @@ export function SharedLayout({
                                 {links.map((link) => (
                                     <button
                                         key={link.href}
+                                        id={link.href === '/settings' ? 'tour-settings' : undefined}
                                         onClick={() => { router.push(link.href); setIsMenuOpen(false) }}
                                         className="w-full text-left px-4 py-3 flex items-center gap-3 rounded-2xl text-[10px] font-black uppercase tracking-widest text-text-secondary hover:bg-bg-light hover:text-brand transition-all"
                                     >
@@ -267,6 +279,7 @@ export function SharedLayout({
                     return (
                         <button
                             key={link.href}
+                            id={link.href === '/settings' ? 'tour-settings-mobile' : undefined}
                             onClick={() => router.push(link.href)}
                             className={`flex flex-col items-center gap-1.5 transition-all duration-300 ${isActive ? 'scale-110' : 'opacity-40 grayscale'}`}
                         >
