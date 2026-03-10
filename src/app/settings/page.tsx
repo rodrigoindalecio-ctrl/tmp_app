@@ -1200,6 +1200,10 @@ function SettingsContent({ user, authLoading, eventSettings, updateEventSettings
                                             alert('As senhas não coincidem.')
                                             return
                                         }
+                                        if (passwordForm.new.length < 6) {
+                                            alert('A nova senha deve ter pelo menos 6 caracteres.')
+                                            return
+                                        }
                                         setPasswordLoading(true)
                                         try {
                                             const res = await fetch('/api/auth/change-password', {
@@ -1214,6 +1218,11 @@ function SettingsContent({ user, authLoading, eventSettings, updateEventSettings
                                             if (res.ok) {
                                                 alert('✅ Senha alterada com sucesso!')
                                                 setPasswordForm({ current: '', new: '', confirm: '' })
+                                                // Se veio do onboarding, remover o query param
+                                                // para que o banner "Quase lá!" desapareça
+                                                if (isOnboarding) {
+                                                    router.replace('/settings')
+                                                }
                                             } else {
                                                 alert('❌ ' + (data.error || 'Erro ao alterar senha.'))
                                             }
